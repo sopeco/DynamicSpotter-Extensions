@@ -230,6 +230,7 @@
 					<excludes>
             			<exclude>**/README</exclude>
             			<exclude>**license.txt</exclude>
+            			<exclude>**extensions.info</exclude>
         			</excludes>
 					<properties>
 						<year>2014</year>

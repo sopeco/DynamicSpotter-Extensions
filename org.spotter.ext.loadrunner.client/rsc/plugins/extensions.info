@@ -1,0 +1,3 @@
+org.spotter.ext.loadrunner.instrumentation.LoadRunnerInstrumentationExtension
+org.spotter.ext.loadrunner.measurement.LoadRunnerMeasurementExtension
+org.spotter.ext.loadrunner.workload.LoadRunnerWorkloadExtension
