@@ -1,0 +1,4 @@
+org.spotter.ext.dummy.TestDetectionExtension
+org.spotter.ext.dummy.TestInstrumentationExtension
+org.spotter.ext.dummy.TestLoadDriverExtension
+org.spotter.ext.dummy.TestMeasurementExtension
