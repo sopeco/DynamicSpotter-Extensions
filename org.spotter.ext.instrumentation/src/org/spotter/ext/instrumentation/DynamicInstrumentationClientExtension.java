@@ -30,9 +30,12 @@ import org.spotter.core.instrumentation.ISpotterInstrumentation;
  */
 public class DynamicInstrumentationClientExtension extends AbstractInstrumentationExtension {
 
-	private static final String EXTENSION_DESCRIPTION = "The default instrumentation satellite adapter can be used to "
-														+ "connect to every instrumentation satellite which is not "
-														+ "covered by other instrumentation satellite adapters.";
+	private static final String EXTENSION_DESCRIPTION = "The default instrumentation satellite adapter can be used to connect "
+														+ "to a instrumentation satellite running in a JVM. This satellite adapter "
+														+ "will instrument the JVM. \n"
+														+ "The data collection with the instrumentation must be en-/disabled with a "
+														+ "measurement satellite. Hence, you should not forget to configure a "
+														+ "corresponding measurement satellite adapter.";
 	
 	@Override
 	public String getName() {

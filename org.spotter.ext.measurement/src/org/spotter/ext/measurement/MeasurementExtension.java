@@ -31,8 +31,10 @@ public class MeasurementExtension extends AbstractMeasurmentExtension {
 	private static final String EXTENSION_DESCRIPTION = "The measurement satellite adapter is used to connect to system where "
 														+ "instrumentation is possible. This satellite adapter can enable and "
 														+ "disable the collecting of data fetched with instrumentation. "
-														+ "Hence, this satellite adapter will be mainly used on systems where "
-														+ "a instrumentation satellite is running.";
+														+ "This satellite adapter will be mainly used on systems where "
+														+ "a instrumentation satellite is running. \n"
+														+ "In addition this satellite adapter comprises the sampling of "
+														+ "hardware utilization.";;
 
 	@Override
 	public String getName() {

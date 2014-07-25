@@ -26,8 +26,8 @@ import org.spotter.ext.jmeter.JMeterConfigKeys;
  */
 public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 
-	private static final String EXTENSION_DESCRIPTION = "The workload satellite adapter connecting to a JMeter "
-														+ "workload satellite.";
+	private static final String EXTENSION_DESCRIPTION = "This workload satellite adapter can execute a local "
+														+ "JMeter application with a given load script.";
 
 	private static final String[] FILE_RESULTS_EXTENSIONS = { "*.csv" };
 
