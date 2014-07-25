@@ -27,10 +27,9 @@ import org.spotter.core.instrumentation.ISpotterInstrumentation;
  */
 public class LoadRunnerInstrumentationExtension extends AbstractInstrumentationExtension {
 
-	private static final String EXTENSION_DESCRIPTION = "The instrumentation satellite adapter for Loadrunner can be used to "
-														+ "connect to an Loadrunner instrumentation satellite. This satellite "
-														+ "will only be applicable if you have a Loadrunner as a workload "
-														+ "generator.";
+	private static final String EXTENSION_DESCRIPTION = "The loadrunner instrumentation satellite adapter can be used to "
+														+ "connect to an HP Loadrunner instrumentation satellite. It will only "
+														+ "be applicable if you have a Loadrunner as a workload generator.";
 	
 	@Override
 	public ISpotterInstrumentation createExtensionArtifact() {
