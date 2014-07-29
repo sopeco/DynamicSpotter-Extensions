@@ -34,11 +34,6 @@ public final class Hiccups {
 	private static final int HICCUP_INTERARRIVAL_TIME = 10 * 1000;
 	private static final int LARGE_NUMBER = 10000;
 	private static final int GARBAGE_CLEANER_TIMEOUT = 200;
-	private static final int NUM_SMALL_GARBAGE = 5;
-
-	private static final int FIB_NUM_1 = 3;
-	private static final int FIB_NUM_2 = 4;
-	private static final int FIB_NUM_3 = 6;
 
 	private static Hiccups instance;
 	private long startTime = -1;

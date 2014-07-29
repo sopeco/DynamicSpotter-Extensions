@@ -44,7 +44,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>org.spotter.demo.app.ServerLauncher</mainClass>
+							<mainClass>org.spotter.ext.demo.app.DemoAppLauncher</mainClass>
 						</manifest>
 					</archive>
 					<descriptor>assembly.xml</descriptor>

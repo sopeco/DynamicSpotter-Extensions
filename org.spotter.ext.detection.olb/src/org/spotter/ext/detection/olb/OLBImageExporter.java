@@ -16,6 +16,10 @@
 package org.spotter.ext.detection.olb;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -43,7 +47,7 @@ public final class OLBImageExporter {
 
 	private OLBImageExporter() {
 	}
-	
+
 	protected static Chart createCpuUtilChart(Map<Integer, Double> cpuMeans, double cpuThreshold) {
 
 		Chart chart = new ChartBuilder().width(IMAGE_WIDTH).height(IMAGE_HEIGHT).title("CPU Utilization")
@@ -57,7 +61,16 @@ public final class OLBImageExporter {
 
 		int i = 0;
 		int maxUsers = 0;
-		for (Entry<Integer, Double> entry : cpuMeans.entrySet()) {
+		List<Entry<Integer, Double>> sortedEntryList = new ArrayList<>(cpuMeans.entrySet());
+		Collections.sort(sortedEntryList, new Comparator<Entry<Integer, Double>>() {
+
+			@Override
+			public int compare(Entry<Integer, Double> o1, Entry<Integer, Double> o2) {
+				return o1.getKey().compareTo(o2.getKey());
+			}
+		});
+
+		for (Entry<Integer, Double> entry : sortedEntryList) {
 			if (entry.getKey() > maxUsers) {
 				maxUsers = entry.getKey();
 			}
@@ -85,7 +98,8 @@ public final class OLBImageExporter {
 		return chart;
 	}
 
-	protected static Chart createOperationRTChart(String operation, Map<Integer, Double> rtMeans, Map<Integer, Double> stdDevs) {
+	protected static Chart createOperationRTChart(String operation, Map<Integer, Double> rtMeans,
+			Map<Integer, Double> stdDevs) {
 		String simpleOperationName = LpeStringUtils.getSimpleMethodName(operation);
 		Chart chart = new ChartBuilder().width(IMAGE_WIDTH).height(IMAGE_HEIGHT)
 				.title("Responset times for " + simpleOperationName + "(...)").xAxisTitle("Number of Users")

@@ -40,9 +40,21 @@ public class DummyApp {
 	@Path("testOLB")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String testOLB() {
+		System.out.println("OBL called");
 		OLB.getInstnace().olbMethod();
 		return "Hello from OLB Test Method!";
-
+	}
+	
+	/**
+	 * 
+	 * @return hello string
+	 */
+	@GET
+	@Path("fibonacci")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String testNoProblem() {
+		fibonacci(4);
+		return "Hello from Fibonacci Method!";
 	}
 
 	/**
@@ -56,6 +68,19 @@ public class DummyApp {
 		Hiccups.getInstnace().garbageHiccupWithNoise();
 		return "Hello from Hiccup Test Method!";
 
+	}
+	
+	/**
+	 * 
+	 * @param n fib parameter
+	 * @return fib(n)
+	 */
+	public int fibonacci(int n) {
+		if (n <= 1) {
+			return 1;
+		} else {
+			return fibonacci(n - 2) + fibonacci(n - 1);
+		}
 	}
 
 }

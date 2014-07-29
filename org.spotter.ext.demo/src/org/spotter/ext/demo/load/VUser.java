@@ -15,6 +15,8 @@
  */
 package org.spotter.ext.demo.load;
 
+import java.util.Random;
+
 import javax.ws.rs.core.MediaType;
 
 import org.lpe.common.util.web.LpeWebUtils;
@@ -31,8 +33,10 @@ import com.sun.jersey.api.client.WebResource;
  */
 public class VUser implements ISimpleVUser {
 
-	private static final int THINK_TIME = 100;
+	private static final int THINK_TIME_MIN = 100;
+	private static final int THINK_TIME_MAX = 200;
 	private static final int TIMEOUT = 120 * 1000;
+	private static final Random random = new Random(System.nanoTime());
 	final WebResource webResource;
 
 	/**
@@ -42,19 +46,28 @@ public class VUser implements ISimpleVUser {
 		Client client = LpeWebUtils.getWebClient();
 		client.setConnectTimeout(TIMEOUT);
 		client.setReadTimeout(TIMEOUT);
-		webResource = client.resource("http://localhost:8089/");
+		webResource = client.resource("http://localhost:8081/");
 	}
 
 	@Override
 	public void executeIteration() {
 		try {
+			// call OLB service
 			webResource.path("demo").path("testOLB").accept(MediaType.APPLICATION_JSON).get(String.class);
+			Thread.sleep(getNextThinkTime());
 
-			Thread.sleep(THINK_TIME);
+			// call Fibonacci service
+			webResource.path("demo").path("fibonacci").accept(MediaType.APPLICATION_JSON).get(String.class);
+			Thread.sleep(getNextThinkTime());
 		} catch (Throwable e) {
 			// ignoring exception
 			e.printStackTrace();
 		}
+	}
+
+	private long getNextThinkTime() {
+		int r = random.nextInt(THINK_TIME_MAX - THINK_TIME_MIN);
+		return THINK_TIME_MIN + r;
 	}
 
 }

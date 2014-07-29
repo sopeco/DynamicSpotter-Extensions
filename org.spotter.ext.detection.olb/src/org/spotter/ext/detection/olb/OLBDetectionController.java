@@ -32,6 +32,7 @@ import org.aim.artifacts.probes.ResponsetimeProbe;
 import org.aim.artifacts.records.CPUUtilizationRecord;
 import org.aim.artifacts.records.ResponseTimeRecord;
 import org.aim.artifacts.sampler.CPUSampler;
+import org.aim.artifacts.scopes.ServletScope;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.LpeNumericUtils;
 import org.spotter.core.detection.AbstractDetectionController;
@@ -94,47 +95,27 @@ public class OLBDetectionController extends AbstractDetectionController {
 				OLBExtension.REQUIRED_CONFIDENCE_LEVEL_KEY);
 		requiredSignificanceLevel = 1.0 - (requiredConfidenceLevelStr != null ? Double
 				.parseDouble(requiredConfidenceLevelStr) : OLBExtension.REQUIRED_CONFIDENCE_LEVEL_DEFAULT);
+
+		scope = getProblemDetectionConfiguration().getProperty(OLBExtension.OLB_SCOPE_KEY);
+		scope = scope == null ? OLBExtension.OLB_SCOPE_ENTRY_POINT : scope;
 	}
 
 	private InstrumentationDescription getInstrumentationDescription() {
 
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
-//		return idBuilder
-//				.addMethodInstrumentation().addMethod("org.spotter.demo.app.DummyApp.testOLB()").addProbe(ResponsetimeProbe.class).entityDone()
-//				.addSamplingInstruction(CPUSampler.class,500)
-//		return idBuilder.addAPIInstrumentation(ServletScope.class).addProbe(ResponsetimeProbe.class).entityDone()
-//				.addSamplingInstruction(CPUSampler.class,500)
-				//.addPairedEventHook(PairedEvent.MONITOR_ENTERING).addProbe(ResponsetimeProbe.class).entityDone()
-//				.build();
-		
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.LoginController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.ChangePasswordController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.ManageCustomerAddressesController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.ManageWishlistController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.OrderHistoryController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.RedirectController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.RegisterController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.UpdateAccountController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.cart.CartController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.catalog.CategoryController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.catalog.ProductController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.catalog.RatingsController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.catalog.SearchController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.catalog.ContactUsController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.checkout.BillingInfoController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.checkout.CheckoutController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.checkout.NullGiftCardController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.checkout.OrderConfirmationController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.checkout.ShippingInfoController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.contactus.ContactUsController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.content.PageController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.seo.RobotsController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.seo.SiteMapController.*").addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.checkout.SendOrderConfirmationEmailActivity.*").addProbe(ResponsetimeProbe.class).entityDone();
-		
-		idBuilder.addSamplingInstruction(CPUSampler.class, 100);
-		
-		return idBuilder.build();
+
+		switch (scope) {
+		case OLBExtension.OLB_SCOPE_ENTRY_POINT:
+			idBuilder.addAPIInstrumentation(ServletScope.class).addProbe(ResponsetimeProbe.class).entityDone();
+			break;
+		case OLBExtension.OLB_SCOPE_SYNC:
+			// TODO: add sync instrumentation
+			break;
+		default:
+			throw new IllegalArgumentException("Invalid Scope value for OLB detection!");
+		}
+
+		return idBuilder.addSamplingInstruction(CPUSampler.class, 200).build();
 
 	}
 
@@ -172,19 +153,31 @@ public class OLBDetectionController extends AbstractDetectionController {
 		for (String operation : rtDataset.getValueSet(ResponseTimeRecord.PAR_OPERATION, String.class)) {
 			Map<Integer, Double> rtMeans = new HashMap<>();
 			Map<Integer, Double> rtStDevs = new HashMap<>();
-			
+
 			boolean operationDetected = false;
 			try {
 				operationDetected = analyseOperationResponseTimes(rtDataset, operation, rtMeans, rtStDevs);
 			} catch (NullPointerException npe) {
-				result.addMessage("OLB detection failed for the operation '" + operation + "', because the operation was not executed in each analysis cycle. "
-								 + "Hence, the operation cannot be analyzed for an OLB.");
+				result.addMessage("OLB detection failed for the operation '" + operation
+						+ "', because the operation was not executed in each analysis cycle. "
+						+ "Hence, the operation cannot be analyzed for an OLB.");
 				continue;
 			}
-			
+
 			if (operationDetected) {
 				result.setDetected(true);
-				result.addMessage("OLB detected in operation: " + operation);
+				
+				switch (scope) {
+				case OLBExtension.OLB_SCOPE_ENTRY_POINT:
+					result.addMessage("OLB detected in service: " + operation);
+					break;
+				case OLBExtension.OLB_SCOPE_SYNC:
+					result.addMessage("OLB detected in synchronized operation: " + operation);
+					break;
+				default:
+					throw new IllegalArgumentException("Invalid Scope value for OLB detection!");
+				}
+				
 
 				Chart rtChart = OLBImageExporter.createOperationRTChart(operation, rtMeans, rtStDevs);
 				getResultManager().storeImageChartResource(rtChart, "RT-" + operation.replace("\\.", "_"), result);
@@ -221,7 +214,8 @@ public class OLBDetectionController extends AbstractDetectionController {
 		int prevNumUsers = -1;
 		int firstSignificantNumUsers = -1;
 		int significantSteps = 0;
-		List<Integer> sortedNumUsersList = new ArrayList<Integer>(dataset.getValueSet(NUMBER_OF_USERS_KEY, Integer.class));
+		List<Integer> sortedNumUsersList = new ArrayList<Integer>(dataset.getValueSet(NUMBER_OF_USERS_KEY,
+				Integer.class));
 		Collections.sort(sortedNumUsersList);
 		double currentMean = -1;
 		double prevMean = -1;
