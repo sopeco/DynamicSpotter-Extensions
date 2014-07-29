@@ -15,6 +15,9 @@
  */
 package org.spotter.ext.detection.olb;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
@@ -29,15 +32,16 @@ import org.spotter.core.detection.IDetectionController;
 public class OLBExtension extends AbstractDetectionExtension {
 
 	private static final double _100_PERCENT = 100.0;
-	
+
 	private static final String EXTENSION_DESCRIPTION = "One-Lane Bridge - Occurs at a point in execution where only one, or a few, processes may continue to execute concurrently (e.g., when accessing a database). Other processes are delayed while they wait for their turn.";
-	
+
 	protected static final String OLB_SCOPE_KEY = "scopes";
+	protected static final String OLB_SCOPE_ENTRY_POINT = "entryPoint";
+	protected static final String OLB_SCOPE_SYNC = "sync";
 	protected static final String REQUIRED_CONFIDENCE_LEVEL_KEY = "confidenceLevel";
 	protected static final String REQUIRED_SIGNIFICANT_STEPS_KEY = "numSignificantSteps";
 	protected static final String CPU_UTILIZATION_THRESHOLD_KEY = "cpuThreshold";
 	protected static final String EXPERIMENT_STEPS_KEY = "numExperiments";
-
 
 	protected static final double REQUIRED_CONFIDENCE_LEVEL_DEFAULT = 0.95;
 	protected static final int REQUIRED_SIGNIFICANT_STEPS_DEFAULT = 2;
@@ -90,12 +94,24 @@ public class OLBExtension extends AbstractDetectionExtension {
 		return requiredConfidenceLevel;
 	}
 
+	private ConfigParameterDescription createScopeParameter() {
+		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(OLB_SCOPE_KEY,
+				LpeSupportedTypes.String);
+
+		Set<String> scopeOptions = new HashSet<>();
+		scopeOptions.add(OLB_SCOPE_ENTRY_POINT);
+		scopeOptions.add(OLB_SCOPE_SYNC);
+
+		scopeParameter.setOptions(scopeOptions);
+		scopeParameter.setDefaultValue(OLB_SCOPE_SYNC);
+		scopeParameter.setDescription("This parameter defines scope to search for the One Lane Bridge behaviour.");
+		return scopeParameter;
+	}
+
 	@Override
 	public IDetectionController createExtensionArtifact() {
 		return new OLBDetectionController(this);
 	}
-
-
 
 	@Override
 	protected void initializeConfigurationParameters() {
@@ -104,6 +120,7 @@ public class OLBExtension extends AbstractDetectionExtension {
 		addConfigParameter(createNumSignificantStepsParameter());
 		addConfigParameter(createCpuThresholdParameter());
 		addConfigParameter(createNumExperimentsParameter());
+		addConfigParameter(createScopeParameter());
 	}
 
 }
