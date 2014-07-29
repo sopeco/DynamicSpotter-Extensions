@@ -29,9 +29,17 @@ import org.spotter.core.measurement.IMeasurementController;
 
 public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 
+	private static final String EXTENSION_DESCRIPTION = "The DBMS sampling measurement satellite adapter is used to connect "
+														+ "to a MySQL DBMS and to query the database status.";
+	
 	@Override
 	public String getName() {
-		return "measurement.sampler.dbms";
+		return "measurement.satellite.adapter.sampling.dbms";
+	}
+	
+	@Override
+	protected String getDefaultSatelleiteExtensionName() {
+		return "DBMS Sampling Measurement Satellite Adapter";
 	}
 
 	@Override
@@ -75,6 +83,7 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 		addConfigParameter(createSamplingDelayParameter());
 		addConfigParameter(createConnectionStringParameter());
 		addConfigParameter(createCollectorTypeParameter());
+		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override
