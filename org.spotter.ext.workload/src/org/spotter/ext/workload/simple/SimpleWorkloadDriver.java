@@ -19,6 +19,8 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
@@ -77,6 +79,8 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 
 	private URLClassLoader urlClassLoader;
 
+	private Future<?> workloadGenerationJob;
+
 	/**
 	 * The number of (virtual) users currently in the system. This variable
 	 * should be accessed in a syncronized way.
@@ -100,90 +104,108 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 		warmupPhaseFinished = false;
 		experimentPhaseFinished = false;
 		numActiveUsers = 0;
-
+		final Object wlDriver = this;
 		Runnable task = new Runnable() {
 
 			@Override
 			public void run() {
-
-				// load the default configuration passed
-				getProperties().putAll(properties);
-				// load the global configuration and overwrite local
-				// configration properties
-				getProperties().putAll(GlobalConfiguration.getInstance().getProperties());
-
-				checkProperties(getProperties());
-				int numberUsers = Integer.parseInt(getProperties().getProperty(NUMBER_CURRENT_USERS));
-				LOGGER.info("starting " + numberUsers + " vUsers ...");
-				File userScriptFile = new File(getProperties().getProperty(USER_SCRIPT_PATH));
-				String userScriptClassNAme = getProperties().getProperty(USER_SCRIPT_CLASS_NAME);
-
-				final long experimentDuration = Long.parseLong(getProperties().getProperty(
-						ConfigKeys.EXPERIMENT_DURATION))
-						* _1000L; // [ms]
-				long rampUpIntervalLength = Long.parseLong(getProperties().getProperty(
-						ConfigKeys.EXPERIMENT_RAMP_UP_INTERVAL_LENGTH));
-				long rampUpUsersPerInterval = Long.parseLong(getProperties().getProperty(
-						ConfigKeys.EXPERIMENT_RAMP_UP_NUM_USERS_PER_INTERVAL));
-				long coolDownIntervalLength = Long.parseLong(getProperties().getProperty(
-						ConfigKeys.EXPERIMENT_COOL_DOWN_INTERVAL_LENGTH));
-				long coolDownUsersPerInterval = Long.parseLong(getProperties().getProperty(
-						ConfigKeys.EXPERIMENT_COOL_DOWN_NUM_USERS_PER_INTERVAL));
-
-				// load one virutal user
-				Class<?> vUserClass;
 				try {
+					// load the default configuration passed
+					getProperties().putAll(properties);
+					// load the global configuration and overwrite local
+					// configration properties
+					getProperties().putAll(GlobalConfiguration.getInstance().getProperties());
+
+					checkProperties(getProperties());
+					int numberUsers = Integer.parseInt(getProperties().getProperty(NUMBER_CURRENT_USERS));
+					LOGGER.info("starting " + numberUsers + " vUsers ...");
+					File userScriptFile = new File(getProperties().getProperty(USER_SCRIPT_PATH));
+					String userScriptClassNAme = getProperties().getProperty(USER_SCRIPT_CLASS_NAME);
+
+					final long experimentDuration = Long.parseLong(getProperties().getProperty(
+							ConfigKeys.EXPERIMENT_DURATION))
+							* _1000L; // [ms]
+					long rampUpIntervalLength = Long.parseLong(getProperties().getProperty(
+							ConfigKeys.EXPERIMENT_RAMP_UP_INTERVAL_LENGTH));
+					long rampUpUsersPerInterval = Long.parseLong(getProperties().getProperty(
+							ConfigKeys.EXPERIMENT_RAMP_UP_NUM_USERS_PER_INTERVAL));
+					long coolDownIntervalLength = Long.parseLong(getProperties().getProperty(
+							ConfigKeys.EXPERIMENT_COOL_DOWN_INTERVAL_LENGTH));
+					long coolDownUsersPerInterval = Long.parseLong(getProperties().getProperty(
+							ConfigKeys.EXPERIMENT_COOL_DOWN_NUM_USERS_PER_INTERVAL));
+
+					// load one virutal user
+					Class<?> vUserClass;
+
 					vUserClass = loadVUserScript(userScriptFile, userScriptClassNAme);
-				} catch (WorkloadException e) {
+
+					// we need to keep track for the offset for the cooldown of
+					// the
+					// virtual user, we
+					// are executing every loop
+					int timeOffsetMultiplicatorCoolDown = 0;
+
+					for (int i = 0; i < numberUsers; i++) {
+
+						if ((i + 1) % coolDownUsersPerInterval == 0) {
+							timeOffsetMultiplicatorCoolDown++;
+						}
+
+						startVUser(vUserClass, coolDownIntervalLength * timeOffsetMultiplicatorCoolDown);
+
+						// We put "rampUpUsersPerInterval" into the system. When
+						// we
+						// have added all of them in one
+						// interval, we set the WorkloadDriver to sleep.
+						// Afterwards the loop is going to continue the next
+						// users
+						// for the next ramp up interval.
+						if ((i + 1) % rampUpUsersPerInterval == 0) {
+							sleep(rampUpIntervalLength);
+						}
+
+					}
+
+					// Some thread could be waiting for us, till the warm-up
+					// phase
+					// is finished. Notify them!
+					synchronized (warmUpMonitor) {
+						warmupPhaseFinished = true;
+						warmUpMonitor.notifyAll();
+					}
+
+					// In the experimentation time, the users are just executing
+					// their task. In this time
+					// system bottlenecks might get visible
+					sleep(experimentDuration);
+
+					// Some thread could be waiting for us, till the experiment
+					// phase is finished. Notify them!
+					synchronized (experimentMonitor) {
+						experimentPhaseFinished = true;
+						experimentMonitor.notifyAll();
+					}
+
+					LOGGER.info("Simple load with " + numberUsers + " vUsers terminated");
+				} catch (Throwable e) {
+					synchronized (warmUpMonitor) {
+						warmupPhaseFinished = true;
+						warmUpMonitor.notifyAll();
+					}
+					synchronized (experimentMonitor) {
+						experimentPhaseFinished = true;
+						experimentMonitor.notifyAll();
+					}
+					synchronized (wlDriver) {
+						LOGGER.debug("notifying all...");
+						wlDriver.notifyAll();
+					}
 					throw new RuntimeException(e);
-				}
-
-				// we need to keep track for the offset for the cooldown of the
-				// virtual user, we
-				// are executing every loop
-				int timeOffsetMultiplicatorCoolDown = 0;
-
-				for (int i = 0; i < numberUsers; i++) {
-
-					if ((i + 1) % coolDownUsersPerInterval == 0) {
-						timeOffsetMultiplicatorCoolDown++;
-					}
-
-					startVUser(vUserClass, coolDownIntervalLength * timeOffsetMultiplicatorCoolDown);
-
-					// We put "rampUpUsersPerInterval" into the system. When we
-					// have added all of them in one
-					// interval, we set the WorkloadDriver to sleep.
-					// Afterwards the loop is going to continue the next users
-					// for the next ramp up interval.
-					if ((i + 1) % rampUpUsersPerInterval == 0) {
-						sleep(rampUpIntervalLength);
-					}
-
-				}
-
-				// Some thread could be waiting for us, till the warm-up phase
-				// is finished. Notify them!
-				synchronized (warmUpMonitor) {
-					warmupPhaseFinished = true;
-					warmUpMonitor.notifyAll();
-				}
-
-				// In the experimentation time, the users are just executing
-				// their task. In this time
-				// system bottlenecks might get visible
-				sleep(experimentDuration);
-
-				// Some thread could be waiting for us, till the experiment
-				// phase is finished. Notify them!
-				synchronized (experimentMonitor) {
-					experimentPhaseFinished = true;
-					experimentMonitor.notifyAll();
 				}
 			}
 		};
 
-		LpeSystemUtils.submitTask(task);
+		workloadGenerationJob = LpeSystemUtils.submitTask(task);
 
 	}
 
@@ -234,7 +256,7 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 			url = userScriptFile.toURI().toURL();
 			URL[] urls = new URL[] { url };
 
-			urlClassLoader = new URLClassLoader(urls);
+			urlClassLoader = new URLClassLoader(urls, this.getClass().getClassLoader());
 
 			vUserClass = urlClassLoader.loadClass(userScriptClassNAme);
 		} catch (Exception e) {
@@ -292,11 +314,21 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 	@Override
 	public synchronized void waitForFinishedLoad() throws WorkloadException {
 		while (numActiveUsers > 0 || !warmupPhaseFinished || !experimentPhaseFinished) {
+			LOGGER.debug("waiting for finished load ...");
+			LOGGER.debug("activeUsers: {}", numActiveUsers);
+			LOGGER.debug("warmupPhaseFinished: {}", warmupPhaseFinished);
+			LOGGER.debug("experimentPhaseFinished: {}", experimentPhaseFinished);
 			try {
 				this.wait();
 			} catch (InterruptedException e) {
 				throw new WorkloadException(e);
 			}
+		}
+		LOGGER.debug("load finished");
+		try {
+			workloadGenerationJob.get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WorkloadException(e);
 		}
 
 	}
@@ -311,12 +343,14 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 		synchronized (warmUpMonitor) {
 			while (!warmupPhaseFinished) {
 				try {
+					LOGGER.debug("waiting for warm up phase termination ...");
 					warmUpMonitor.wait();
 				} catch (InterruptedException e) {
 					throw new WorkloadException(e);
 				}
 			}
 		}
+		LOGGER.debug("warm-up phase terminated");
 
 	}
 
@@ -325,12 +359,14 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 		synchronized (experimentMonitor) {
 			while (!experimentPhaseFinished) {
 				try {
+					LOGGER.debug("waiting for experiment phase termination ...");
 					experimentMonitor.wait();
 				} catch (InterruptedException e) {
 					throw new WorkloadException(e);
 				}
 			}
 		}
+		LOGGER.debug("experiment phase terminated");
 
 	}
 

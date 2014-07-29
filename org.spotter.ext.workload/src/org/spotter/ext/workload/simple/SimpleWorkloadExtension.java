@@ -49,6 +49,7 @@ public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 		scriptParameter.setMandatory(true);
 		scriptParameter.setAset(false);
 		scriptParameter.setDefaultValue("");
+		scriptParameter.setDirectory(true);
 		scriptParameter
 				.setDescription("Path to the directory which contains the package containing the load script class file. "
 								+ "This is most times the path to the folder where the source folder is located.");
