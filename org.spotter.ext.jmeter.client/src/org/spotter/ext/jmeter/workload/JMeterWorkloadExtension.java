@@ -63,7 +63,7 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	private ConfigParameterDescription createJMeterScenarioFileParameter() {
 		ConfigParameterDescription jMeterScenarioFileParameter = new ConfigParameterDescription(JMeterConfigKeys.SCENARIO_FILE,
 																								LpeSupportedTypes.String);
-		jMeterScenarioFileParameter.setFile(true);
+		jMeterScenarioFileParameter.setIsAFile(true);
 		jMeterScenarioFileParameter.setMandatory(true);
 		jMeterScenarioFileParameter.setDefaultValue("");
 		jMeterScenarioFileParameter.setFileExtensions(FILE_SCENARIO_EXTENSIONS);
@@ -75,7 +75,7 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	private ConfigParameterDescription createJMeterSamplingFileParameter() {
 		ConfigParameterDescription jMeterSamplingFileParameter = new ConfigParameterDescription(JMeterConfigKeys.SAMPLING_FILE,
 																								LpeSupportedTypes.String);
-		jMeterSamplingFileParameter.setFile(true);
+		jMeterSamplingFileParameter.setIsAFile(true);
 		jMeterSamplingFileParameter.setMandatory(false);
 		jMeterSamplingFileParameter.setDefaultValue("");
 		jMeterSamplingFileParameter.setDefaultFileName(FILE_RESULTS_DEFAULT);

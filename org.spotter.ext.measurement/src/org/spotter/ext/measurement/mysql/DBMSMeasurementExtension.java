@@ -51,7 +51,7 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(
 				DBMSMeasurement.SAMPLING_DELAY, LpeSupportedTypes.Long);
 		samplingDelayParameter.setMandatory(false);
-		samplingDelayParameter.setAset(false);
+		samplingDelayParameter.setIsASet(false);
 		samplingDelayParameter.setDefaultValue(String.valueOf(DBMSMeasurement.DEFAULT_DELAY));
 		samplingDelayParameter.setDescription("The sampling interval in milliseconds.");
 
@@ -62,7 +62,7 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(
 				DBMSMeasurement.CONNECTION_STRING, LpeSupportedTypes.String);
 		samplingDelayParameter.setMandatory(true);
-		samplingDelayParameter.setAset(false);
+		samplingDelayParameter.setIsASet(false);
 		samplingDelayParameter.setDescription("The connection string to the database");
 
 		return samplingDelayParameter;
@@ -72,7 +72,7 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 		ConfigParameterDescription collectorTypeParameter = new ConfigParameterDescription(
 				DBMSMeasurement.COLLECTOR_TYPE_KEY, LpeSupportedTypes.String);
 		collectorTypeParameter.setMandatory(true);
-		collectorTypeParameter.setAset(false);
+		collectorTypeParameter.setIsASet(false);
 		collectorTypeParameter.setDescription("Type to use for data collector");
 
 		return collectorTypeParameter;

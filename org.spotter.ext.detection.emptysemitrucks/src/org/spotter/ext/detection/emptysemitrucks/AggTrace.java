@@ -18,9 +18,16 @@ package org.spotter.ext.detection.emptysemitrucks;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Aggregated trace. Groups loops, and calculates average over equally
+ * structured simple traces.
+ * 
+ * @author Alexander Wert
+ * 
+ */
 public class AggTrace {
 	public static final String LOOP_STR = "LOOP";
-	private static final long PER_CENT = 100;
+	// private static final long PER_CENT = 100;
 	private List<AggTrace> subTraces;
 	private AggTrace parent;
 	private String methodName;
@@ -29,7 +36,7 @@ public class AggTrace {
 	private boolean sendMethod;
 	private long overhead;
 	private long payload;
-	
+
 	/**
 	 * Constructor.
 	 */
@@ -96,34 +103,37 @@ public class AggTrace {
 		this.methodName = methodName;
 	}
 
-	
-
-	public String getPathToParentString(){
+	/**
+	 * The path in the trace to the root node.
+	 * 
+	 * @return path to the parent as string
+	 */
+	public String getPathToParentString() {
 		String result = "";
 		AggTrace currentTrace = this;
 		int depth = -1;
-		while(currentTrace != null){
+		while (currentTrace != null) {
 			depth++;
 			currentTrace = currentTrace.getParent();
 		}
-		
+
 		currentTrace = this;
 		int currentDepth = depth;
-		while(currentTrace != null){
+		while (currentTrace != null) {
 			String indention = "";
-			for(int i = 1; i <= currentDepth; i++){
+			for (int i = 1; i <= currentDepth; i++) {
 				indention += "   ";
 			}
 			result += indention + currentTrace.getMethodName();
-			if(currentTrace.isLoop()){
-				result += " ["+currentTrace.getLoopCount()+"]";
+			if (currentTrace.isLoop()) {
+				result += " [" + currentTrace.getLoopCount() + "]";
 			}
 			result += "\n";
 			currentTrace = currentTrace.getParent();
 			currentDepth--;
 		}
 		return result;
-		
+
 	}
 
 	/**
@@ -178,10 +188,8 @@ public class AggTrace {
 	public String toString() {
 		int depth = 0;
 		AggTrace parent = getParent();
-		AggTrace root = this;
 		while (parent != null) {
 			depth++;
-			root = parent;
 			parent = parent.getParent();
 		}
 		StringBuilder indention = new StringBuilder();
@@ -196,14 +204,13 @@ public class AggTrace {
 			strBuilder.append(" [");
 			strBuilder.append(getLoopCount());
 			strBuilder.append("]");
-		} else if(isSendMethod()){
+		} else if (isSendMethod()) {
 			strBuilder.append(" ***SENT: ");
 			strBuilder.append(getOverhead());
 			strBuilder.append(" | ");
 			strBuilder.append(getPayload());
 			strBuilder.append(" Bytes");
 		}
-		
 
 		strBuilder.append("\n");
 		for (AggTrace child : getSubTraces()) {
@@ -234,6 +241,13 @@ public class AggTrace {
 		return true;
 	}
 
+	/**
+	 * Transforms a simple trace to an aggregated trace (grouping up loops).
+	 * 
+	 * @param rootTrace
+	 *            root trace to convert
+	 * @return aggreagated trace
+	 */
 	public static AggTrace fromTrace(Trace rootTrace) {
 		if (rootTrace == null) {
 			return null;
@@ -249,7 +263,7 @@ public class AggTrace {
 
 	private static AggTrace fromTrace(Trace trace, AggTrace parentAggTrace) {
 		AggTrace aggRootTrace = new AggTrace(parentAggTrace, trace.getMethodName());
-		if(trace.isSendMethod()){
+		if (trace.isSendMethod()) {
 			aggRootTrace.setSendMethod(true);
 			aggRootTrace.setPayload(trace.getPayload());
 			aggRootTrace.setOverhead(trace.getOverhead());
@@ -282,8 +296,7 @@ public class AggTrace {
 
 				sequenceLoop: while (nextSequenceEnd < trace.getSubTraces().size()) {
 
-					nextSequenceHash = calculateSequenceHash(trace.getSubTraces(), nextSequenceStart,
-							nextSequenceEnd);
+					nextSequenceHash = calculateSequenceHash(trace.getSubTraces(), nextSequenceStart, nextSequenceEnd);
 					if (nextSequenceHash == sequenceHash) {
 
 						if (loopTrace == null) {
@@ -294,11 +307,9 @@ public class AggTrace {
 							}
 						}
 
-					
-
 						loopCount++;
 						loopTrace.setLoopCount(loopCount);
-				
+
 						i = nextSequenceEnd;
 
 						nextSequenceStart += sequenceLength;
@@ -343,7 +354,8 @@ public class AggTrace {
 	}
 
 	/**
-	 * @param sendMethod the sendMethod to set
+	 * @param sendMethod
+	 *            the sendMethod to set
 	 */
 	public void setSendMethod(boolean sendMethod) {
 		this.sendMethod = sendMethod;
@@ -357,7 +369,8 @@ public class AggTrace {
 	}
 
 	/**
-	 * @param overhead the overhead to set
+	 * @param overhead
+	 *            the overhead to set
 	 */
 	public void setOverhead(long overhead) {
 		this.overhead = overhead;
@@ -371,7 +384,8 @@ public class AggTrace {
 	}
 
 	/**
-	 * @param payload the payload to set
+	 * @param payload
+	 *            the payload to set
 	 */
 	public void setPayload(long payload) {
 		this.payload = payload;

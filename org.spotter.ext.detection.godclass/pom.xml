@@ -11,4 +11,16 @@
 
 	<artifactId>org.spotter.ext.detection.godclass</artifactId>
 	<name>God Class Detection</name>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<skipAssembly>false</skipAssembly>
+				</configuration>
+
+			</plugin>
+		</plugins>
+	</build>
 </project>

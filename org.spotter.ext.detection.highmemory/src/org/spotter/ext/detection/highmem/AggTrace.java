@@ -18,6 +18,13 @@ package org.spotter.ext.detection.highmem;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Aggregated trace. Groups loops, and calculates average over equally
+ * structured simple traces.
+ * 
+ * @author Alexander Wert
+ * 
+ */
 public class AggTrace {
 	private static final String LOOP_STR = "LOOP";
 	private static final long PER_CENT = 100;
@@ -233,6 +240,13 @@ public class AggTrace {
 		return true;
 	}
 
+	/**
+	 * Transforms a simple trace to an aggregated trace (grouping up loops).
+	 * 
+	 * @param rootTrace
+	 *            root trace to convert
+	 * @return aggreagated trace
+	 */
 	public static AggTrace fromTrace(Trace rootTrace) {
 		if (rootTrace == null) {
 			return null;
@@ -250,10 +264,10 @@ public class AggTrace {
 		AggTrace aggRootTrace = new AggTrace(parentAggTrace, trace.getMethodName());
 		aggRootTrace.setTotalMemoryFootprint(trace.getTotalMemoryFootprint());
 
-//		for (Trace child : trace.getSubTraces()) {
-//
-//			aggRootTrace.getSubTraces().add(fromTrace(child, aggRootTrace));
-//		}
+		// for (Trace child : trace.getSubTraces()) {
+		//
+		// aggRootTrace.getSubTraces().add(fromTrace(child, aggRootTrace));
+		// }
 
 		int i = 0;
 		while (i < trace.getSubTraces().size() - 1) {
@@ -283,8 +297,7 @@ public class AggTrace {
 				long totalMemoryUsage = 0;
 				sequenceLoop: while (nextSequenceEnd < trace.getSubTraces().size()) {
 
-					nextSequenceHash = calculateSequenceHash(trace.getSubTraces(), nextSequenceStart,
-							nextSequenceEnd);
+					nextSequenceHash = calculateSequenceHash(trace.getSubTraces(), nextSequenceStart, nextSequenceEnd);
 					if (nextSequenceHash == sequenceHash) {
 
 						if (loopTrace == null) {

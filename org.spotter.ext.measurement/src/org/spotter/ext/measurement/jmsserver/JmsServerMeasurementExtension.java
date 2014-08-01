@@ -52,7 +52,7 @@ public class JmsServerMeasurementExtension extends AbstractMeasurmentExtension {
 		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(
 				JmsServerMeasurement.SAMPLING_DELAY, LpeSupportedTypes.Long);
 		samplingDelayParameter.setMandatory(false);
-		samplingDelayParameter.setAset(false);
+		samplingDelayParameter.setIsASet(false);
 		samplingDelayParameter.setDefaultValue(String.valueOf(JmsServerMeasurement.DEFAULT_DELAY));
 		samplingDelayParameter.setDescription("The sampling interval in milliseconds.");
 
@@ -63,7 +63,7 @@ public class JmsServerMeasurementExtension extends AbstractMeasurmentExtension {
 		ConfigParameterDescription collectorTypeParameter = new ConfigParameterDescription(
 				JmsServerMeasurement.COLLECTOR_TYPE_KEY, LpeSupportedTypes.String);
 		collectorTypeParameter.setMandatory(true);
-		collectorTypeParameter.setAset(false);
+		collectorTypeParameter.setIsASet(false);
 		collectorTypeParameter.setDescription("Type to use for data collector");
 
 		return collectorTypeParameter;
@@ -73,7 +73,7 @@ public class JmsServerMeasurementExtension extends AbstractMeasurmentExtension {
 		ConfigParameterDescription collectorTypeParameter = new ConfigParameterDescription(
 				JmsServerMeasurement.ACTIVE_MQJMX_URL, LpeSupportedTypes.String);
 		collectorTypeParameter.setMandatory(true);
-		collectorTypeParameter.setAset(false);
+		collectorTypeParameter.setIsASet(false);
 		collectorTypeParameter.setDescription("Connection string to the JMX interface of the massaging service.");
 
 		return collectorTypeParameter;

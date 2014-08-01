@@ -12,4 +12,15 @@
 	<artifactId>org.spotter.ext.detection.osj</artifactId>
 	<name>Operating System Jobs and Burst Calculations Detection</name>
 
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<skipAssembly>false</skipAssembly>
+				</configuration>
+
+			</plugin>
+		</plugins>
+	</build>
 </project>

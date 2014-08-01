@@ -19,7 +19,16 @@ import org.spotter.ext.detection.godclass.processor.data.Component;
 import org.spotter.ext.detection.godclass.processor.data.ProcessedData;
 import org.spotter.shared.result.model.SpotterResult;
 
+/**
+ * Analysis strategy for god class identification based on exclusion of
+ * individual components.
+ * 
+ * @author Alexander Wert
+ * 
+ */
 public class ComponentExclusionAnalyzer implements IGodClassAnalyzer {
+
+	private static final double TIME_IMPROVEMENT_THREASHOLD_PERCENT = 0.4;
 
 	@Override
 	public void analyze(ProcessedData processData, SpotterResult result) {
@@ -50,8 +59,8 @@ public class ComponentExclusionAnalyzer implements IGodClassAnalyzer {
 
 			double percentageCountImprovement = 1 - messageCountWithoutComp / totalCountMessages;
 
-			if (percentageTimeImprovement > 0.4) {
-				if (percentageCountImprovement > 0.4) {
+			if (percentageTimeImprovement > TIME_IMPROVEMENT_THREASHOLD_PERCENT) {
+				if (percentageCountImprovement > TIME_IMPROVEMENT_THREASHOLD_PERCENT) {
 					result.setDetected(true);
 					result.addMessage("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *");
 					result.addMessage("GodClass: Component " + comp.getId());

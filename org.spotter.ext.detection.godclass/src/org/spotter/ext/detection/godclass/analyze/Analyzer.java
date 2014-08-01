@@ -32,9 +32,7 @@ import org.spotter.shared.result.model.SpotterResult;
  */
 public final class Analyzer {
 
-	private static final int PROBLEMATIC_DISTANCE_FACTOR = 2;
-
-	private static final int CRITICAL_DISTANCE_FACTOR = 3;
+	private static final int THREE_SIGMA = 3;
 
 	private static final double _100_PERCENT = 100D;
 
@@ -60,10 +58,6 @@ public final class Analyzer {
 	}
 
 	private static final DecimalFormat df = new DecimalFormat("0.000");
-
-	private enum Distance {
-		DOUBLE, TRIPLE
-	}
 
 	private long highestReceiveCount = 0;
 
@@ -112,10 +106,10 @@ public final class Analyzer {
 			result.addMessage("Component Pct Messages Sent:   " + df.format(getRelativeReceivePct(outer)) + "$");
 			result.addMessage("Current Mean:   " + df.format(currentMean) + "$");
 			result.addMessage("Current StdDev: " + df.format(standardDeviation) + "%");
-			result.addMessage("Critical Threshold (Mean + 3 * SD): " + df.format(currentMean + 3 * standardDeviation)
-					+ "%");
+			result.addMessage("Critical Threshold (Mean + 3 * SD): "
+					+ df.format(currentMean + THREE_SIGMA * standardDeviation) + "%");
 
-			if (currentMean + 3 * standardDeviation < getRelativeReceivePct(outer)) {
+			if (currentMean + THREE_SIGMA * standardDeviation < getRelativeReceivePct(outer)) {
 				result.addMessage("Result: As GodClass detected");
 				result.setDetected(true);
 			} else {
@@ -123,51 +117,6 @@ public final class Analyzer {
 			}
 			result.addMessage("* * * *");
 		}
-	}
-
-	private void oldAnalysis(ProcessedData processData, SpotterResult result) {
-		// Value information
-		result.addMessage("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *");
-		result.addMessage("Calculated Values - Pct Messages received relative to the highest value");
-		result.addMessage("Messages sent: " + processData.getTotalMessagesSent());
-		result.addMessage("* * * *");
-		result.addMessage("Mean: " + df.format(mean) + "%");
-		result.addMessage("StandardDeviation: " + df.format(standardDeviation) + "%");
-		result.addMessage("Problematical Threshold (Mean + 2 * SD): " + df.format(getRange(Distance.DOUBLE)) + "%");
-		result.addMessage("Critical Threshold (Mean + 3 * SD): " + df.format(getRange(Distance.TRIPLE)) + "%");
-		result.addMessage("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *");
-
-		// Print problematical components
-		List<Component> problematicalComponents = findProblematicalComponents(processData);
-		if (!problematicalComponents.isEmpty()) {
-			result.addMessage("Found potential problematical components:");
-			for (Component c : problematicalComponents) {
-				result.addMessage("Pct.: " + df.format(getRelativeReceivePct(c)) + "% - ID: " + c.getId());
-			}
-			result.addMessage("");
-		}
-
-		// Print critical components
-		List<Component> criticalComponents = findCriticalComponents(processData);
-		if (!criticalComponents.isEmpty()) {
-			result.addMessage("Critical components:");
-			result.setDetected(true);
-			for (Component c : criticalComponents) {
-				result.addMessage("Pct.: " + df.format(getRelativeReceivePct(c)) + "% - ID: " + c.getId());
-			}
-			result.addMessage("");
-		}
-
-		// Print critical components
-		result.addMessage("Remaining components:");
-		for (Component c : processData.getComponents()) {
-			if (criticalComponents.contains(c) || problematicalComponents.contains(c)) {
-				continue;
-			}
-			result.addMessage("Pct.: " + df.format(getRelativeReceivePct(c)) + "% - ID: " + c.getId());
-		}
-
-		result.addMessage("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *");
 	}
 
 	/**
@@ -181,19 +130,6 @@ public final class Analyzer {
 				highestReceiveCount = c.getMessagesReceived();
 			}
 		}
-	}
-
-	private long findHighestReceiveCount(ProcessedData data, Component excluded) {
-		long value = 0;
-		for (Component c : data.getComponents()) {
-			if (c == excluded) {
-				continue;
-			}
-			if (c.getMessagesReceived() > value) {
-				value = c.getMessagesReceived();
-			}
-		}
-		return value;
 	}
 
 	/**
@@ -230,37 +166,4 @@ public final class Analyzer {
 		return _100_PERCENT / highestReceiveCount * component.getMessagesReceived();
 	}
 
-	private List<Component> findCriticalComponents(ProcessedData data) {
-		return findComponents(data, Distance.TRIPLE);
-	}
-
-	private List<Component> findProblematicalComponents(ProcessedData data) {
-		return findComponents(data, Distance.DOUBLE);
-	}
-
-	private List<Component> findComponents(ProcessedData data, Distance distance) {
-		List<Component> criticalList = new ArrayList<Component>();
-		for (Component c : data.getComponents()) {
-			if (inRange(getRelativeReceivePct(c), distance)) {
-				criticalList.add(c);
-			}
-		}
-		return criticalList;
-	}
-
-	private boolean inRange(double value, Distance distance) {
-		switch (distance) {
-		case DOUBLE:
-			return value >= getRange(Distance.DOUBLE) && value < getRange(Distance.TRIPLE);
-		case TRIPLE:
-			return value >= getRange(Distance.TRIPLE);
-		default:
-			throw new IllegalArgumentException(distance + " is not a valid value");
-		}
-	}
-
-	private double getRange(Distance distance) {
-		return mean + ((distance == Distance.TRIPLE) ? CRITICAL_DISTANCE_FACTOR : PROBLEMATIC_DISTANCE_FACTOR)
-				* standardDeviation;
-	}
 }

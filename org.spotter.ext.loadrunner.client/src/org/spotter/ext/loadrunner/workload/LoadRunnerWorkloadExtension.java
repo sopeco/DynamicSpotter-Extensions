@@ -49,7 +49,7 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 				LpeSupportedTypes.String);
 		loadRunnerPathParameter.setDirectory(true);
 		loadRunnerPathParameter.setMandatory(true);
-		loadRunnerPathParameter.setAset(false);
+		loadRunnerPathParameter.setIsASet(false);
 		loadRunnerPathParameter.setDefaultValue("");
 		loadRunnerPathParameter.setDescription("The path to the LoadRunner.exe file of the Loadrunner installation.");
 
@@ -61,7 +61,7 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 				LpeSupportedTypes.String);
 		resultDirParameter.setDirectory(true);
 		resultDirParameter.setMandatory(true);
-		resultDirParameter.setAset(false);
+		resultDirParameter.setIsASet(false);
 		resultDirParameter.setDefaultValue("");
 		resultDirParameter.setDescription("The path to the result directory.");
 
@@ -73,7 +73,7 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 				LpeSupportedTypes.String);
 		scenarioPathParameter.setDirectory(true);
 		scenarioPathParameter.setMandatory(true);
-		scenarioPathParameter.setAset(false);
+		scenarioPathParameter.setIsASet(false);
 		scenarioPathParameter.setDefaultValue("");
 		scenarioPathParameter
 				.setDescription("The path to the Loadrunner scenario (.lrs) file to use for load generation.");

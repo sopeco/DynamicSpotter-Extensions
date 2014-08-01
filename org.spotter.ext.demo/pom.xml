@@ -36,8 +36,6 @@
 	</dependencies>
 
 	<build>
-
-
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -48,7 +46,7 @@
 						</manifest>
 					</archive>
 					<descriptor>assembly.xml</descriptor>
-
+					<skipAssembly>false</skipAssembly>
 				</configuration>
 				<executions>
 					<execution>

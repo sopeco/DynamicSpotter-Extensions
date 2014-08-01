@@ -11,5 +11,16 @@
 
 	<artifactId>org.spotter.ext.detection.gcoverloading</artifactId>
 	<name>Garbage Collection Overloading Detection</name>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<skipAssembly>false</skipAssembly>
+				</configuration>
 
+			</plugin>
+		</plugins>
+	</build>
 </project>

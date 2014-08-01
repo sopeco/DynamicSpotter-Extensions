@@ -49,7 +49,6 @@ public class Component implements Serializable {
 	private long messagesReceived = 0;
 	private long messagesSent = 0;
 
-	
 	private ProcessedData parentContainer;
 	private Map<String, Long> sendToCountMap = new HashMap<String, Long>();
 	private Map<String, Double> sendToDurationMap = new HashMap<String, Double>();
@@ -73,12 +72,14 @@ public class Component implements Serializable {
 			sendToCountMap.put(receiverId, 1L);
 		}
 	}
-	
+
 	/**
 	 * Adds id of component which received messages from this component.
 	 * 
 	 * @param receiverId
 	 *            id of the receiver component
+	 * @param duration
+	 *            duration to add
 	 */
 	public void addSendMessageToDuration(String receiverId, double duration) {
 		if (sendToDurationMap.containsKey(receiverId)) {
@@ -439,7 +440,8 @@ public class Component implements Serializable {
 	}
 
 	/**
-	 * @param sendToDurationMap the sendToDurationMap to set
+	 * @param sendToDurationMap
+	 *            the sendToDurationMap to set
 	 */
 	public void setSendToDurationMap(Map<String, Double> sendToDurationMap) {
 		this.sendToDurationMap = sendToDurationMap;

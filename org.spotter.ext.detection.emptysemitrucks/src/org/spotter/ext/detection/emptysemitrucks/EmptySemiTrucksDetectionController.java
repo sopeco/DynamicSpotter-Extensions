@@ -28,8 +28,6 @@ import java.util.Map;
 
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.instrumentation.description.InstrumentationDescription;
-import org.aim.api.instrumentation.description.InstrumentationDescriptionBuilder;
 import org.aim.api.measurement.AbstractRecord;
 import org.aim.api.measurement.dataset.Dataset;
 import org.aim.api.measurement.dataset.DatasetCollection;
@@ -41,18 +39,33 @@ import org.aim.artifacts.probes.ThreadTracingProbe;
 import org.aim.artifacts.records.JmsMessageSizeRecord;
 import org.aim.artifacts.records.JmsRecord;
 import org.aim.artifacts.records.ThreadTracingRecord;
+import org.aim.artifacts.scopes.EntryPointScope;
 import org.aim.artifacts.scopes.JmsScope;
-import org.aim.artifacts.scopes.ServletScope;
+import org.aim.description.InstrumentationDescription;
+import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.shared.result.model.SpotterResult;
 
+/**
+ * Detection controller for Empty Semi Trucks.
+ * 
+ * @author Alexander Wert
+ * 
+ */
 public class EmptySemiTrucksDetectionController extends AbstractDetectionController {
-	private static final long NANO_TO_MILLI = 1000000L;
+	private static final double HUNDRED_PERCENT = 100.0;
+	// private static final long NANO_TO_MILLI = 1000000L;
 	private static final int NUM_EXPERIMENTS = 1;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param provider
+	 *            extension provider
+	 */
 	public EmptySemiTrucksDetectionController(IExtension<IDetectionController> provider) {
 		super(provider);
 		// TODO Auto-generated constructor stub
@@ -73,9 +86,10 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 
 	private InstrumentationDescription getInstrumentationDescription() {
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
-		return idBuilder.addFullTraceInstrumentation().addRootAPI(ServletScope.class)
-				.addProbe(ThreadTracingProbe.class).entityDone().addAPIInstrumentation(JmsScope.class)
-				.addProbe(JmsMessageSizeProbe.class).addProbe(JmsCommunicationProbe.class).entityDone().build();
+		return idBuilder.newTraceScopeEntity().setAPISubScope(EntryPointScope.class.getName())
+				.addProbe(ThreadTracingProbe.MODEL_PROBE).entityDone().newAPIScopeEntity(JmsScope.class.getName())
+				.addProbe(JmsMessageSizeProbe.MODEL_PROBE).addProbe(JmsCommunicationProbe.MODEL_PROBE).entityDone()
+				.build();
 	}
 
 	@Override
@@ -147,7 +161,8 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 				result.addMessage("Avg Messaging Overhead: " + candidate.getAggTrace().getOverhead() + " Bytes");
 				result.addMessage("Loop count: " + candidate.getLoopCount());
 				result.addMessage("Saving potential: " + savingPotential + " Bytes");
-				result.addMessage("Saving potential %: " + (100.0 * savingPotential / transmittedBytes) + " %");
+				result.addMessage("Saving potential %: " + (HUNDRED_PERCENT * savingPotential / transmittedBytes)
+						+ " %");
 
 				result.addMessage("TRACE: ");
 				result.addMessage(candidate.getAggTrace().getPathToParentString());
@@ -267,7 +282,8 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 				if (sendMethodRecord == null || sendMethodRecord.getExitNanoTime() <= ttRecord.getEnterNanoTime()) {
 					sendMethodRecord = null;
 
-					long durationMs = (ttRecord.getExitNanoTime() - ttRecord.getEnterNanoTime()) / NANO_TO_MILLI;
+					// long durationMs = (ttRecord.getExitNanoTime() -
+					// ttRecord.getEnterNanoTime()) / NANO_TO_MILLI;
 					if (ttRecord.getTimeStamp() < nextValidTimestamp) {
 						continue;
 					}

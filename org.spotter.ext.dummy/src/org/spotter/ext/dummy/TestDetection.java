@@ -17,8 +17,8 @@ package org.spotter.ext.dummy;
 
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.instrumentation.description.InstrumentationDescription;
 import org.aim.api.measurement.dataset.DatasetCollection;
+import org.aim.description.InstrumentationDescription;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;

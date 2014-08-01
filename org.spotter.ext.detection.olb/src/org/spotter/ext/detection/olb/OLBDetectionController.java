@@ -23,8 +23,6 @@ import java.util.Map;
 
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.instrumentation.description.InstrumentationDescription;
-import org.aim.api.instrumentation.description.InstrumentationDescriptionBuilder;
 import org.aim.api.measurement.dataset.Dataset;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.api.measurement.dataset.ParameterSelection;
@@ -32,7 +30,9 @@ import org.aim.artifacts.probes.ResponsetimeProbe;
 import org.aim.artifacts.records.CPUUtilizationRecord;
 import org.aim.artifacts.records.ResponseTimeRecord;
 import org.aim.artifacts.sampler.CPUSampler;
-import org.aim.artifacts.scopes.ServletScope;
+import org.aim.artifacts.scopes.EntryPointScope;
+import org.aim.description.InstrumentationDescription;
+import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.LpeNumericUtils;
 import org.spotter.core.detection.AbstractDetectionController;
@@ -49,6 +49,8 @@ import com.xeiam.xchart.Chart;
  * 
  */
 public class OLBDetectionController extends AbstractDetectionController {
+
+	private static final int SAMPLING_DELAY = 200;
 
 	private static final double PER_PERCENT = 0.01;
 
@@ -106,7 +108,7 @@ public class OLBDetectionController extends AbstractDetectionController {
 
 		switch (scope) {
 		case OLBExtension.OLB_SCOPE_ENTRY_POINT:
-			idBuilder.addAPIInstrumentation(ServletScope.class).addProbe(ResponsetimeProbe.class).entityDone();
+			idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE).entityDone();
 			break;
 		case OLBExtension.OLB_SCOPE_SYNC:
 			// TODO: add sync instrumentation
@@ -115,7 +117,7 @@ public class OLBDetectionController extends AbstractDetectionController {
 			throw new IllegalArgumentException("Invalid Scope value for OLB detection!");
 		}
 
-		return idBuilder.addSamplingInstruction(CPUSampler.class, 200).build();
+		return idBuilder.newSampling(CPUSampler.class.getName(), SAMPLING_DELAY).build();
 
 	}
 

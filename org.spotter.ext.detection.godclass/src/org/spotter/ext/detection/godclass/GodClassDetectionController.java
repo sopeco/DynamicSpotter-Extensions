@@ -17,20 +17,20 @@ package org.spotter.ext.detection.godclass;
 
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.instrumentation.description.InstrumentationDescription;
-import org.aim.api.instrumentation.description.InstrumentationDescriptionBuilder;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.artifacts.probes.JmsCommunicationProbe;
 import org.aim.artifacts.scopes.JmsScope;
+import org.aim.description.InstrumentationDescription;
+import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
+import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.detection.godclass.analyze.ComponentExclusionAnalyzer;
 import org.spotter.ext.detection.godclass.processor.DataProcessor;
 import org.spotter.ext.detection.godclass.processor.data.ProcessedData;
-import org.spotter.exceptions.WorkloadException;
 import org.spotter.shared.result.model.SpotterResult;
 
 /**
@@ -68,7 +68,7 @@ public class GodClassDetectionController extends AbstractDetectionController {
 
 	private InstrumentationDescription getInstrumentationDescription() throws InstrumentationException {
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
-		return idBuilder.addAPIInstrumentation(JmsScope.class).addProbe(JmsCommunicationProbe.class).entityDone()
+		return idBuilder.newAPIScopeEntity(JmsScope.class.getName()).addProbe(JmsCommunicationProbe.MODEL_PROBE).entityDone()
 				.build();
 	}
 

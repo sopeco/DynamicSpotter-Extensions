@@ -17,10 +17,10 @@ package org.spotter.ext.detection.gcoverloading;
 
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.instrumentation.description.InstrumentationDescription;
-import org.aim.api.instrumentation.description.InstrumentationDescriptionBuilder;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.artifacts.sampler.GarbageCollectionSampler;
+import org.aim.description.InstrumentationDescription;
+import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
@@ -67,7 +67,7 @@ public class GCOverloadingDetectionController extends AbstractDetectionControlle
 	public InstrumentationDescription getInstrumentationDescription() {
 
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
-		return idBuilder.addSamplingInstruction(GarbageCollectionSampler.class, gcSamplingDelay).build();
+		return idBuilder.newSampling(GarbageCollectionSampler.class.getName(), gcSamplingDelay).build();
 
 	}
 

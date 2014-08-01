@@ -26,7 +26,16 @@ import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPair;
 import org.lpe.common.util.NumericPairList;
 
-public class BucketOutlierStrategy {
+/**
+ * Hiccup detection strategy based on outlier detection through buckets.
+ * 
+ * @author Alexander Wert
+ * 
+ */
+public final class BucketOutlierStrategy {
+
+	private BucketOutlierStrategy() {
+	}
 
 	/**
 	 * Searches for hiccups in a response time series.
@@ -40,6 +49,11 @@ public class BucketOutlierStrategy {
 	 *            list where to write calculated moving averages to
 	 * @param hiccupConfig
 	 *            configures hiccup detection
+	 * 
+	 * @param rtWithoutOutliers
+	 *            response times without outliers
+	 * @param hiccupDetectionValues
+	 *            hiccup information
 	 * @return list of detected hiccups
 	 */
 	public static List<Hiccup> findHiccups(Dataset rtDataSet, final NumericPairList<Long, Double> outRTSeries,
@@ -53,7 +67,7 @@ public class BucketOutlierStrategy {
 		int j = 0;
 		long minTimestamp = Long.MAX_VALUE;
 		long maxTimestamp = Long.MIN_VALUE;
-		// create buckets and remove outlier 
+		// create buckets and remove outlier
 		for (NumericPair<Long, Double> pair : outRTSeries) {
 			currentBucket.add(pair);
 			long ts = pair.getKey();

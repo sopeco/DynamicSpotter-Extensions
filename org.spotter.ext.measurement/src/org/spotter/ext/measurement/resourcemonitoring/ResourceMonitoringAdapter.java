@@ -19,10 +19,10 @@ import java.io.OutputStream;
 import java.util.Properties;
 
 import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.instrumentation.description.InstrumentationDescriptionBuilder;
 import org.aim.api.measurement.MeasurementData;
 import org.aim.artifacts.sampler.CPUSampler;
 import org.aim.artifacts.sampler.NetworkIOSampler;
+import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.resourcemonitoring.ResourceMonitoringClient;
 import org.spotter.core.measurement.AbstractMeasurementController;
@@ -57,8 +57,8 @@ public class ResourceMonitoringAdapter extends AbstractMeasurementController {
 	public void enableMonitoring() throws MeasurementException {
 
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
-		idBuilder.addSamplingInstruction(CPUSampler.class, samplingDelay);
-		idBuilder.addSamplingInstruction(NetworkIOSampler.class, samplingDelay);
+		idBuilder.newSampling(CPUSampler.class.getName(), samplingDelay);
+		idBuilder.newSampling(NetworkIOSampler.class.getName(), samplingDelay);
 
 		client.enableMonitoring(idBuilder.build());
 

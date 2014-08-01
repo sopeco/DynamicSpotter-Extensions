@@ -28,8 +28,6 @@ import java.util.Map;
 
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.instrumentation.description.InstrumentationDescription;
-import org.aim.api.instrumentation.description.InstrumentationDescriptionBuilder;
 import org.aim.api.measurement.dataset.Dataset;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.api.measurement.dataset.ParameterSelection;
@@ -40,7 +38,9 @@ import org.aim.artifacts.records.GCSamplingStatsRecord;
 import org.aim.artifacts.records.MemoryFootprintRecord;
 import org.aim.artifacts.records.ThreadTracingRecord;
 import org.aim.artifacts.sampler.GarbageCollectionSampler;
-import org.aim.artifacts.scopes.ServletScope;
+import org.aim.artifacts.scopes.EntryPointScope;
+import org.aim.description.InstrumentationDescription;
+import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
@@ -87,9 +87,9 @@ public class HighMemFootprintDetectionController extends AbstractDetectionContro
 	private InstrumentationDescription getInstrumentationDescription() {
 
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
-		return idBuilder.addFullTraceInstrumentation().addRootAPI(ServletScope.class)
-				.addProbe(ThreadTracingProbe.class).addProbe(MemoryFootprintProbe.class).entityDone()
-				.addSamplingInstruction(GarbageCollectionSampler.class, gcSamplingDelay).build();
+		return idBuilder.newTraceScopeEntity().setAPISubScope(EntryPointScope.class.getName())
+				.addProbe(ThreadTracingProbe.MODEL_PROBE).addProbe(MemoryFootprintProbe.MODEL_PROBE).entityDone()
+				.newSampling(GarbageCollectionSampler.class.getName(), gcSamplingDelay).build();
 	}
 
 	@Override

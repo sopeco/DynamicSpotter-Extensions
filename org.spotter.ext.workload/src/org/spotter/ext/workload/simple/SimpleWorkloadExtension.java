@@ -47,7 +47,7 @@ public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 		ConfigParameterDescription scriptParameter = new ConfigParameterDescription(
 				SimpleWorkloadDriver.USER_SCRIPT_PATH, LpeSupportedTypes.String);
 		scriptParameter.setMandatory(true);
-		scriptParameter.setAset(false);
+		scriptParameter.setIsASet(false);
 		scriptParameter.setDefaultValue("");
 		scriptParameter.setDirectory(true);
 		scriptParameter
@@ -61,7 +61,7 @@ public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 		ConfigParameterDescription classParameter = new ConfigParameterDescription(
 				SimpleWorkloadDriver.USER_SCRIPT_CLASS_NAME, LpeSupportedTypes.String);
 		classParameter.setMandatory(true);
-		classParameter.setAset(false);
+		classParameter.setIsASet(false);
 		classParameter.setDefaultValue("");
 		classParameter.setDescription("Full qualified name of the Class describing the load.");
 

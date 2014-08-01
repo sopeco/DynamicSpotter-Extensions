@@ -11,4 +11,15 @@
 	<artifactId>org.spotter.ext.detection.emptysemitrucks</artifactId>
 	<name>Empty Semi Trucks detection</name>
 
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<skipAssembly>false</skipAssembly>
+				</configuration>
+
+			</plugin>
+		</plugins>
+	</build>
 </project>

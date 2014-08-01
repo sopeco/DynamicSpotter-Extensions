@@ -50,7 +50,7 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 				LpeSupportedTypes.String);
 		analysisPathParameter.setDirectory(true);
 		analysisPathParameter.setMandatory(true);
-		analysisPathParameter.setAset(false);
+		analysisPathParameter.setIsASet(false);
 		analysisPathParameter.setDefaultValue("");
 		analysisPathParameter.setDescription("The path to the Analysis.exe file of the Loadrunner installation.");
 
@@ -61,7 +61,7 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 		ConfigParameterDescription analysisTemplateParameter = new ConfigParameterDescription(
 				LRConfigKeys.ANALYSIS_TEMPLATE_NAME, LpeSupportedTypes.String);
 		analysisTemplateParameter.setMandatory(true);
-		analysisTemplateParameter.setAset(false);
+		analysisTemplateParameter.setIsASet(false);
 		analysisTemplateParameter.setDefaultValue("");
 		analysisTemplateParameter
 				.setDescription("The name of the analysis template as configured in the Analysis program of Loadrunner.");
@@ -74,7 +74,7 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 				LpeSupportedTypes.String);
 		resultDirParameter.setDirectory(true);
 		resultDirParameter.setMandatory(true);
-		resultDirParameter.setAset(false);
+		resultDirParameter.setIsASet(false);
 		resultDirParameter.setDefaultValue("");
 		resultDirParameter.setDescription("The path to the result directory.");
 
@@ -85,7 +85,7 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 		ConfigParameterDescription analysisSessionParameter = new ConfigParameterDescription(
 				LRConfigKeys.ANALYSIS_SESSION_NAME, LpeSupportedTypes.String);
 		analysisSessionParameter.setMandatory(true);
-		analysisSessionParameter.setAset(false);
+		analysisSessionParameter.setIsASet(false);
 		analysisSessionParameter.setDefaultValue("");
 		analysisSessionParameter
 				.setDescription("The name of the analysis session as configured in the Analysis program of Loadrunner.");

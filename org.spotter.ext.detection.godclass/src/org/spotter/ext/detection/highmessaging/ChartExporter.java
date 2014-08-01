@@ -38,28 +38,29 @@ public final class ChartExporter {
 	private static final int IMAGE_WIDTH = 950;
 	private static final int IMAGE_HEIGHT = 500;
 
-
 	private ChartExporter() {
 	}
 
 	/**
-	 * Creates a chart showing the response time series as recorded with
-	 * detected hiccups.
+	 * Creates a chart for raw data.
 	 * 
-	 * @param operation
-	 *            measured operation
-	 * @param rtSeries
-	 *            response time series
-	 * @param hiccups
-	 *            detected hiccups
-	 * @return a chart
+	 * @param title
+	 *            chart title
+	 * @param xLabel
+	 *            label of the x axis
+	 * @param yLabel
+	 *            label of the y axis
+	 * @param keys
+	 *            x values
+	 * @param values
+	 *            y values
+	 * @return a chart object
 	 */
 	public static Chart createRawDataChart(String title, String xLabel, String yLabel, List<? extends Number> keys,
 			List<? extends Number> values) {
 		double maxX = LpeNumericUtils.max(keys).doubleValue();
 		double maxY = LpeNumericUtils.max(values).doubleValue();
 
-	
 		ChartBuilder chartBuilder = new ChartBuilder();
 		chartBuilder.width(IMAGE_WIDTH);
 		chartBuilder.height(IMAGE_HEIGHT);
@@ -90,5 +91,4 @@ public final class ChartExporter {
 		return chart;
 	}
 
-	
 }
