@@ -20,15 +20,4 @@
 		</dependency>
 	</dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<skipAssembly>false</skipAssembly>
-				</configuration>
-
-			</plugin>
-		</plugins>
-	</build>
 </project>

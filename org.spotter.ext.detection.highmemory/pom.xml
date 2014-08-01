@@ -12,15 +12,5 @@
 	<artifactId>org.spotter.ext.detection.highmemory</artifactId>
 	<name>High Memory Usage</name>
 
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<skipAssembly>false</skipAssembly>
-				</configuration>
 
-			</plugin>
-		</plugins>
-	</build>
 </project>
