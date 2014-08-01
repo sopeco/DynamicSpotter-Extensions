@@ -49,7 +49,7 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 	private ConfigParameterDescription createPackagesToIncludeParameter() {
 		ConfigParameterDescription packagesToIncludeParameter = new ConfigParameterDescription(
 				ISpotterInstrumentation.INSTRUMENTATION_INCLUDES, LpeSupportedTypes.String);
-		packagesToIncludeParameter.setIsASet(true);
+		packagesToIncludeParameter.setASet(true);
 		packagesToIncludeParameter.setDefaultValue("");
 		packagesToIncludeParameter
 				.setDescription("This parameter specifies the java packages whose classes should be considered for instrumentation. "
@@ -61,7 +61,7 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 	private ConfigParameterDescription createPackagesToExcludeParameter() {
 		ConfigParameterDescription packagesToExcludeParameter = new ConfigParameterDescription(
 				ISpotterInstrumentation.INSTRUMENTATION_EXCLUDES, LpeSupportedTypes.String);
-		packagesToExcludeParameter.setIsASet(true);
+		packagesToExcludeParameter.setASet(true);
 		packagesToExcludeParameter.setDefaultValue(InstrumentationConstants.JAVA_PACKAGE + ","
 				+ InstrumentationConstants.JAVAX_PACKAGE + "," + InstrumentationConstants.JAVASSIST_PACKAGE + ","
 				+ InstrumentationConstants.AIM_PACKAGE + "," + InstrumentationConstants.LPE_COMMON_PACKAGE);

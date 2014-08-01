@@ -27,7 +27,7 @@ import org.spotter.ext.jmeter.JMeterConfigKeys;
 public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 
 	private static final String EXTENSION_DESCRIPTION = "This workload satellite adapter can execute a local "
-														+ "JMeter application with a given load script.";
+			+ "JMeter application with a given load script.";
 
 	private static final String[] FILE_RESULTS_EXTENSIONS = { "*.csv" };
 
@@ -51,8 +51,8 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 
 	private ConfigParameterDescription createJMeterHomeParameter() {
 		ConfigParameterDescription jMeterHomeParameter = new ConfigParameterDescription(JMeterConfigKeys.JMETER_HOME,
-																						LpeSupportedTypes.String);
-		jMeterHomeParameter.setDirectory(true);
+				LpeSupportedTypes.String);
+		jMeterHomeParameter.setADirectory(true);
 		jMeterHomeParameter.setMandatory(true);
 		jMeterHomeParameter.setDefaultValue("");
 		jMeterHomeParameter.setDescription("The path to the JMeter root directory.");
@@ -61,9 +61,9 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createJMeterScenarioFileParameter() {
-		ConfigParameterDescription jMeterScenarioFileParameter = new ConfigParameterDescription(JMeterConfigKeys.SCENARIO_FILE,
-																								LpeSupportedTypes.String);
-		jMeterScenarioFileParameter.setIsAFile(true);
+		ConfigParameterDescription jMeterScenarioFileParameter = new ConfigParameterDescription(
+				JMeterConfigKeys.SCENARIO_FILE, LpeSupportedTypes.String);
+		jMeterScenarioFileParameter.setAFile(true);
 		jMeterScenarioFileParameter.setMandatory(true);
 		jMeterScenarioFileParameter.setDefaultValue("");
 		jMeterScenarioFileParameter.setFileExtensions(FILE_SCENARIO_EXTENSIONS);
@@ -73,32 +73,34 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createJMeterSamplingFileParameter() {
-		ConfigParameterDescription jMeterSamplingFileParameter = new ConfigParameterDescription(JMeterConfigKeys.SAMPLING_FILE,
-																								LpeSupportedTypes.String);
-		jMeterSamplingFileParameter.setIsAFile(true);
+		ConfigParameterDescription jMeterSamplingFileParameter = new ConfigParameterDescription(
+				JMeterConfigKeys.SAMPLING_FILE, LpeSupportedTypes.String);
+		jMeterSamplingFileParameter.setAFile(true);
 		jMeterSamplingFileParameter.setMandatory(false);
 		jMeterSamplingFileParameter.setDefaultValue("");
 		jMeterSamplingFileParameter.setDefaultFileName(FILE_RESULTS_DEFAULT);
 		jMeterSamplingFileParameter.setFileExtensions(FILE_RESULTS_EXTENSIONS);
-		jMeterSamplingFileParameter.setDescription("The file where JMeter should store the sampling values. The sampling must be enabled "
-													+ "explicity with the corresponding property key.");
+		jMeterSamplingFileParameter
+				.setDescription("The file where JMeter should store the sampling values. The sampling must be enabled "
+						+ "explicity with the corresponding property key.");
 
 		return jMeterSamplingFileParameter;
 	}
 
 	private ConfigParameterDescription createJMeterSamplingFileFlagParameter() {
-		ConfigParameterDescription jMeterSamplingFileFlag = new ConfigParameterDescription(	JMeterConfigKeys.SAMPLING_FLAG,
-																							LpeSupportedTypes.Boolean);
+		ConfigParameterDescription jMeterSamplingFileFlag = new ConfigParameterDescription(
+				JMeterConfigKeys.SAMPLING_FLAG, LpeSupportedTypes.Boolean);
 		jMeterSamplingFileFlag.setMandatory(false);
 		jMeterSamplingFileFlag.setDefaultValue(String.valueOf(false));
-		jMeterSamplingFileFlag.setDescription("Flag, if JMeter should create a result file. If this is true, you must define a sampling file!");
+		jMeterSamplingFileFlag
+				.setDescription("Flag, if JMeter should create a result file. If this is true, you must define a sampling file!");
 
 		return jMeterSamplingFileFlag;
 	}
 
 	private ConfigParameterDescription createJMeterThinkTimeMinParameter() {
-		ConfigParameterDescription jMeterThinkTimeMinParameter = new ConfigParameterDescription(JMeterConfigKeys.THINK_TIME_MIN,
-																								LpeSupportedTypes.Integer);
+		ConfigParameterDescription jMeterThinkTimeMinParameter = new ConfigParameterDescription(
+				JMeterConfigKeys.THINK_TIME_MIN, LpeSupportedTypes.Integer);
 		jMeterThinkTimeMinParameter.setMandatory(true);
 		jMeterThinkTimeMinParameter.setDefaultValue(String.valueOf(1000));
 		jMeterThinkTimeMinParameter.setDescription("Minimal thinktime in milliseconds.");
@@ -107,19 +109,20 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createJMeterLogFilePrefixParameter() {
-		ConfigParameterDescription jMeterLogFilePrefixParameter = new ConfigParameterDescription(	JMeterConfigKeys.LOG_FILE_PREFIX,
-																									LpeSupportedTypes.String);
+		ConfigParameterDescription jMeterLogFilePrefixParameter = new ConfigParameterDescription(
+				JMeterConfigKeys.LOG_FILE_PREFIX, LpeSupportedTypes.String);
 		jMeterLogFilePrefixParameter.setMandatory(false);
 		jMeterLogFilePrefixParameter.setDefaultValue("JMETWRAPPERLOG_");
-		jMeterLogFilePrefixParameter.setDescription("Prefix for log files. The log files are stored in the JMeter root directory. A "
-													+ "unique ID is appeneded to the file name. Only respected when the log file flag is true.");
+		jMeterLogFilePrefixParameter
+				.setDescription("Prefix for log files. The log files are stored in the JMeter root directory. A "
+						+ "unique ID is appeneded to the file name. Only respected when the log file flag is true.");
 
 		return jMeterLogFilePrefixParameter;
 	}
 
 	private ConfigParameterDescription createJMeterLogFileFlagParameter() {
-		ConfigParameterDescription jMeterLogFileFlag = new ConfigParameterDescription(	JMeterConfigKeys.LOG_FILE_FLAG,
-																						LpeSupportedTypes.Boolean);
+		ConfigParameterDescription jMeterLogFileFlag = new ConfigParameterDescription(JMeterConfigKeys.LOG_FILE_FLAG,
+				LpeSupportedTypes.Boolean);
 		jMeterLogFileFlag.setMandatory(false);
 		jMeterLogFileFlag.setDefaultValue(String.valueOf(false));
 		jMeterLogFileFlag.setDescription("Flag if JMeter should create a log file.");
@@ -128,8 +131,8 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createJMeterThinkTimeMaxParameter() {
-		ConfigParameterDescription jMeterThinkTimeMaxParameter = new ConfigParameterDescription(JMeterConfigKeys.THINK_TIME_MAX,
-																								LpeSupportedTypes.Integer);
+		ConfigParameterDescription jMeterThinkTimeMaxParameter = new ConfigParameterDescription(
+				JMeterConfigKeys.THINK_TIME_MAX, LpeSupportedTypes.Integer);
 		jMeterThinkTimeMaxParameter.setMandatory(true);
 		jMeterThinkTimeMaxParameter.setDefaultValue(String.valueOf(2000));
 		jMeterThinkTimeMaxParameter.setDescription("Maximum thinktime in milliseconds.");

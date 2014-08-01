@@ -45,8 +45,6 @@ public class ResourceMonitoringExtension extends AbstractMeasurmentExtension {
 	private ConfigParameterDescription createSamplingDelayParameter() {
 		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(
 				ResourceMonitoringAdapter.SAMPLING_DELAY, LpeSupportedTypes.Long);
-		samplingDelayParameter.setMandatory(false);
-		samplingDelayParameter.setIsASet(false);
 		samplingDelayParameter.setDefaultValue(String.valueOf(ResourceMonitoringAdapter.DEFAULT_DELAY));
 		samplingDelayParameter.setDescription("The sampling interval in milliseconds.");
 
