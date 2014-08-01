@@ -25,14 +25,14 @@ import java.util.Set;
 
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.instrumentation.description.InstrumentationDescription;
-import org.aim.api.instrumentation.description.InstrumentationDescriptionBuilder;
 import org.aim.api.measurement.dataset.Dataset;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.api.measurement.dataset.ParameterSelection;
 import org.aim.artifacts.records.GCSamplingStatsRecord;
 import org.aim.artifacts.records.ResponseTimeRecord;
 import org.aim.artifacts.sampler.GarbageCollectionSampler;
+import org.aim.description.InstrumentationDescription;
+import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPairList;
@@ -149,7 +149,7 @@ public class GCHiccupDetectionController extends AbstractDetectionController imp
 	@Override
 	public InstrumentationDescription getInstrumentationDescription() {
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
-		return idBuilder.addSamplingInstruction(GarbageCollectionSampler.class, gcSamplingDelay).build();
+		return idBuilder.newSampling(GarbageCollectionSampler.class.getName(), gcSamplingDelay).build();
 	}
 
 	@Override

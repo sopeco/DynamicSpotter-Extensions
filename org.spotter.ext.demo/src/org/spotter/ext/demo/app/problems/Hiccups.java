@@ -29,6 +29,10 @@ import java.util.concurrent.TimeUnit;
  * 
  */
 public final class Hiccups {
+	private static final int KILO = 1024;
+	private static final int SLEEP_TIME = 1500;
+	private static final double HICCUP_PROBABILITY = 0.005;
+	private static final int NUM_METHOD_CALLS = 10;
 	private static final int CORE_TIME_TO_SLEEP = 200;
 	private static final int HICCUP_DURATION = 100;
 	private static final int HICCUP_INTERARRIVAL_TIME = 10 * 1000;
@@ -121,7 +125,7 @@ public final class Hiccups {
 	public void garbageHiccup() {
 		List<String> aList = new ArrayList<>();
 		aList.add(String.valueOf(System.currentTimeMillis()));
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < NUM_METHOD_CALLS; i++) {
 			thirdMethod();
 		}
 
@@ -134,9 +138,9 @@ public final class Hiccups {
 	 * Emulate hiccups by garbage collection.
 	 */
 	public void garbageHiccupWithNoise() {
-		if (random.nextInt(2000) < 10) {
+		if (random.nextDouble() < HICCUP_PROBABILITY) {
 
-			long sleepTime = 1500 + random.nextInt(1500);
+			long sleepTime = SLEEP_TIME + random.nextInt(SLEEP_TIME);
 			try {
 				Thread.sleep(sleepTime);
 			} catch (InterruptedException e) {
@@ -146,7 +150,7 @@ public final class Hiccups {
 		} else {
 			List<String> aList = new ArrayList<>();
 			aList.add(String.valueOf(System.currentTimeMillis()));
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < NUM_METHOD_CALLS; i++) {
 				thirdMethod();
 			}
 
@@ -187,7 +191,7 @@ public final class Hiccups {
 		atrList.add(b);
 		atrList.add(c);
 		List<Byte> bytes = new ArrayList<>();
-		for (int i = 0; i < 1024; i++) {
+		for (int i = 0; i < KILO; i++) {
 			bytes.add(new Integer(i).byteValue());
 		}
 		fourthMethod();

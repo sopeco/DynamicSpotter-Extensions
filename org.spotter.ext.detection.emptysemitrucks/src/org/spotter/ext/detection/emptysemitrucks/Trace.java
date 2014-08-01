@@ -28,7 +28,8 @@ import java.util.Map;
  * 
  */
 public class Trace implements Iterable<Trace> {
-	private static final long PER_CENT = 100;
+	private static final int HASH_CONSTANT_2 = 1237;
+	private static final int HASH_CONSTANT_1 = 1231;
 	private List<Trace> subTraces;
 	private Trace parent;
 	private String methodName;
@@ -104,10 +105,6 @@ public class Trace implements Iterable<Trace> {
 		this.methodName = methodName;
 	}
 
-	
-
-	
-
 	/**
 	 * @return the startTime
 	 */
@@ -160,10 +157,8 @@ public class Trace implements Iterable<Trace> {
 	public String toString() {
 		int depth = 0;
 		Trace parent = getParent();
-		Trace root = this;
 		while (parent != null) {
 			depth++;
-			root = parent;
 			parent = parent.getParent();
 		}
 		StringBuilder indention = new StringBuilder();
@@ -204,9 +199,9 @@ public class Trace implements Iterable<Trace> {
 		return true;
 	}
 
-	
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -214,12 +209,14 @@ public class Trace implements Iterable<Trace> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((methodName == null) ? 0 : methodName.hashCode());
-		result = prime * result + (sendMethod ? 1231 : 1237);
+		result = prime * result + (sendMethod ? HASH_CONSTANT_1 : HASH_CONSTANT_2);
 		result = prime * result + ((subTraces == null) ? 0 : subTraces.hashCode());
 		return result;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -267,7 +264,8 @@ public class Trace implements Iterable<Trace> {
 	}
 
 	/**
-	 * @param sendMethod the sendMethod to set
+	 * @param sendMethod
+	 *            the sendMethod to set
 	 */
 	public void setSendMethod(boolean sendMethod) {
 		this.sendMethod = sendMethod;
@@ -281,7 +279,8 @@ public class Trace implements Iterable<Trace> {
 	}
 
 	/**
-	 * @param overhead the overhead to set
+	 * @param overhead
+	 *            the overhead to set
 	 */
 	public void setOverhead(long overhead) {
 		this.overhead = overhead;
@@ -295,12 +294,19 @@ public class Trace implements Iterable<Trace> {
 	}
 
 	/**
-	 * @param payload the payload to set
+	 * @param payload
+	 *            the payload to set
 	 */
 	public void setPayload(long payload) {
 		this.payload = payload;
 	}
 
+	/**
+	 * Iterator for the trace object.
+	 * 
+	 * @author Alexander Wert
+	 * 
+	 */
 	public class TraceIterator implements Iterator<Trace> {
 
 		private Trace originTrace;
@@ -309,6 +315,12 @@ public class Trace implements Iterable<Trace> {
 		private int currentLevel = 0;
 		private boolean finished = false;
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param trace
+		 *            trace to iterate over.
+		 */
 		public TraceIterator(Trace trace) {
 			this.originTrace = trace;
 			this.currentTrace = trace;
@@ -349,10 +361,7 @@ public class Trace implements Iterable<Trace> {
 					currentLevel--;
 					tempTrace = tempTrace.getParent();
 
-						currentChildIndex = levelChildMapping.get(currentLevel);
-
-					
-				
+					currentChildIndex = levelChildMapping.get(currentLevel);
 
 				}
 				if (tempTrace.getSubTraces().size() <= currentChildIndex) {

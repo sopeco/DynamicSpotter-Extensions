@@ -16,7 +16,7 @@
 package org.spotter.ext.loadrunner.instrumentation;
 
 import org.aim.api.exceptions.InstrumentationException;
-import org.aim.api.instrumentation.description.InstrumentationDescription;
+import org.aim.description.InstrumentationDescription;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.instrumentation.AbstractSpotterInstrumentation;
 

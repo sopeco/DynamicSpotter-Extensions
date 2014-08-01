@@ -289,6 +289,12 @@ public class Trace implements Iterable<Trace> {
 		return new TraceIterator(this);
 	}
 
+	/**
+	 * Iterator for the trace object.
+	 * 
+	 * @author Alexander Wert
+	 * 
+	 */
 	public class TraceIterator implements Iterator<Trace> {
 
 		private Trace originTrace;
@@ -297,6 +303,12 @@ public class Trace implements Iterable<Trace> {
 		private int currentLevel = 0;
 		private boolean finished = false;
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param trace
+		 *            trace to iterate over
+		 */
 		public TraceIterator(Trace trace) {
 			this.originTrace = trace;
 			this.currentTrace = trace;
@@ -337,10 +349,7 @@ public class Trace implements Iterable<Trace> {
 					currentLevel--;
 					tempTrace = tempTrace.getParent();
 
-						currentChildIndex = levelChildMapping.get(currentLevel);
-
-					
-				
+					currentChildIndex = levelChildMapping.get(currentLevel);
 
 				}
 				if (tempTrace.getSubTraces().size() <= currentChildIndex) {

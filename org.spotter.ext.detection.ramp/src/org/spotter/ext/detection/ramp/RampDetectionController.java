@@ -22,8 +22,6 @@ import java.util.TreeSet;
 
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.instrumentation.description.InstrumentationDescription;
-import org.aim.api.instrumentation.description.InstrumentationDescriptionBuilder;
 import org.aim.api.measurement.dataset.Dataset;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.api.measurement.dataset.Parameter;
@@ -32,6 +30,9 @@ import org.aim.artifacts.probes.ResponsetimeProbe;
 import org.aim.artifacts.records.CPUUtilizationRecord;
 import org.aim.artifacts.records.ResponseTimeRecord;
 import org.aim.artifacts.sampler.CPUSampler;
+import org.aim.artifacts.scopes.EntryPointScope;
+import org.aim.description.InstrumentationDescription;
+import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.LpeNumericUtils;
@@ -54,12 +55,14 @@ import org.spotter.shared.status.DiagnosisStatus;
  */
 public class RampDetectionController extends AbstractDetectionController {
 
+	private static final int SAMPLING_DELAY = 100;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(RampDetectionController.class);
 
 	private static final String STEP = "step";
 
 	private static int stimulationPhaseDuration;
-	private static int experiment_steps;
+	private static int experimentSteps;
 	private static int reuiqredSignificanceSteps;
 	private static double requiredSignificanceLevel;
 	private static double maxCpuUtilization;
@@ -80,13 +83,13 @@ public class RampDetectionController extends AbstractDetectionController {
 
 			instrumentApplication(getInstrumentationDescription());
 
-			for (int i = 1; i <= experiment_steps; i++) {
+			for (int i = 1; i <= experimentSteps; i++) {
 
 				LOGGER.info("RampDetectionController step count ----{}----.", i);
 
 				LOGGER.info("RampDetectionController started to stimulate the SUT with {} users.", GlobalConfiguration
 						.getInstance().getPropertyAsInteger(ConfigKeys.WORKLOAD_MAXUSERS));
-				stimulateSystem(experiment_steps * stimulationPhaseDuration);
+				stimulateSystem(experimentSteps * stimulationPhaseDuration);
 				LOGGER.info("RampDetectionController finalized to stimulate the SUT.");
 
 				LOGGER.info("RampDetectionController started to run a single user experiment.");
@@ -173,65 +176,10 @@ public class RampDetectionController extends AbstractDetectionController {
 	}
 
 	private InstrumentationDescription getInstrumentationDescription() {
-
-		// return
-		// idBuilder.addAPIInstrumentation(ServletScope.class).addProbe(ResponsetimeProbe.class).entityDone().build();
-
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.LoginController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.ChangePasswordController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation()
-				.addMethod("com.mycompany.controller.account.ManageCustomerAddressesController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.ManageWishlistController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.OrderHistoryController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.RedirectController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.RegisterController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.account.UpdateAccountController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.cart.CartController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.catalog.CategoryController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.catalog.ProductController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.catalog.RatingsController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.catalog.SearchController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.catalog.ContactUsController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.checkout.BillingInfoController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.checkout.CheckoutController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.checkout.NullGiftCardController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation()
-				.addMethod("com.mycompany.controller.checkout.OrderConfirmationController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.checkout.ShippingInfoController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.contactus.ContactUsController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.content.PageController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.seo.RobotsController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation().addMethod("com.mycompany.controller.seo.SiteMapController.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-		idBuilder.addMethodInstrumentation()
-				.addMethod("com.mycompany.controller.checkout.SendOrderConfirmationEmailActivity.*")
-				.addProbe(ResponsetimeProbe.class).entityDone();
-
-		idBuilder.addSamplingInstruction(CPUSampler.class, 100);
-
+		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
+				.entityDone();
+		idBuilder.newSampling(CPUSampler.class.getName(), SAMPLING_DELAY);
 		return idBuilder.build();
 
 	}
@@ -306,8 +254,8 @@ public class RampDetectionController extends AbstractDetectionController {
 		stimulationPhaseDuration = warmupPhaseStr != null ? Integer.parseInt(warmupPhaseStr)
 				: RampExtension.STIMULATION_PHASE_DURATION_DEFAULT;
 
-		String experiment_stepsStr = getProblemDetectionConfiguration().getProperty(RampExtension.KEY_EXPERIMENT_STEPS);
-		experiment_steps = experiment_stepsStr != null ? Integer.parseInt(experiment_stepsStr)
+		String experimentStepsStr = getProblemDetectionConfiguration().getProperty(RampExtension.KEY_EXPERIMENT_STEPS);
+		experimentSteps = experimentStepsStr != null ? Integer.parseInt(experimentStepsStr)
 				: RampExtension.EXPERIMENT_STEPS_DEFAULT;
 
 		String significanceStepsStr = getProblemDetectionConfiguration().getProperty(
@@ -328,7 +276,7 @@ public class RampDetectionController extends AbstractDetectionController {
 
 	@Override
 	public int getNumOfExperiments() {
-		return experiment_steps;
+		return experimentSteps;
 	}
 
 }

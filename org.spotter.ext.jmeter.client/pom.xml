@@ -24,4 +24,5 @@
 			<version>${lpe.common.version}</version>
 		</dependency>
 	</dependencies>
+
 </project>

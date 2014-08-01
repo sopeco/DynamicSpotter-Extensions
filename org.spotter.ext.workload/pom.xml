@@ -11,5 +11,5 @@
 
 	<artifactId>org.spotter.ext.workload</artifactId>
 	<name>Workload Driver Adapter</name>
-	
+
 </project>

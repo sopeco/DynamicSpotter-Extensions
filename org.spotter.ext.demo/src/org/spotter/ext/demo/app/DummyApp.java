@@ -32,6 +32,8 @@ import org.spotter.ext.demo.app.problems.OLB;
 @Path("demo")
 public class DummyApp {
 
+	private static final int FIB_NUMBER = 4;
+
 	/**
 	 * 
 	 * @return hello string
@@ -53,7 +55,7 @@ public class DummyApp {
 	@Path("fibonacci")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String testNoProblem() {
-		fibonacci(4);
+		fibonacci(FIB_NUMBER);
 		return "Hello from Fibonacci Method!";
 	}
 

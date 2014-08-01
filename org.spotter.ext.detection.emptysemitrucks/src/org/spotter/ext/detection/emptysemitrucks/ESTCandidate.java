@@ -15,32 +15,44 @@
  */
 package org.spotter.ext.detection.emptysemitrucks;
 
+/**
+ * Candidate for an Empty Semi Trucks problem.
+ * 
+ * @author Alexander Wert
+ * 
+ */
 public class ESTCandidate {
 	private AggTrace aggTrace;
 	private int loopCount;
+
 	/**
 	 * @return the loopCount
 	 */
 	public int getLoopCount() {
 		return loopCount;
 	}
+
 	/**
-	 * @param loopCount the loopCount to set
+	 * @param loopCount
+	 *            the loopCount to set
 	 */
 	public void setLoopCount(int loopCount) {
 		this.loopCount = loopCount;
 	}
+
 	/**
 	 * @return the aggTrace
 	 */
 	public AggTrace getAggTrace() {
 		return aggTrace;
 	}
+
 	/**
-	 * @param aggTrace the aggTrace to set
+	 * @param aggTrace
+	 *            the aggTrace to set
 	 */
 	public void setAggTrace(AggTrace aggTrace) {
 		this.aggTrace = aggTrace;
 	}
-	
+
 }

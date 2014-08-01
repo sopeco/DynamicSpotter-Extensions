@@ -18,7 +18,13 @@ package org.spotter.ext.detection.emptysemitrucks;
 import org.spotter.core.detection.AbstractDetectionExtension;
 import org.spotter.core.detection.IDetectionController;
 
-public class EmptySemiTrucksExtension extends AbstractDetectionExtension{
+/**
+ * Extension provider for the detection of Empty Semi Trucks.
+ * 
+ * @author Alexander Wert
+ * 
+ */
+public class EmptySemiTrucksExtension extends AbstractDetectionExtension {
 
 	@Override
 	public IDetectionController createExtensionArtifact() {
@@ -32,7 +38,7 @@ public class EmptySemiTrucksExtension extends AbstractDetectionExtension{
 
 	@Override
 	protected void initializeConfigurationParameters() {
-		
+
 	}
 
 }

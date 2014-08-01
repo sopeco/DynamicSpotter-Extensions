@@ -144,10 +144,15 @@ public class ProcessedData implements Serializable {
 	public void setTotalExperimentDuration(double totalDuration) {
 		this.totalExperimentDuration = totalDuration;
 	}
-	
-	public double getTotalMessagingTime(){
+
+	/**
+	 * Returns the total messaging time.
+	 * 
+	 * @return total messaging time
+	 */
+	public double getTotalMessagingTime() {
 		double duration = 0.0;
-		for(Component comp : components.values()){
+		for (Component comp : components.values()) {
 			duration += comp.getTotalMessageSentDuration();
 		}
 		return duration;

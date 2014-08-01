@@ -21,14 +21,14 @@ import java.util.List;
 
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.instrumentation.description.InstrumentationDescription;
-import org.aim.api.instrumentation.description.InstrumentationDescriptionBuilder;
 import org.aim.api.measurement.dataset.Dataset;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.api.measurement.dataset.ParameterSelection;
 import org.aim.artifacts.probes.ResponsetimeProbe;
 import org.aim.artifacts.records.ResponseTimeRecord;
-import org.aim.artifacts.scopes.ServletScope;
+import org.aim.artifacts.scopes.EntryPointScope;
+import org.aim.description.InstrumentationDescription;
+import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPairList;
@@ -102,8 +102,8 @@ public class RTHiccupsDetectionController extends AbstractDetectionController {
 
 	private InstrumentationDescription getInstrumentationDescription() throws InstrumentationException {
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
-		return idBuilder.addAPIInstrumentation(ServletScope.class).addProbe(ResponsetimeProbe.class).entityDone()
-				.build();
+		return idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
+				.entityDone().build();
 	}
 
 	@Override
@@ -142,12 +142,12 @@ public class RTHiccupsDetectionController extends AbstractDetectionController {
 					hiccupDetectionValues.getThreshold());
 			appendHiccupData(operation, i, hiccups);
 
-			LpeNumericUtils.exportAsCSV(preprocessedDataSeries, getResultManager().getAdditionalResourcesPath() + "noiseReduced-" + i
-					+ ".csv", "timestamp", "responsetime");
-			LpeNumericUtils.exportAsCSV(responseTimeSeries, getResultManager().getAdditionalResourcesPath() + "ResponseTimeSeries-" + i
-					+ ".csv", "timestamp", "responsetime");
-			LpeNumericUtils.exportAsCSV(detectionTimeSeries, getResultManager().getAdditionalResourcesPath() + "detection-" + i + ".csv",
-					"timestamp", "responsetime");
+			LpeNumericUtils.exportAsCSV(preprocessedDataSeries, getResultManager().getAdditionalResourcesPath()
+					+ "noiseReduced-" + i + ".csv", "timestamp", "responsetime");
+			LpeNumericUtils.exportAsCSV(responseTimeSeries, getResultManager().getAdditionalResourcesPath()
+					+ "ResponseTimeSeries-" + i + ".csv", "timestamp", "responsetime");
+			LpeNumericUtils.exportAsCSV(detectionTimeSeries, getResultManager().getAdditionalResourcesPath()
+					+ "detection-" + i + ".csv", "timestamp", "responsetime");
 
 			// Chart preprocessedChart =
 			// HiccupChartExporter.createCombinedDataChart(operation,
@@ -210,7 +210,8 @@ public class RTHiccupsDetectionController extends AbstractDetectionController {
 
 	private void appendCalculatedThresholdsMetaInfo(String operation, int number, double mean, double threshold) {
 		try {
-			FileWriter writer = new FileWriter(getResultManager().getAdditionalResourcesPath() + "thresholds_" + number + ".csv", true);
+			FileWriter writer = new FileWriter(getResultManager().getAdditionalResourcesPath() + "thresholds_" + number
+					+ ".csv", true);
 			writer.append("mean;threshold");
 			writer.append("\n");
 			writer.append(String.valueOf(mean) + ";" + String.valueOf(threshold));
@@ -222,7 +223,8 @@ public class RTHiccupsDetectionController extends AbstractDetectionController {
 
 	private void appendHiccupData(String operation, int number, List<Hiccup> hiccups) {
 		try {
-			FileWriter writer = new FileWriter(getResultManager().getAdditionalResourcesPath() + "hiccups_" + number + ".csv", true);
+			FileWriter writer = new FileWriter(getResultManager().getAdditionalResourcesPath() + "hiccups_" + number
+					+ ".csv", true);
 			writer.append("\"starttime\";\"endtime\";\"maxHeight\";\"avgHeight\";\"maxPreproccedHeight\";\"avgPreproccedHeight\"");
 			writer.append("\n");
 			for (Hiccup hiccup : hiccups) {

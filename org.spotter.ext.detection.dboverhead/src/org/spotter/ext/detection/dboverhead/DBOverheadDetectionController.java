@@ -28,8 +28,6 @@ import java.util.Map;
 
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.instrumentation.description.InstrumentationDescription;
-import org.aim.api.instrumentation.description.InstrumentationDescriptionBuilder;
 import org.aim.api.measurement.dataset.Dataset;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.api.measurement.dataset.ParameterSelection;
@@ -37,7 +35,9 @@ import org.aim.api.measurement.utils.MeasurementDataUtils;
 import org.aim.artifacts.probes.ResponsetimeProbe;
 import org.aim.artifacts.records.DBStatisticsRecrod;
 import org.aim.artifacts.records.ResponseTimeRecord;
-import org.aim.artifacts.scopes.ServletScope;
+import org.aim.artifacts.scopes.EntryPointScope;
+import org.aim.description.InstrumentationDescription;
+import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.LpeNumericUtils;
 import org.spotter.core.detection.AbstractDetectionController;
@@ -47,6 +47,7 @@ import org.spotter.shared.result.model.SpotterResult;
 
 public class DBOverheadDetectionController extends AbstractDetectionController {
 
+	private static final int INDEX_BEGIN_NODE_NAME = 13;
 	private static final int NUM_EXPERIMENTS = 1;
 
 	public DBOverheadDetectionController(IExtension<IDetectionController> provider) {
@@ -69,8 +70,8 @@ public class DBOverheadDetectionController extends AbstractDetectionController {
 
 	private InstrumentationDescription getInstrumentationDescription() {
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
-		return idBuilder.addAPIInstrumentation(ServletScope.class).addProbe(ResponsetimeProbe.class).entityDone()
-				.build();
+		return idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
+				.entityDone().build();
 
 	}
 
@@ -93,7 +94,7 @@ public class DBOverheadDetectionController extends AbstractDetectionController {
 		Collections.sort(keys);
 
 		for (String node : dbDataset.getValueSet(DBStatisticsRecrod.PAR_PROCESS_ID, String.class)) {
-			String fileName = node.substring(13, 26);
+			String fileName = node.substring(INDEX_BEGIN_NODE_NAME, 26);
 			List<Double> lockWaitsValues = new ArrayList<>();
 			for (Integer numUsers : keys) {
 

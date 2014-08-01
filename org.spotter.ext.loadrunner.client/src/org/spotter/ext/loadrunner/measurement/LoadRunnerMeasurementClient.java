@@ -147,8 +147,6 @@ public class LoadRunnerMeasurementClient extends AbstractMeasurementController {
 
 	}
 
-	
-
 	@Override
 	public void storeReport(String path) throws MeasurementException {
 		String reportPath = path + System.getProperty("file.separator") + "LRReport";

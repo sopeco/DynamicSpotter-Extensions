@@ -18,6 +18,20 @@ package org.spotter.ext.detection.godclass.analyze;
 import org.spotter.ext.detection.godclass.processor.data.ProcessedData;
 import org.spotter.shared.result.model.SpotterResult;
 
+/**
+ * Interface for god class analysis strategies.
+ * 
+ * @author Alexander Wert
+ * 
+ */
 public interface IGodClassAnalyzer {
+	/**
+	 * Analyse the processData to identify a god class.
+	 * 
+	 * @param processData
+	 *            data to analyse
+	 * @param result
+	 *            result object where to report a detection
+	 */
 	void analyze(ProcessedData processData, SpotterResult result);
 }

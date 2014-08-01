@@ -10,5 +10,4 @@
 
 	<artifactId>org.spotter.ext.detection.olb</artifactId>
 	<name>One Lane Bridge Detection</name>
-
 </project>

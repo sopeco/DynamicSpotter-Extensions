@@ -33,7 +33,10 @@ public class OLBExtension extends AbstractDetectionExtension {
 
 	private static final double _100_PERCENT = 100.0;
 
-	private static final String EXTENSION_DESCRIPTION = "One-Lane Bridge - Occurs at a point in execution where only one, or a few, processes may continue to execute concurrently (e.g., when accessing a database). Other processes are delayed while they wait for their turn.";
+	private static final String EXTENSION_DESCRIPTION = "One-Lane Bridge - "
+			+ "Occurs at a point in execution where only one, or a few, "
+			+ "processes may continue to execute concurrently (e.g., when accessing a database). "
+			+ "Other processes are delayed while they wait for their turn.";
 
 	protected static final String OLB_SCOPE_KEY = "scopes";
 	protected static final String OLB_SCOPE_ENTRY_POINT = "entryPoint";

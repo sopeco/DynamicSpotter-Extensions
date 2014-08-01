@@ -11,5 +11,4 @@
 
 	<artifactId>org.spotter.ext.detection.gcoverloading</artifactId>
 	<name>Garbage Collection Overloading Detection</name>
-
 </project>

@@ -47,9 +47,9 @@ public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 		ConfigParameterDescription scriptParameter = new ConfigParameterDescription(
 				SimpleWorkloadDriver.USER_SCRIPT_PATH, LpeSupportedTypes.String);
 		scriptParameter.setMandatory(true);
-		scriptParameter.setAset(false);
+		scriptParameter.setASet(false);
 		scriptParameter.setDefaultValue("");
-		scriptParameter.setDirectory(true);
+		scriptParameter.setADirectory(true);
 		scriptParameter
 				.setDescription("Path to the directory which contains the package containing the load script class file. "
 								+ "This is most times the path to the folder where the source folder is located.");
@@ -61,7 +61,7 @@ public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 		ConfigParameterDescription classParameter = new ConfigParameterDescription(
 				SimpleWorkloadDriver.USER_SCRIPT_CLASS_NAME, LpeSupportedTypes.String);
 		classParameter.setMandatory(true);
-		classParameter.setAset(false);
+		classParameter.setASet(false);
 		classParameter.setDefaultValue("");
 		classParameter.setDescription("Full qualified name of the Class describing the load.");
 
