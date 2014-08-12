@@ -28,7 +28,7 @@ import org.spotter.core.detection.IDetectionController;
 public class GodClassExtension extends AbstractDetectionExtension {
 
 	private static final String EXTENSION_DESCRIPTION = "Occurs when a single class either performs "
-			+ "all of the work of an application or holds all of the application’s data. Either "
+			+ "all of the work of an application or holds all of the application's data. Either "
 			+ "manifestation results in excessive message traffic that can degrade performance.";
 
 	@Override
