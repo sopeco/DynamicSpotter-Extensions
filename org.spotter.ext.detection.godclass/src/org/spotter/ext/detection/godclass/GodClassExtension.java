@@ -15,6 +15,7 @@
  */
 package org.spotter.ext.detection.godclass;
 
+import org.lpe.common.config.ConfigParameterDescription;
 import org.spotter.core.detection.AbstractDetectionExtension;
 import org.spotter.core.detection.IDetectionController;
 
@@ -25,6 +26,10 @@ import org.spotter.core.detection.IDetectionController;
  * 
  */
 public class GodClassExtension extends AbstractDetectionExtension {
+
+	private static final String EXTENSION_DESCRIPTION = "Occurs when a single class either performs "
+			+ "all of the work of an application or holds all of the application’s data. Either "
+			+ "manifestation results in excessive message traffic that can degrade performance.";
 
 	@Override
 	public String getName() {
@@ -38,8 +43,7 @@ public class GodClassExtension extends AbstractDetectionExtension {
 
 	@Override
 	protected void initializeConfigurationParameters() {
-		// TODO Auto-generated method stub
-
+		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 }

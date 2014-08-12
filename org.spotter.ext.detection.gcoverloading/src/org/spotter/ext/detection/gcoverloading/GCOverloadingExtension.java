@@ -28,6 +28,9 @@ import org.spotter.core.detection.IDetectionController;
  */
 public class GCOverloadingExtension extends AbstractDetectionExtension {
 
+	// TODO: please provide a description
+	private static final String EXTENSION_DESCRIPTION = "no description";
+
 	protected static final String GC_SAMPLING_DELAY_KEY = "gcStatsSamplingDelay";
 
 	protected static final long GC_SAMPLING_DELAY_DEFAULT = 500;
@@ -52,6 +55,7 @@ public class GCOverloadingExtension extends AbstractDetectionExtension {
 
 		addConfigParameter(gcSamplingDelayParameter);
 
+		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 }

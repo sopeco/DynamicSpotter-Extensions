@@ -15,11 +15,15 @@
  */
 package org.spotter.ext.detection.dboverhead;
 
+import org.lpe.common.config.ConfigParameterDescription;
 import org.spotter.core.detection.AbstractDetectionExtension;
 import org.spotter.core.detection.IDetectionController;
 
 public class DBOverheadExtension extends AbstractDetectionExtension{
 
+	// TODO: please provide a description
+	private static final String EXTENSION_DESCRIPTION = "no description";
+	
 	public IDetectionController createExtensionArtifact() {
 		return new DBOverheadDetectionController(this);
 	}
@@ -30,7 +34,7 @@ public class DBOverheadExtension extends AbstractDetectionExtension{
 
 	@Override
 	protected void initializeConfigurationParameters() {
-		
+		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 }

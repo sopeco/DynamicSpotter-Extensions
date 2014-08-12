@@ -53,7 +53,7 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 		packagesToIncludeParameter.setDefaultValue("");
 		packagesToIncludeParameter
 				.setDescription("This parameter specifies the java packages whose classes should be considered for instrumentation. "
-						+ "Class which are not in these packages will not be instrumented.");
+						+ "Classes which are not in these packages will not be instrumented.");
 
 		return packagesToIncludeParameter;
 	}
@@ -67,7 +67,7 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 				+ InstrumentationConstants.AIM_PACKAGE + "," + InstrumentationConstants.LPE_COMMON_PACKAGE);
 		packagesToExcludeParameter
 				.setDescription("This parameter specifies the java packages whose classes should NOT be considered for instrumentation. "
-						+ "Class which are in these packages will not be instrumented.");
+						+ "Classes which are in these packages will not be instrumented.");
 
 		return packagesToExcludeParameter;
 	}

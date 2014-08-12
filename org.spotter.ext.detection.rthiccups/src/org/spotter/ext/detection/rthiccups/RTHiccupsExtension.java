@@ -28,6 +28,9 @@ import org.spotter.ext.detection.hiccup.utils.HiccupDetectionConfig;
  */
 public class RTHiccupsExtension extends AbstractDetectionExtension {
 
+	// TODO: please provide a description
+	private static final String EXTENSION_DESCRIPTION = "no description";
+
 	@Override
 	public String getName() {
 		return "RTHiccups";
@@ -43,5 +46,6 @@ public class RTHiccupsExtension extends AbstractDetectionExtension {
 		for (ConfigParameterDescription cpd : HiccupDetectionConfig.getConfigurationParameters()) {
 			addConfigParameter(cpd);
 		}
+		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 }

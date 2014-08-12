@@ -20,7 +20,9 @@ import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
 import org.spotter.core.detection.IDetectionController;
 
-public class TestDetectionExtension extends AbstractDetectionExtension{
+public class TestDetectionExtension extends AbstractDetectionExtension {
+
+	private static final String EXTENSION_DESCRIPTION = "This is just a dummy extension doing dummy experiments.";
 
 	@Override
 	public IDetectionController createExtensionArtifact() {
@@ -39,6 +41,7 @@ public class TestDetectionExtension extends AbstractDetectionExtension{
 		par.setDefaultValue(String.valueOf(100));
 		par.setDescription("It's just a test parameter.");
 		addConfigParameter(par);
+		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 }

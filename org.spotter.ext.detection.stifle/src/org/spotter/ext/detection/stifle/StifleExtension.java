@@ -15,10 +15,14 @@
  */
 package org.spotter.ext.detection.stifle;
 
+import org.lpe.common.config.ConfigParameterDescription;
 import org.spotter.core.detection.AbstractDetectionExtension;
 import org.spotter.core.detection.IDetectionController;
 
 public class StifleExtension extends AbstractDetectionExtension{
+
+	// TODO: please provide a description
+	private static final String EXTENSION_DESCRIPTION = "no description";
 
 	public IDetectionController createExtensionArtifact() {
 		return new StifleDetectionController(this);
@@ -30,8 +34,7 @@ public class StifleExtension extends AbstractDetectionExtension{
 
 	@Override
 	protected void initializeConfigurationParameters() {
-		
-		
+		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 }
