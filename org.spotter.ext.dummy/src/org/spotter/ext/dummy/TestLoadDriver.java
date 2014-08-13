@@ -15,10 +15,9 @@
  */
 package org.spotter.ext.dummy;
 
-import java.util.Properties;
-
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.workload.AbstractWorkloadAdapter;
+import org.spotter.core.workload.LoadConfig;
 import org.spotter.exceptions.WorkloadException;
 
 public class TestLoadDriver extends AbstractWorkloadAdapter {
@@ -34,7 +33,7 @@ public class TestLoadDriver extends AbstractWorkloadAdapter {
 	}
 
 	@Override
-	public void startLoad(Properties config) throws WorkloadException {
+	public void startLoad(LoadConfig loadConfig) throws WorkloadException {
 
 	}
 

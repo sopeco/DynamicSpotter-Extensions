@@ -28,8 +28,8 @@ import org.lpe.common.util.system.LpeSystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spotter.core.workload.AbstractWorkloadAdapter;
+import org.spotter.core.workload.LoadConfig;
 import org.spotter.exceptions.WorkloadException;
-import org.spotter.shared.configuration.ConfigKeys;
 
 /**
  * Generates a simple closed workload.
@@ -98,7 +98,7 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 	}
 
 	@Override
-	public void startLoad(final Properties properties) throws WorkloadException {
+	public void startLoad(final LoadConfig loadConfig) throws WorkloadException {
 
 		// reset current variables
 		warmupPhaseFinished = false;
@@ -110,29 +110,17 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 			@Override
 			public void run() {
 				try {
-					// load the default configuration passed
-					getProperties().putAll(properties);
 					// load the global configuration and overwrite local
 					// configration properties
 					getProperties().putAll(GlobalConfiguration.getInstance().getProperties());
 
 					checkProperties(getProperties());
-					int numberUsers = Integer.parseInt(getProperties().getProperty(NUMBER_CURRENT_USERS));
+					int numberUsers = loadConfig.getNumUsers();
 					LOGGER.info("starting " + numberUsers + " vUsers ...");
 					File userScriptFile = new File(getProperties().getProperty(USER_SCRIPT_PATH));
 					String userScriptClassNAme = getProperties().getProperty(USER_SCRIPT_CLASS_NAME);
 
-					final long experimentDuration = Long.parseLong(getProperties().getProperty(
-							ConfigKeys.EXPERIMENT_DURATION))
-							* _1000L; // [ms]
-					long rampUpIntervalLength = Long.parseLong(getProperties().getProperty(
-							ConfigKeys.EXPERIMENT_RAMP_UP_INTERVAL_LENGTH));
-					long rampUpUsersPerInterval = Long.parseLong(getProperties().getProperty(
-							ConfigKeys.EXPERIMENT_RAMP_UP_NUM_USERS_PER_INTERVAL));
-					long coolDownIntervalLength = Long.parseLong(getProperties().getProperty(
-							ConfigKeys.EXPERIMENT_COOL_DOWN_INTERVAL_LENGTH));
-					long coolDownUsersPerInterval = Long.parseLong(getProperties().getProperty(
-							ConfigKeys.EXPERIMENT_COOL_DOWN_NUM_USERS_PER_INTERVAL));
+					final long experimentDuration = loadConfig.getExperimentDuration() * _1000L; // [ms]
 
 					// load one virutal user
 					Class<?> vUserClass;
@@ -147,11 +135,11 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 
 					for (int i = 0; i < numberUsers; i++) {
 
-						if ((i + 1) % coolDownUsersPerInterval == 0) {
+						if ((i + 1) % loadConfig.getCoolDownUsersPerInterval() == 0) {
 							timeOffsetMultiplicatorCoolDown++;
 						}
 
-						startVUser(vUserClass, coolDownIntervalLength * timeOffsetMultiplicatorCoolDown);
+						startVUser(vUserClass, loadConfig.getCoolDownIntervalLength() * timeOffsetMultiplicatorCoolDown);
 
 						// We put "rampUpUsersPerInterval" into the system. When
 						// we
@@ -160,8 +148,8 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 						// Afterwards the loop is going to continue the next
 						// users
 						// for the next ramp up interval.
-						if ((i + 1) % rampUpUsersPerInterval == 0) {
-							sleep(rampUpIntervalLength);
+						if ((i + 1) % loadConfig.getRampUpUsersPerInterval() == 0) {
+							sleep(loadConfig.getRampUpIntervalLength());
 						}
 
 					}
@@ -284,10 +272,6 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 
 		if (!properties.containsKey(USER_SCRIPT_CLASS_NAME)) {
 			throw new RuntimeException("Class name for user script has not been specified");
-		}
-
-		if (!properties.containsKey(NUMBER_CURRENT_USERS)) {
-			throw new RuntimeException("Number of users has not been specified");
 		}
 
 	}

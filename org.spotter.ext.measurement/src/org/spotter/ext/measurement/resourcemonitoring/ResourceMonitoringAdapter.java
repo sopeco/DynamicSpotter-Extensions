@@ -25,7 +25,7 @@ import org.aim.artifacts.sampler.NetworkIOSampler;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.resourcemonitoring.ResourceMonitoringClient;
-import org.spotter.core.measurement.AbstractMeasurementController;
+import org.spotter.core.measurement.AbstractMeasurementAdapter;
 
 /**
  * REST client for the resource monitoring service.
@@ -33,7 +33,7 @@ import org.spotter.core.measurement.AbstractMeasurementController;
  * @author Alexander Wert
  * 
  */
-public class ResourceMonitoringAdapter extends AbstractMeasurementController {
+public class ResourceMonitoringAdapter extends AbstractMeasurementAdapter {
 
 	public static final String SAMPLING_DELAY = "org.spotter.sampling.delay";
 

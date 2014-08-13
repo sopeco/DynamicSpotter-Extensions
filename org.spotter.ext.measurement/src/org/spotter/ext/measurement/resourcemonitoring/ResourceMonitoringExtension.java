@@ -19,7 +19,7 @@ import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.resourcemonitoring.ResourceMonitoringClient;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementController;
+import org.spotter.core.measurement.IMeasurementAdapter;
 
 /**
  * Extension for the resource monitoring client.
@@ -58,7 +58,7 @@ public class ResourceMonitoringExtension extends AbstractMeasurmentExtension {
 	}
 
 	@Override
-	public IMeasurementController createExtensionArtifact() {
+	public IMeasurementAdapter createExtensionArtifact() {
 		return new ResourceMonitoringAdapter(this);
 	}
 

@@ -20,7 +20,7 @@ import org.aim.artifacts.instrumentation.InstrumentationClient;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.instrumentation.AbstractInstrumentationExtension;
-import org.spotter.core.instrumentation.ISpotterInstrumentation;
+import org.spotter.core.instrumentation.IInstrumentationAdapter;
 
 /**
  * Extension for dynamic instrumentation.
@@ -48,7 +48,7 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 
 	private ConfigParameterDescription createPackagesToIncludeParameter() {
 		ConfigParameterDescription packagesToIncludeParameter = new ConfigParameterDescription(
-				ISpotterInstrumentation.INSTRUMENTATION_INCLUDES, LpeSupportedTypes.String);
+				IInstrumentationAdapter.INSTRUMENTATION_INCLUDES, LpeSupportedTypes.String);
 		packagesToIncludeParameter.setASet(true);
 		packagesToIncludeParameter.setDefaultValue("");
 		packagesToIncludeParameter
@@ -60,7 +60,7 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 
 	private ConfigParameterDescription createPackagesToExcludeParameter() {
 		ConfigParameterDescription packagesToExcludeParameter = new ConfigParameterDescription(
-				ISpotterInstrumentation.INSTRUMENTATION_EXCLUDES, LpeSupportedTypes.String);
+				IInstrumentationAdapter.INSTRUMENTATION_EXCLUDES, LpeSupportedTypes.String);
 		packagesToExcludeParameter.setASet(true);
 		packagesToExcludeParameter.setDefaultValue(InstrumentationConstants.JAVA_PACKAGE + ","
 				+ InstrumentationConstants.JAVAX_PACKAGE + "," + InstrumentationConstants.JAVASSIST_PACKAGE + ","
@@ -80,7 +80,7 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 	}
 
 	@Override
-	public ISpotterInstrumentation createExtensionArtifact() {
+	public IInstrumentationAdapter createExtensionArtifact() {
 		return new DynamicInstrumentationClient(this);
 	}
 

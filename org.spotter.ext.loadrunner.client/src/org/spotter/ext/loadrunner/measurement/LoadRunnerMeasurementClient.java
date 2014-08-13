@@ -31,7 +31,7 @@ import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.lpe.common.loadgenerator.config.LGMeasurementConfig;
 import org.lpe.common.util.LpeStringUtils;
 import org.spotter.core.instrumentation.InstrumentationBroker;
-import org.spotter.core.measurement.AbstractMeasurementController;
+import org.spotter.core.measurement.AbstractMeasurementAdapter;
 import org.spotter.ext.loadrunner.LRConfigKeys;
 import org.spotter.ext.loadrunner.instrumentation.LoadRunnerInstrumentationClient;
 
@@ -41,7 +41,7 @@ import org.spotter.ext.loadrunner.instrumentation.LoadRunnerInstrumentationClien
  * 
  * @author Le-Huan Stefan Tran
  */
-public class LoadRunnerMeasurementClient extends AbstractMeasurementController {
+public class LoadRunnerMeasurementClient extends AbstractMeasurementAdapter {
 	private LGMeasurementConfig lrmConfig;
 	private LoadGeneratorClient lrClient;
 	private LoadRunnerInstrumentationClient instrumentationClient = null;

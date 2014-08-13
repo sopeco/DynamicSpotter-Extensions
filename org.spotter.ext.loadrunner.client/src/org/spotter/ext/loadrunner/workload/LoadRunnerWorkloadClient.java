@@ -27,10 +27,9 @@ import org.lpe.common.util.LpeStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spotter.core.workload.AbstractWorkloadAdapter;
-import org.spotter.core.workload.IWorkloadAdapter;
+import org.spotter.core.workload.LoadConfig;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.loadrunner.LRConfigKeys;
-import org.spotter.shared.configuration.ConfigKeys;
 
 /**
  * The client to communicate with the LoadRunner server.
@@ -73,12 +72,8 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 	}
 
 	@Override
-	public void startLoad(Properties properties) throws WorkloadException {
-		Properties propsToUse = new Properties();
-		propsToUse.putAll(GlobalConfiguration.getInstance().getProperties());
-		propsToUse.putAll(getProperties());
-		propsToUse.putAll(properties);
-		LGWorkloadConfig lrConfig = createLRConfig(propsToUse);
+	public void startLoad(LoadConfig loadConfig) throws WorkloadException {
+		LGWorkloadConfig lrConfig = createLRConfig(loadConfig);
 		LOGGER.info("Triggered load with {} users ...", lrConfig.getNumUsers());
 		experimentStartTime = System.currentTimeMillis();
 		rampUpDuration = calculateActualRampUpDuration(lrConfig);
@@ -102,27 +97,24 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 		LOGGER.info("Load generation finished.");
 	}
 
-	private LGWorkloadConfig createLRConfig(Properties properties) {
+	private LGWorkloadConfig createLRConfig(LoadConfig loadConfig) {
 		LGWorkloadConfig lrConfig = new LGWorkloadConfig();
 
-		lrConfig.setCoolDownIntervalLength(Integer.parseInt(LpeStringUtils.getPropertyOrFail(properties,
-				ConfigKeys.EXPERIMENT_COOL_DOWN_INTERVAL_LENGTH, null)));
-		lrConfig.setCoolDownUsersPerInterval(Integer.parseInt(LpeStringUtils.getPropertyOrFail(properties,
-				ConfigKeys.EXPERIMENT_COOL_DOWN_NUM_USERS_PER_INTERVAL, null)));
-		lrConfig.setExperimentDuration(Integer.parseInt(LpeStringUtils.getPropertyOrFail(properties,
-				ConfigKeys.EXPERIMENT_DURATION, null)));
-		lrConfig.setLoadGeneratorPath(LpeStringUtils.getPropertyOrFail(properties, LRConfigKeys.CONTROLLER_EXE, null));
-		lrConfig.setNumUsers(Integer.parseInt(LpeStringUtils.getPropertyOrFail(properties,
-				IWorkloadAdapter.NUMBER_CURRENT_USERS, null)));
-		lrConfig.setRampUpIntervalLength(Integer.parseInt(LpeStringUtils.getPropertyOrFail(properties,
-				ConfigKeys.EXPERIMENT_RAMP_UP_INTERVAL_LENGTH, null)));
-		lrConfig.setRampUpUsersPerInterval(Integer.parseInt(LpeStringUtils.getPropertyOrFail(properties,
-				ConfigKeys.EXPERIMENT_RAMP_UP_NUM_USERS_PER_INTERVAL, null)));
-		lrConfig.setResultPath(LpeStringUtils.getPropertyOrFail(properties, LRConfigKeys.RESULT_DIR, null));
-		lrConfig.setScenarioPath(LpeStringUtils.getPropertyOrFail(properties, LRConfigKeys.SCENARIO_FILE, null));
-		lrConfig.setSchedulingMode(SchedulingMode.valueOf(LpeStringUtils.getPropertyOrFail(properties,
+		lrConfig.setCoolDownIntervalLength(loadConfig.getCoolDownIntervalLength());
+		lrConfig.setCoolDownUsersPerInterval(loadConfig.getCoolDownUsersPerInterval());
+		lrConfig.setExperimentDuration(loadConfig.getExperimentDuration());
+		lrConfig.setNumUsers(loadConfig.getNumUsers());
+		lrConfig.setRampUpIntervalLength(loadConfig.getRampUpIntervalLength());
+		lrConfig.setRampUpUsersPerInterval(loadConfig.getRampUpUsersPerInterval());
+
+		lrConfig.setLoadGeneratorPath(LpeStringUtils.getPropertyOrFail(getProperties(), LRConfigKeys.CONTROLLER_EXE,
+				null));
+
+		lrConfig.setResultPath(LpeStringUtils.getPropertyOrFail(getProperties(), LRConfigKeys.RESULT_DIR, null));
+		lrConfig.setScenarioPath(LpeStringUtils.getPropertyOrFail(getProperties(), LRConfigKeys.SCENARIO_FILE, null));
+		lrConfig.setSchedulingMode(SchedulingMode.valueOf(LpeStringUtils.getPropertyOrFail(getProperties(),
 				LRConfigKeys.EXPERIMENT_SCHEDULING_MODE, SchedulingMode.dynamicScheduling.toString())));
-		lrConfig.setvUserInitMode(VUserInitializationMode.valueOf(LpeStringUtils.getPropertyOrFail(properties,
+		lrConfig.setvUserInitMode(VUserInitializationMode.valueOf(LpeStringUtils.getPropertyOrFail(getProperties(),
 				LRConfigKeys.EXPERIMENT_USER_INIT_MODE, VUserInitializationMode.beforeRunning.toString())));
 
 		return lrConfig;

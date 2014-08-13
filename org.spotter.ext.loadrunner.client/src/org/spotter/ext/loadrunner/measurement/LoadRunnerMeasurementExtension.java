@@ -19,7 +19,7 @@ import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementController;
+import org.spotter.core.measurement.IMeasurementAdapter;
 import org.spotter.ext.loadrunner.LRConfigKeys;
 
 /**
@@ -98,7 +98,7 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 	}
 
 	@Override
-	public IMeasurementController createExtensionArtifact() {
+	public IMeasurementAdapter createExtensionArtifact() {
 		return new LoadRunnerMeasurementClient(this);
 	}
 

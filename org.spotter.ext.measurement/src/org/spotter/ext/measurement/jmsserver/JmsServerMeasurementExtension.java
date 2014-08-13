@@ -18,7 +18,7 @@ package org.spotter.ext.measurement.jmsserver;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementController;
+import org.spotter.core.measurement.IMeasurementAdapter;
 
 /**
  * Extension for JMS server sampler.
@@ -44,7 +44,7 @@ public class JmsServerMeasurementExtension extends AbstractMeasurmentExtension {
 	}
 	
 	@Override
-	public IMeasurementController createExtensionArtifact() {
+	public IMeasurementAdapter createExtensionArtifact() {
 		return new JmsServerMeasurement(this);
 	}
 

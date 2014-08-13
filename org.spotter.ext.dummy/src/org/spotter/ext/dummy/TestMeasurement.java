@@ -29,9 +29,9 @@ import org.aim.api.measurement.MeasurementData;
 import org.aim.artifacts.records.CPUUtilizationRecord;
 import org.aim.artifacts.records.ResponseTimeRecord;
 import org.lpe.common.extension.IExtension;
-import org.spotter.core.measurement.AbstractMeasurementController;
+import org.spotter.core.measurement.AbstractMeasurementAdapter;
 
-public class TestMeasurement extends AbstractMeasurementController {
+public class TestMeasurement extends AbstractMeasurementAdapter {
 
 	public TestMeasurement(IExtension<?> provider) {
 		super(provider);

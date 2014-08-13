@@ -17,7 +17,7 @@ package org.spotter.ext.dummy;
 
 import org.lpe.common.config.ConfigParameterDescription;
 import org.spotter.core.instrumentation.AbstractInstrumentationExtension;
-import org.spotter.core.instrumentation.ISpotterInstrumentation;
+import org.spotter.core.instrumentation.IInstrumentationAdapter;
 
 public class TestInstrumentationExtension extends AbstractInstrumentationExtension {
 
@@ -26,7 +26,7 @@ public class TestInstrumentationExtension extends AbstractInstrumentationExtensi
 														+ "the first version has been officially released.";
 
 	@Override
-	public ISpotterInstrumentation createExtensionArtifact() {
+	public IInstrumentationAdapter createExtensionArtifact() {
 		return new TestInstrumentation(this);
 	}
 

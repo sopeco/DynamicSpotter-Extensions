@@ -19,7 +19,7 @@ import org.aim.api.exceptions.InstrumentationException;
 import org.aim.artifacts.instrumentation.InstrumentationClient;
 import org.aim.description.InstrumentationDescription;
 import org.lpe.common.extension.IExtension;
-import org.spotter.core.instrumentation.AbstractSpotterInstrumentation;
+import org.spotter.core.instrumentation.AbstractInstrumentationAdapter;
 
 /**
  * Client for usage of dynamic instrumentation agent.
@@ -27,7 +27,7 @@ import org.spotter.core.instrumentation.AbstractSpotterInstrumentation;
  * @author Alexander Wert
  * 
  */
-public class DynamicInstrumentationClient extends AbstractSpotterInstrumentation {
+public class DynamicInstrumentationClient extends AbstractInstrumentationAdapter {
 
 	private InstrumentationClient client;
 

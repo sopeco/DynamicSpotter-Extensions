@@ -18,7 +18,7 @@ package org.spotter.ext.dummy;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementController;
+import org.spotter.core.measurement.IMeasurementAdapter;
 
 public class TestMeasurementExtension extends AbstractMeasurmentExtension {
 
@@ -29,7 +29,7 @@ public class TestMeasurementExtension extends AbstractMeasurmentExtension {
 	public static final String NUM_RECORDS = "org.spotter.test.numRecords";
 
 	@Override
-	public IMeasurementController createExtensionArtifact() {
+	public IMeasurementAdapter createExtensionArtifact() {
 		return new TestMeasurement(this);
 	}
 
