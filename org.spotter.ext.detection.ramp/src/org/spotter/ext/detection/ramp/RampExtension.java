@@ -15,6 +15,7 @@
  */
 package org.spotter.ext.detection.ramp;
 
+import org.lpe.common.config.ConfigParameterDescription;
 import org.spotter.core.detection.AbstractDetectionExtension;
 import org.spotter.core.detection.IDetectionController;
 
@@ -24,6 +25,8 @@ import org.spotter.core.detection.IDetectionController;
  * @author Alexander Wert
  */
 public class RampExtension extends AbstractDetectionExtension {
+
+	private static final String EXTENSION_DESCRIPTION = "The ramp occurs when processing time increases as the system is used.";
 
 	protected static final String KEY_WARMUP_PHASE_DURATION = "warmupPhaseDuration";
 	protected static final String KEY_REQUIRED_SIGNIFICANT_STEPS = "numRequiredSignificantSteps";
@@ -49,7 +52,6 @@ public class RampExtension extends AbstractDetectionExtension {
 
 	@Override
 	protected void initializeConfigurationParameters() {
-		// TODO Auto-generated method stub
-
+		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 }

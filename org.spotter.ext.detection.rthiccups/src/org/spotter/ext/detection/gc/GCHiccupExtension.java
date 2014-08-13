@@ -29,6 +29,9 @@ import org.spotter.ext.detection.hiccup.utils.HiccupDetectionConfig;
  */
 public class GCHiccupExtension extends AbstractDetectionExtension {
 
+	// TODO: please provide a description
+	private static final String EXTENSION_DESCRIPTION = "no description";
+
 	protected static final String GC_SAMPLING_DELAY_KEY = "gcStatsSamplingDelay";
 	protected static final String GC_CPU_OVERLOAD_THRESHOLD_KEY = "gcOverloadThreshold";
 	protected static final String GC_GUILTY_GC_RATIO_THRESHOLD_KEY = "guiltyFullGCRatioThreshold";
@@ -106,6 +109,8 @@ public class GCHiccupExtension extends AbstractDetectionExtension {
 		for (ConfigParameterDescription cpd : HiccupDetectionConfig.getConfigurationParameters()) {
 			addConfigParameter(cpd);
 		}
+		
+		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 }
