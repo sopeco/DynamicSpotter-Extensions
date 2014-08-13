@@ -35,7 +35,7 @@ import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.system.LpeSystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spotter.core.measurement.AbstractMeasurementController;
+import org.spotter.core.measurement.AbstractMeasurementAdapter;
 
 /**
  * Measurement adapter for sampling status of a Database Server. TODO: this
@@ -44,7 +44,7 @@ import org.spotter.core.measurement.AbstractMeasurementController;
  * @author Alexander Wert
  * 
  */
-public class DBMSMeasurement extends AbstractMeasurementController implements Runnable {
+public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runnable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DBMSMeasurement.class);
 	public static final String SAMPLING_DELAY = "org.spotter.sampling.delay";

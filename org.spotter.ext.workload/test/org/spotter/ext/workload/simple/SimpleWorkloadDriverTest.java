@@ -22,9 +22,8 @@ import java.util.Properties;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lpe.common.config.GlobalConfiguration;
-import org.spotter.core.workload.IWorkloadAdapter;
+import org.spotter.core.workload.LoadConfig;
 import org.spotter.exceptions.WorkloadException;
-import org.spotter.shared.configuration.ConfigKeys;
 
 public class SimpleWorkloadDriverTest {
 	@BeforeClass
@@ -40,17 +39,20 @@ public class SimpleWorkloadDriverTest {
 		String vuserPath = url.toURI().getPath();
 
 		Properties workloadProperties = new Properties();
-		workloadProperties.setProperty(IWorkloadAdapter.NUMBER_CURRENT_USERS, String.valueOf(1));
 		workloadProperties.setProperty(SimpleWorkloadDriver.USER_SCRIPT_PATH, vuserPath);
 		workloadProperties.setProperty(SimpleWorkloadDriver.USER_SCRIPT_CLASS_NAME, SimpleVUser.class.getName());
-		workloadProperties.setProperty(ConfigKeys.EXPERIMENT_DURATION, String.valueOf(1));
-		workloadProperties.setProperty(ConfigKeys.EXPERIMENT_RAMP_UP_INTERVAL_LENGTH, String.valueOf(1));
-		workloadProperties.setProperty(ConfigKeys.EXPERIMENT_RAMP_UP_NUM_USERS_PER_INTERVAL, String.valueOf(10));
-		workloadProperties.setProperty(ConfigKeys.EXPERIMENT_COOL_DOWN_INTERVAL_LENGTH, String.valueOf(1));
-		workloadProperties.setProperty(ConfigKeys.EXPERIMENT_COOL_DOWN_NUM_USERS_PER_INTERVAL, String.valueOf(20));
+
+		LoadConfig lConfig = new LoadConfig();
+		lConfig.setNumUsers(1);
+		lConfig.setRampUpIntervalLength(1);
+		lConfig.setRampUpUsersPerInterval(10);
+		lConfig.setCoolDownIntervalLength(1);
+		lConfig.setCoolDownUsersPerInterval(20);
+		lConfig.setExperimentDuration(1);
 
 		SimpleWorkloadDriver swlDriver = new SimpleWorkloadDriver(null);
-		swlDriver.startLoad(workloadProperties);
+		swlDriver.setProperties(workloadProperties);
+		swlDriver.startLoad(lConfig);
 		swlDriver.waitForWarmupPhaseTermination();
 		swlDriver.waitForExperimentPhaseTermination();
 		swlDriver.waitForFinishedLoad();
@@ -64,17 +66,21 @@ public class SimpleWorkloadDriverTest {
 		String vuserPath = url.toURI().getPath();
 
 		Properties workloadProperties = new Properties();
-		workloadProperties.setProperty(IWorkloadAdapter.NUMBER_CURRENT_USERS, String.valueOf(1));
 		workloadProperties.setProperty(SimpleWorkloadDriver.USER_SCRIPT_PATH, vuserPath);
-		workloadProperties.setProperty(SimpleWorkloadDriver.USER_SCRIPT_CLASS_NAME, SimpleVUser.class.getName()+"INVALID");
-		workloadProperties.setProperty(ConfigKeys.EXPERIMENT_DURATION, String.valueOf(1));
-		workloadProperties.setProperty(ConfigKeys.EXPERIMENT_RAMP_UP_INTERVAL_LENGTH, String.valueOf(1));
-		workloadProperties.setProperty(ConfigKeys.EXPERIMENT_RAMP_UP_NUM_USERS_PER_INTERVAL, String.valueOf(10));
-		workloadProperties.setProperty(ConfigKeys.EXPERIMENT_COOL_DOWN_INTERVAL_LENGTH, String.valueOf(1));
-		workloadProperties.setProperty(ConfigKeys.EXPERIMENT_COOL_DOWN_NUM_USERS_PER_INTERVAL, String.valueOf(20));
+		workloadProperties.setProperty(SimpleWorkloadDriver.USER_SCRIPT_CLASS_NAME, SimpleVUser.class.getName()
+				+ "INVALID");
+
+		LoadConfig lConfig = new LoadConfig();
+		lConfig.setNumUsers(1);
+		lConfig.setRampUpIntervalLength(1);
+		lConfig.setRampUpUsersPerInterval(10);
+		lConfig.setCoolDownIntervalLength(1);
+		lConfig.setCoolDownUsersPerInterval(20);
+		lConfig.setExperimentDuration(1);
 
 		SimpleWorkloadDriver swlDriver = new SimpleWorkloadDriver(null);
-		swlDriver.startLoad(workloadProperties);
+		swlDriver.setProperties(workloadProperties);
+		swlDriver.startLoad(lConfig);
 		swlDriver.waitForWarmupPhaseTermination();
 		swlDriver.waitForExperimentPhaseTermination();
 		swlDriver.waitForFinishedLoad();

@@ -21,7 +21,7 @@ import org.aim.api.exceptions.MeasurementException;
 import org.aim.api.measurement.MeasurementData;
 import org.aim.artifacts.instrumentation.InstrumentationClient;
 import org.lpe.common.extension.IExtension;
-import org.spotter.core.measurement.AbstractMeasurementController;
+import org.spotter.core.measurement.AbstractMeasurementAdapter;
 
 /**
  * Generic REST client for the measurement service.
@@ -29,7 +29,7 @@ import org.spotter.core.measurement.AbstractMeasurementController;
  * @author Alexander Wert
  * 
  */
-public class MeasurementClient extends AbstractMeasurementController {
+public class MeasurementClient extends AbstractMeasurementAdapter {
 	private InstrumentationClient agentClient;
 
 	/**

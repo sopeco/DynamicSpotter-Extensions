@@ -16,7 +16,6 @@
 package org.spotter.ext.detection.ramp;
 
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -41,7 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
-import org.spotter.core.workload.IWorkloadAdapter;
+import org.spotter.core.workload.LoadConfig;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
@@ -110,11 +109,22 @@ public class RampDetectionController extends AbstractDetectionController {
 			int stepNumber) throws WorkloadException, MeasurementException {
 
 		LOGGER.info("{} started experiment with {} users ...", detectionControllerClass.getSimpleName(), numUsers);
-		Properties wlProperties = new Properties();
-		wlProperties.setProperty(IWorkloadAdapter.NUMBER_CURRENT_USERS, String.valueOf(numUsers));
+
+		LoadConfig lConfig = new LoadConfig();
+		lConfig.setNumUsers(numUsers);
+		lConfig.setRampUpIntervalLength(GlobalConfiguration.getInstance().getPropertyAsInteger(
+				ConfigKeys.EXPERIMENT_RAMP_UP_INTERVAL_LENGTH));
+		lConfig.setRampUpUsersPerInterval(GlobalConfiguration.getInstance().getPropertyAsInteger(
+				ConfigKeys.EXPERIMENT_RAMP_UP_NUM_USERS_PER_INTERVAL));
+		lConfig.setCoolDownIntervalLength(GlobalConfiguration.getInstance().getPropertyAsInteger(
+				ConfigKeys.EXPERIMENT_COOL_DOWN_INTERVAL_LENGTH));
+		lConfig.setCoolDownUsersPerInterval(GlobalConfiguration.getInstance().getPropertyAsInteger(
+				ConfigKeys.EXPERIMENT_COOL_DOWN_NUM_USERS_PER_INTERVAL));
+		lConfig.setExperimentDuration(GlobalConfiguration.getInstance().getPropertyAsInteger(
+				ConfigKeys.EXPERIMENT_DURATION));
 
 		ProgressManager.getInstance().updateProgressStatus(getProblemId(), DiagnosisStatus.EXPERIMENTING_RAMP_UP);
-		workloadAdapter.startLoad(wlProperties);
+		workloadAdapter.startLoad(lConfig);
 
 		workloadAdapter.waitForWarmupPhaseTermination();
 
@@ -141,11 +151,18 @@ public class RampDetectionController extends AbstractDetectionController {
 	}
 
 	private void stimulateSystem(int duration) throws WorkloadException {
-		Properties wlProperties = new Properties();
-		wlProperties.setProperty(IWorkloadAdapter.NUMBER_CURRENT_USERS,
-				String.valueOf(GlobalConfiguration.getInstance().getPropertyAsInteger(ConfigKeys.WORKLOAD_MAXUSERS)));
-		wlProperties.setProperty(ConfigKeys.EXPERIMENT_DURATION, String.valueOf(duration));
-		workloadAdapter.startLoad(wlProperties);
+		LoadConfig lConfig = new LoadConfig();
+		lConfig.setNumUsers(GlobalConfiguration.getInstance().getPropertyAsInteger(ConfigKeys.WORKLOAD_MAXUSERS));
+		lConfig.setRampUpIntervalLength(GlobalConfiguration.getInstance().getPropertyAsInteger(
+				ConfigKeys.EXPERIMENT_RAMP_UP_INTERVAL_LENGTH));
+		lConfig.setRampUpUsersPerInterval(GlobalConfiguration.getInstance().getPropertyAsInteger(
+				ConfigKeys.EXPERIMENT_RAMP_UP_NUM_USERS_PER_INTERVAL));
+		lConfig.setCoolDownIntervalLength(GlobalConfiguration.getInstance().getPropertyAsInteger(
+				ConfigKeys.EXPERIMENT_COOL_DOWN_INTERVAL_LENGTH));
+		lConfig.setCoolDownUsersPerInterval(GlobalConfiguration.getInstance().getPropertyAsInteger(
+				ConfigKeys.EXPERIMENT_COOL_DOWN_NUM_USERS_PER_INTERVAL));
+		lConfig.setExperimentDuration(duration);
+		workloadAdapter.startLoad(lConfig);
 
 		workloadAdapter.waitForFinishedLoad();
 	}

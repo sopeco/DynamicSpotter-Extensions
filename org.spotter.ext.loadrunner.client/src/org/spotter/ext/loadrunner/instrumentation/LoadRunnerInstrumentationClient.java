@@ -18,14 +18,14 @@ package org.spotter.ext.loadrunner.instrumentation;
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.description.InstrumentationDescription;
 import org.lpe.common.extension.IExtension;
-import org.spotter.core.instrumentation.AbstractSpotterInstrumentation;
+import org.spotter.core.instrumentation.AbstractInstrumentationAdapter;
 
 /**
  * Client for LoadRunner instrumentation.
  * @author Alexander Wert
  *
  */
-public class LoadRunnerInstrumentationClient extends AbstractSpotterInstrumentation {
+public class LoadRunnerInstrumentationClient extends AbstractInstrumentationAdapter {
 
 	private boolean instrumented = false;
 

@@ -13,9 +13,7 @@
 package org.spotter.ext.jmeter.workload;
 
 import java.io.IOException;
-import java.util.Properties;
 
-import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.jmeter.JMeterWrapper;
 import org.lpe.common.jmeter.config.JMeterWorkloadConfig;
@@ -23,10 +21,9 @@ import org.lpe.common.util.LpeStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spotter.core.workload.AbstractWorkloadAdapter;
-import org.spotter.core.workload.IWorkloadAdapter;
+import org.spotter.core.workload.LoadConfig;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.jmeter.JMeterConfigKeys;
-import org.spotter.shared.configuration.ConfigKeys;
 
 /**
  * The client to communicate with the JMeter server.
@@ -50,7 +47,8 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 	/**
 	 * Constructor.
 	 * 
-	 * @param provider extension provider
+	 * @param provider
+	 *            extension provider
 	 */
 	public JMeterWorkloadClient(IExtension<?> provider) {
 		super(provider);
@@ -62,15 +60,11 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 	}
 
 	@Override
-	public void startLoad(Properties properties) throws WorkloadException {
-		Properties propsToUse = new Properties();
-		propsToUse.putAll(GlobalConfiguration.getInstance().getProperties());
-		propsToUse.putAll(getProperties());
-		propsToUse.putAll(properties);
-		JMeterWorkloadConfig jMeterConfig = createJMeterConfig(propsToUse);
+	public void startLoad(LoadConfig loadConfig) throws WorkloadException {
 
-		LOGGER.info("Triggered load with {} users ...",
-					jMeterConfig.getNumUsers());
+		JMeterWorkloadConfig jMeterConfig = createJMeterConfig(loadConfig);
+
+		LOGGER.info("Triggered load with {} users ...", jMeterConfig.getNumUsers());
 		experimentStartTime = System.currentTimeMillis();
 		rampUpDuration = calculateActualRampUpDuration(jMeterConfig);
 		experimentDuration = jMeterConfig.getExperimentDuration() * MILLIS_IN_SECOND;
@@ -85,7 +79,8 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 	/**
 	 * Calculaters the estimated time for the ramp up phase for JMeter.
 	 * 
-	 * @param jMeterConfig the {@link JMeterWorkloadConfig}
+	 * @param jMeterConfig
+	 *            the {@link JMeterWorkloadConfig}
 	 * @return the time
 	 */
 	private long calculateActualRampUpDuration(JMeterWorkloadConfig jMeterConfig) {
@@ -107,66 +102,49 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 		LOGGER.info("Load generation finished.");
 	}
 
-	private JMeterWorkloadConfig createJMeterConfig(Properties properties) {
+	private JMeterWorkloadConfig createJMeterConfig(LoadConfig loadConfig) {
 		JMeterWorkloadConfig jMeterConfig = new JMeterWorkloadConfig();
 
 		// required properties
-		jMeterConfig.setExperimentDuration(Integer.parseInt(LpeStringUtils.getPropertyOrFail(	properties,
-																								ConfigKeys.EXPERIMENT_DURATION,
-																								null)));
+		jMeterConfig.setExperimentDuration(loadConfig.getExperimentDuration());
 
-		jMeterConfig.setNumUsers(Integer.parseInt(LpeStringUtils.getPropertyOrFail(	properties,
-																					IWorkloadAdapter.NUMBER_CURRENT_USERS,
-																					null)));
+		jMeterConfig.setNumUsers(loadConfig.getNumUsers());
 
-		jMeterConfig.setPathToJMeterBinFolder(LpeStringUtils.getPropertyOrFail(	properties,
-																				JMeterConfigKeys.JMETER_HOME,
-																				null));
+		jMeterConfig.setRampUpInterval(loadConfig.getRampUpIntervalLength());
 
-		jMeterConfig.setPathToScript(LpeStringUtils.getPropertyOrFail(	properties,
-																		JMeterConfigKeys.SCENARIO_FILE,
-																		null));
+		jMeterConfig.setRampUpNumUsersPerInterval(loadConfig.getRampUpUsersPerInterval());
 
-		jMeterConfig.setRampUpInterval(Double.parseDouble(LpeStringUtils.getPropertyOrFail(	properties,
-																							ConfigKeys.EXPERIMENT_RAMP_UP_INTERVAL_LENGTH,
-																							null)));
+		jMeterConfig.setCoolDownInterval(loadConfig.getCoolDownIntervalLength());
 
-		jMeterConfig.setRampUpNumUsersPerInterval(Double.parseDouble(LpeStringUtils.getPropertyOrFail(	properties,
-																										ConfigKeys.EXPERIMENT_RAMP_UP_NUM_USERS_PER_INTERVAL,
-																										null)));
+		jMeterConfig.setCoolDownNumUsersPerInterval(loadConfig.getCoolDownUsersPerInterval());
 
-		jMeterConfig.setCoolDownInterval(Double.parseDouble(LpeStringUtils.getPropertyOrFail(	properties,
-																								ConfigKeys.EXPERIMENT_COOL_DOWN_INTERVAL_LENGTH,
-																								null)));
+		jMeterConfig.setPathToJMeterBinFolder(LpeStringUtils.getPropertyOrFail(getProperties(),
+				JMeterConfigKeys.JMETER_HOME, null));
 
-		jMeterConfig.setCoolDownNumUsersPerInterval(Double.parseDouble(LpeStringUtils.getPropertyOrFail(properties,
-																										ConfigKeys.EXPERIMENT_COOL_DOWN_NUM_USERS_PER_INTERVAL,
-																										null)));
+		jMeterConfig.setPathToScript(LpeStringUtils.getPropertyOrFail(getProperties(), JMeterConfigKeys.SCENARIO_FILE,
+				null));
 
-		jMeterConfig.setThinkTimeMaximum(Integer.parseInt(LpeStringUtils.getPropertyOrFail(	properties,
-																							JMeterConfigKeys.THINK_TIME_MIN,
-																							null)));
+		jMeterConfig.setThinkTimeMaximum(Integer.parseInt(LpeStringUtils.getPropertyOrFail(getProperties(),
+				JMeterConfigKeys.THINK_TIME_MIN, null)));
 
-		jMeterConfig.setThinkTimeMinimum(Integer.parseInt(LpeStringUtils.getPropertyOrFail(	properties,
-																							JMeterConfigKeys.THINK_TIME_MAX,
-																							null)));
+		jMeterConfig.setThinkTimeMinimum(Integer.parseInt(LpeStringUtils.getPropertyOrFail(getProperties(),
+				JMeterConfigKeys.THINK_TIME_MAX, null)));
 
 		// optional properties
-		boolean sampleInFile = Boolean.parseBoolean(properties.getProperty(JMeterConfigKeys.SAMPLING_FLAG));
+		boolean sampleInFile = Boolean.parseBoolean(getProperties().getProperty(JMeterConfigKeys.SAMPLING_FLAG));
 
 		if (sampleInFile) {
 			jMeterConfig.setSamplingFileFlag(true);
 			// fail when there is no property set for the sampling file
-			jMeterConfig.setPathToSamplingFile(LpeStringUtils.getPropertyOrFail(properties,
-																				JMeterConfigKeys.SAMPLING_FILE,
-																				null));
+			jMeterConfig.setPathToSamplingFile(LpeStringUtils.getPropertyOrFail(getProperties(),
+					JMeterConfigKeys.SAMPLING_FILE, null));
 		}
 
-		boolean createLogFile = Boolean.parseBoolean(properties.getProperty(JMeterConfigKeys.LOG_FILE_FLAG));
-		
+		boolean createLogFile = Boolean.parseBoolean(getProperties().getProperty(JMeterConfigKeys.LOG_FILE_FLAG));
+
 		if (createLogFile) {
 			jMeterConfig.setCreateLogFlag(true);
-			jMeterConfig.setLogFilePrefix(properties.getProperty(JMeterConfigKeys.LOG_FILE_PREFIX));
+			jMeterConfig.setLogFilePrefix(getProperties().getProperty(JMeterConfigKeys.LOG_FILE_PREFIX));
 		}
 
 		return jMeterConfig;

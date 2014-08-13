@@ -18,7 +18,7 @@ package org.spotter.ext.measurement;
 import org.aim.artifacts.instrumentation.InstrumentationClient;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementController;
+import org.spotter.core.measurement.IMeasurementAdapter;
 
 /**
  * Extension for generic measurement REST client.
@@ -52,8 +52,8 @@ public class MeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	@Override
-	public IMeasurementController createExtensionArtifact() {
-		IMeasurementController mController = new MeasurementClient(this);
+	public IMeasurementAdapter createExtensionArtifact() {
+		IMeasurementAdapter mController = new MeasurementClient(this);
 		for (ConfigParameterDescription cpd : this.getConfigParameters()) {
 			if (cpd.getDefaultValue() != null) {
 				mController.getProperties().setProperty(cpd.getName(), cpd.getDefaultValue());

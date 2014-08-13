@@ -18,7 +18,7 @@ package org.spotter.ext.loadrunner.instrumentation;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.spotter.core.instrumentation.AbstractInstrumentationExtension;
-import org.spotter.core.instrumentation.ISpotterInstrumentation;
+import org.spotter.core.instrumentation.IInstrumentationAdapter;
 
 /**
  * Extension for LoadRunner instrumentation.
@@ -32,7 +32,7 @@ public class LoadRunnerInstrumentationExtension extends AbstractInstrumentationE
 														+ "be applicable if you have a Loadrunner as a workload generator.";
 	
 	@Override
-	public ISpotterInstrumentation createExtensionArtifact() {
+	public IInstrumentationAdapter createExtensionArtifact() {
 		return new LoadRunnerInstrumentationClient(this);
 	}
 

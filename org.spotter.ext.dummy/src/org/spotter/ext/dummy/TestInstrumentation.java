@@ -18,9 +18,9 @@ package org.spotter.ext.dummy;
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.description.InstrumentationDescription;
 import org.lpe.common.extension.IExtension;
-import org.spotter.core.instrumentation.AbstractSpotterInstrumentation;
+import org.spotter.core.instrumentation.AbstractInstrumentationAdapter;
 
-public class TestInstrumentation extends AbstractSpotterInstrumentation {
+public class TestInstrumentation extends AbstractInstrumentationAdapter {
 
 	public TestInstrumentation(IExtension<?> provider) {
 		super(provider);
