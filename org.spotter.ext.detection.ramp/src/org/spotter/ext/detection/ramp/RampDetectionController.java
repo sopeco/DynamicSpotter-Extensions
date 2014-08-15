@@ -138,7 +138,7 @@ public class RampDetectionController extends AbstractDetectionController {
 
 		getWorkloadAdapter().waitForFinishedLoad();
 
-		ProgressManager.getInstance().updateProgressStatus(getProvider().getName(), DiagnosisStatus.COLLECTING_DATA);
+		ProgressManager.getInstance().updateProgressStatus(getProblemId(), DiagnosisStatus.COLLECTING_DATA);
 		LOGGER.info("Storing data ...");
 		long dataCollectionStart = System.currentTimeMillis();
 		Parameter numOfUsersParameter = new Parameter(STEP, stepNumber);
