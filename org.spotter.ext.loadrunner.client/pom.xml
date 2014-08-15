@@ -22,6 +22,7 @@
 			<groupId>org.lpe.common</groupId>
 			<artifactId>org.aim.artifacts.core</artifactId>
 			<version>${lpe.common.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 

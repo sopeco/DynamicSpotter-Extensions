@@ -45,6 +45,7 @@
 			<groupId>org.spotter</groupId>
 			<artifactId>org.spotter.core</artifactId>
 			<version>${dynamicspotter.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
