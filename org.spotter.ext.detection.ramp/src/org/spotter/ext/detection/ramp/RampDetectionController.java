@@ -88,7 +88,7 @@ public class RampDetectionController extends AbstractDetectionController {
 
 				LOGGER.info("RampDetectionController started to stimulate the SUT with {} users.", GlobalConfiguration
 						.getInstance().getPropertyAsInteger(ConfigKeys.WORKLOAD_MAXUSERS));
-				stimulateSystem(experimentSteps * stimulationPhaseDuration);
+				stimulateSystem(stimulationPhaseDuration);
 				LOGGER.info("RampDetectionController finalized to stimulate the SUT.");
 
 				LOGGER.info("RampDetectionController started to run a single user experiment.");
@@ -124,19 +124,19 @@ public class RampDetectionController extends AbstractDetectionController {
 				ConfigKeys.EXPERIMENT_DURATION));
 
 		ProgressManager.getInstance().updateProgressStatus(getProblemId(), DiagnosisStatus.EXPERIMENTING_RAMP_UP);
-		workloadAdapter.startLoad(lConfig);
+		getWorkloadAdapter().startLoad(lConfig);
 
-		workloadAdapter.waitForWarmupPhaseTermination();
+		getWorkloadAdapter().waitForWarmupPhaseTermination();
 
 		ProgressManager.getInstance().updateProgressStatus(getProblemId(), DiagnosisStatus.EXPERIMENTING_STABLE_PHASE);
-		measurementController.enableMonitoring();
+		getMeasurementController().enableMonitoring();
 
-		workloadAdapter.waitForExperimentPhaseTermination();
+		getWorkloadAdapter().waitForExperimentPhaseTermination();
 
 		ProgressManager.getInstance().updateProgressStatus(getProblemId(), DiagnosisStatus.EXPERIMENTING_COOL_DOWN);
-		measurementController.disableMonitoring();
+		getMeasurementController().disableMonitoring();
 
-		workloadAdapter.waitForFinishedLoad();
+		getWorkloadAdapter().waitForFinishedLoad();
 
 		ProgressManager.getInstance().updateProgressStatus(getProvider().getName(), DiagnosisStatus.COLLECTING_DATA);
 		LOGGER.info("Storing data ...");
@@ -144,7 +144,7 @@ public class RampDetectionController extends AbstractDetectionController {
 		Parameter numOfUsersParameter = new Parameter(STEP, stepNumber);
 		Set<Parameter> parameters = new TreeSet<>();
 		parameters.add(numOfUsersParameter);
-		getResultManager().storeResults(parameters, measurementController);
+		getResultManager().storeResults(parameters, getMeasurementController());
 		ProgressManager.getInstance()
 				.addAdditionalDuration((System.currentTimeMillis() - dataCollectionStart) / SECOND);
 		LOGGER.info("Data stored!");
@@ -162,9 +162,9 @@ public class RampDetectionController extends AbstractDetectionController {
 		lConfig.setCoolDownUsersPerInterval(GlobalConfiguration.getInstance().getPropertyAsInteger(
 				ConfigKeys.EXPERIMENT_COOL_DOWN_NUM_USERS_PER_INTERVAL));
 		lConfig.setExperimentDuration(duration);
-		workloadAdapter.startLoad(lConfig);
+		getWorkloadAdapter().startLoad(lConfig);
 
-		workloadAdapter.waitForFinishedLoad();
+		getWorkloadAdapter().waitForFinishedLoad();
 	}
 
 	@Override
@@ -292,8 +292,14 @@ public class RampDetectionController extends AbstractDetectionController {
 	}
 
 	@Override
-	public int getNumOfExperiments() {
-		return experimentSteps;
+	public long getExperimentSeriesDuration() {
+		long experimentDuration = ProgressManager.getInstance().calculateExperimentDuration(1,
+				GlobalConfiguration.getInstance().getPropertyAsInteger(ConfigKeys.EXPERIMENT_DURATION));
+		long stimulationDuration = ProgressManager.getInstance().calculateExperimentDuration(
+				GlobalConfiguration.getInstance().getPropertyAsInteger(ConfigKeys.WORKLOAD_MAXUSERS),
+				stimulationPhaseDuration);
+
+		return ((long) experimentSteps) * (stimulationDuration + experimentDuration);
 	}
 
 }

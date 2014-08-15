@@ -303,7 +303,7 @@ public class GCHiccupDetectionController extends AbstractDetectionController imp
 	}
 
 	@Override
-	public int getNumOfExperiments() {
+	public long getExperimentSeriesDuration() {
 		return 0;
 	}
 
