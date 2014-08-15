@@ -78,7 +78,7 @@ public class GCOverloadingDetectionController extends AbstractDetectionControlle
 	}
 
 	@Override
-	public int getNumOfExperiments() {
+	public long getExperimentSeriesDuration() {
 		return 0;
 	}
 

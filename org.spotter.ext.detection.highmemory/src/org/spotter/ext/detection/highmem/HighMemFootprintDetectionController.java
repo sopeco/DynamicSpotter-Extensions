@@ -42,6 +42,7 @@ import org.aim.artifacts.scopes.EntryPointScope;
 import org.aim.description.InstrumentationDescription;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
+import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
@@ -297,7 +298,7 @@ public class HighMemFootprintDetectionController extends AbstractDetectionContro
 	}
 
 	@Override
-	public int getNumOfExperiments() {
-		return NUM_EXPERIMENTS;
+	public long getExperimentSeriesDuration() {
+		return ProgressManager.getInstance().calculateDefaultExperimentSeriesDuration(NUM_EXPERIMENTS);
 	}
 }

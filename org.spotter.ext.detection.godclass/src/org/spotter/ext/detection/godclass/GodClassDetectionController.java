@@ -25,6 +25,7 @@ import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
@@ -99,7 +100,7 @@ public class GodClassDetectionController extends AbstractDetectionController {
 	}
 
 	@Override
-	public int getNumOfExperiments() {
-		return EXPERIMENT_STEPS;
+	public long getExperimentSeriesDuration() {
+		return ProgressManager.getInstance().calculateDefaultExperimentSeriesDuration(EXPERIMENT_STEPS);
 	}
 }

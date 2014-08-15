@@ -40,6 +40,7 @@ import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.LpeStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
@@ -309,8 +310,8 @@ public class StifleDetectionController extends AbstractDetectionController {
 	}
 
 	@Override
-	public int getNumOfExperiments() {
-		return NUM_EXPERIMENTS;
+	public long getExperimentSeriesDuration() {
+		return ProgressManager.getInstance().calculateDefaultExperimentSeriesDuration(NUM_EXPERIMENTS);
 	}
 
 }

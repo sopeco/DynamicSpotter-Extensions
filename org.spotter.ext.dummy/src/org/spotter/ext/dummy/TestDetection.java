@@ -20,6 +20,7 @@ import org.aim.api.exceptions.MeasurementException;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.description.InstrumentationDescription;
 import org.lpe.common.extension.IExtension;
+import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
@@ -52,8 +53,8 @@ public class TestDetection extends AbstractDetectionController {
 	}
 
 	@Override
-	public int getNumOfExperiments() {
-		return 1;
+	public long getExperimentSeriesDuration() {
+		return ProgressManager.getInstance().calculateDefaultExperimentSeriesDuration(1);
 	}
 
 }
