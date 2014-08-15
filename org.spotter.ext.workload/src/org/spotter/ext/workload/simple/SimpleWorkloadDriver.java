@@ -297,15 +297,17 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 
 	@Override
 	public synchronized void waitForFinishedLoad() throws WorkloadException {
-		while (numActiveUsers > 0 || !warmupPhaseFinished || !experimentPhaseFinished) {
-			LOGGER.debug("waiting for finished load ...");
-			LOGGER.debug("activeUsers: {}", numActiveUsers);
-			LOGGER.debug("warmupPhaseFinished: {}", warmupPhaseFinished);
-			LOGGER.debug("experimentPhaseFinished: {}", experimentPhaseFinished);
-			try {
-				this.wait();
-			} catch (InterruptedException e) {
-				throw new WorkloadException(e);
+		LOGGER.debug("waiting for finished load ...");
+		synchronized (this) {
+			while (numActiveUsers > 0 || !warmupPhaseFinished || !experimentPhaseFinished) {
+				LOGGER.debug("activeUsers: {}", numActiveUsers);
+				LOGGER.debug("warmupPhaseFinished: {}", warmupPhaseFinished);
+				LOGGER.debug("experimentPhaseFinished: {}", experimentPhaseFinished);
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+					throw new WorkloadException(e);
+				}
 			}
 		}
 		LOGGER.debug("load finished");
@@ -324,10 +326,10 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 
 	@Override
 	public void waitForWarmupPhaseTermination() throws WorkloadException {
+		LOGGER.debug("waiting for warm up phase termination ...");
 		synchronized (warmUpMonitor) {
 			while (!warmupPhaseFinished) {
 				try {
-					LOGGER.debug("waiting for warm up phase termination ...");
 					warmUpMonitor.wait();
 				} catch (InterruptedException e) {
 					throw new WorkloadException(e);
@@ -340,10 +342,11 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 
 	@Override
 	public void waitForExperimentPhaseTermination() throws WorkloadException {
+		LOGGER.debug("waiting for experiment phase termination ...");
 		synchronized (experimentMonitor) {
 			while (!experimentPhaseFinished) {
 				try {
-					LOGGER.debug("waiting for experiment phase termination ...");
+					LOGGER.debug("going to wait in: experiment phase termination ...");
 					experimentMonitor.wait();
 				} catch (InterruptedException e) {
 					throw new WorkloadException(e);

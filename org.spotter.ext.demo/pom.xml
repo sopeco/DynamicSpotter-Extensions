@@ -13,6 +13,16 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>0.9.28</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>0.9.28</version>
+		</dependency>
+		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-bundle</artifactId>
 			<version>1.17.1</version>
@@ -25,8 +35,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.spotter</groupId>
-			<artifactId>org.spotter.runner</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<artifactId>org.spotter.core</artifactId>
+			<version>${dynamicspotter.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.spotter.ext</groupId>
