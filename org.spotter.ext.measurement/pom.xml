@@ -12,21 +12,21 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.lpe.common</groupId>
-			<artifactId>org.lpe.common.resourcemonitoring</artifactId>
-			<version>${lpe.common.version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-all</artifactId>
 			<version>5.9.0</version>
 		</dependency>
 
 		<dependency>
-			<groupId>org.lpe.common</groupId>
+			<groupId>org.aim</groupId>
+			<artifactId>org.aim.resourcemonitoring</artifactId>
+			<version>${aim.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aim</groupId>
 			<artifactId>org.aim.artifacts.core</artifactId>
-			<version>${lpe.common.version}</version>
+			<version>${aim.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

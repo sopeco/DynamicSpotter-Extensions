@@ -14,9 +14,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.lpe.common</groupId>
+			<groupId>org.aim</groupId>
 			<artifactId>org.aim.artifacts.core</artifactId>
-			<version>${lpe.common.version}</version>
+			<version>${aim.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
