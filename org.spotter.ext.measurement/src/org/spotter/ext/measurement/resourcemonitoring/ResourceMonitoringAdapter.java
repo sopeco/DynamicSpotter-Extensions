@@ -23,8 +23,8 @@ import org.aim.api.measurement.MeasurementData;
 import org.aim.artifacts.sampler.CPUSampler;
 import org.aim.artifacts.sampler.NetworkIOSampler;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
+import org.aim.resourcemonitoring.ResourceMonitoringClient;
 import org.lpe.common.extension.IExtension;
-import org.lpe.common.resourcemonitoring.ResourceMonitoringClient;
 import org.spotter.core.measurement.AbstractMeasurementAdapter;
 
 /**

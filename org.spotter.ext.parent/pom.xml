@@ -9,6 +9,7 @@
 
 	<properties>
 		<lpe.common.version>1.0.4-SNAPSHOT</lpe.common.version>
+		<aim.version>1.0.4-SNAPSHOT</aim.version>
 		<dynamicspotter.version>1.0.1-SNAPSHOT</dynamicspotter.version>
 	</properties>
 

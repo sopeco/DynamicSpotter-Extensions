@@ -15,8 +15,8 @@
  */
 package org.spotter.ext.measurement.resourcemonitoring;
 
+import org.aim.resourcemonitoring.ResourceMonitoringClient;
 import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.resourcemonitoring.ResourceMonitoringClient;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
 import org.spotter.core.measurement.IMeasurementAdapter;
