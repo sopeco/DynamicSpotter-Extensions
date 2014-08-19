@@ -17,18 +17,22 @@ package org.spotter.ext.loadrunner.measurement;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.aim.api.exceptions.MeasurementException;
 import org.aim.api.measurement.AbstractRecord;
 import org.aim.api.measurement.MeasurementData;
+import org.aim.artifacts.records.ResponseTimeRecord;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.lpe.common.loadgenerator.config.LGMeasurementConfig;
+import org.lpe.common.loadgenerator.data.LGMeasurementData;
+import org.lpe.common.loadgenerator.data.TimeSpan;
 import org.lpe.common.util.LpeStringUtils;
 import org.spotter.core.instrumentation.InstrumentationBroker;
 import org.spotter.core.measurement.AbstractMeasurementAdapter;
@@ -101,7 +105,18 @@ public class LoadRunnerMeasurementClient extends AbstractMeasurementAdapter {
 			throw new MeasurementException("LoadRunner Measurement Client has not been initialized yet!");
 		}
 		if (instrumentationClient != null && instrumentationClient.isInstrumented()) {
-			return lrClient.getMeasurementData(lrmConfig);
+			LGMeasurementData lgData = lrClient.getMeasurementData(lrmConfig);
+			List<AbstractRecord> records = new ArrayList<>();
+			for (String transactionName : lgData.getTransactionNames()) {
+				for (TimeSpan tSpan : lgData.getTimesForTransaction(transactionName)) {
+					records.add(new ResponseTimeRecord(tSpan.getStart(), transactionName, tSpan.getStop()));
+				}
+			}
+
+			MeasurementData data = new MeasurementData();
+			data.setRecords(records);
+			return data;
+
 		} else {
 			return new MeasurementData();
 		}
@@ -128,7 +143,7 @@ public class LoadRunnerMeasurementClient extends AbstractMeasurementAdapter {
 		BufferedWriter bWriter = new BufferedWriter(new OutputStreamWriter(oStream));
 
 		try {
-			MeasurementData data = lrClient.getMeasurementData(lrmConfig);
+			MeasurementData data = getMeasurementData();
 			for (AbstractRecord record : data.getRecords()) {
 				String line = record.toString();
 				bWriter.write(line);
@@ -157,7 +172,7 @@ public class LoadRunnerMeasurementClient extends AbstractMeasurementAdapter {
 		try {
 			FileOutputStream fos = new FileOutputStream(reportZip);
 			lrClient.pipeReportToOutputStream(fos, lrmConfig);
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			throw new MeasurementException(e);
 		}
 	}
