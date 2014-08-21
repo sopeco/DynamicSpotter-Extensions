@@ -30,7 +30,6 @@
 		<module>../org.spotter.ext.detection.stifle</module>
 		<module>../org.spotter.ext.dummy</module>
 		<module>../org.spotter.ext.workload</module>
-		<module>../org.spotter.ext.demo</module>
 	</modules>
 
 	<repositories>
