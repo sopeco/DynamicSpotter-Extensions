@@ -47,7 +47,7 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 	private ConfigParameterDescription createLoadRunnerPathParameter() {
 		ConfigParameterDescription loadRunnerPathParameter = new ConfigParameterDescription(LRConfigKeys.CONTROLLER_EXE,
 				LpeSupportedTypes.String);
-		loadRunnerPathParameter.setADirectory(true);
+		loadRunnerPathParameter.setADirectory(false);
 		loadRunnerPathParameter.setMandatory(true);
 		loadRunnerPathParameter.setDefaultValue("");
 		loadRunnerPathParameter.setDescription("The path to the LoadRunner.exe file of the Loadrunner installation.");
@@ -58,7 +58,7 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 	private ConfigParameterDescription createResultDirParameter() {
 		ConfigParameterDescription resultDirParameter = new ConfigParameterDescription(LRConfigKeys.RESULT_DIR,
 				LpeSupportedTypes.String);
-		resultDirParameter.setADirectory(true);
+		resultDirParameter.setADirectory(false);
 		resultDirParameter.setMandatory(true);
 		resultDirParameter.setDefaultValue("");
 		resultDirParameter.setDescription("The path to the result directory.");
@@ -69,7 +69,7 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 	private ConfigParameterDescription createScenarioPathParameter() {
 		ConfigParameterDescription scenarioPathParameter = new ConfigParameterDescription(LRConfigKeys.SCENARIO_FILE,
 				LpeSupportedTypes.String);
-		scenarioPathParameter.setADirectory(true);
+		scenarioPathParameter.setADirectory(false);
 		scenarioPathParameter.setMandatory(true);
 		scenarioPathParameter.setDefaultValue("");
 		scenarioPathParameter
