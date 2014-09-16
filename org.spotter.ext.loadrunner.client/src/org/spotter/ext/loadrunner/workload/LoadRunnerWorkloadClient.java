@@ -15,9 +15,6 @@
  */
 package org.spotter.ext.loadrunner.workload;
 
-import java.util.Properties;
-
-import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.lpe.common.loadgenerator.config.LGWorkloadConfig;
@@ -42,7 +39,8 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 
 	private static final int MILLIS_IN_SECOND = 1000;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(LoadRunnerWorkloadClient.class);
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(LoadRunnerWorkloadClient.class);
 
 	private LoadGeneratorClient lrClient;
 	private long experimentStartTime;
@@ -66,7 +64,8 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 		if (lrClient == null) {
 			lrClient = new LoadGeneratorClient(getHost(), getPort());
 			if (!lrClient.testConnection()) {
-				throw new WorkloadException("Connection to loadrunner could not be established!");
+				throw new WorkloadException(
+						"Connection to loadrunner could not be established!");
 			}
 		}
 	}
@@ -76,8 +75,10 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 		LGWorkloadConfig lrConfig = createLRConfig(loadConfig);
 		LOGGER.info("Triggered load with {} users ...", lrConfig.getNumUsers());
 		experimentStartTime = System.currentTimeMillis();
-		rampUpDuration = calculateActualRampUpDuration(lrConfig);
-		experimentDuration = lrConfig.getExperimentDuration() * MILLIS_IN_SECOND;
+		rampUpDuration = calculateActualRampUpDuration(lrConfig)
+				* MILLIS_IN_SECOND;
+		experimentDuration = lrConfig.getExperimentDuration()
+				* MILLIS_IN_SECOND;
 		lrClient.startLoad(lrConfig);
 	}
 
@@ -87,7 +88,8 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 		int rampUpUsersPerInterval = lrConfig.getRampUpUsersPerInterval();
 		int numUsers = lrConfig.getNumUsers();
 
-		return ((numUsers / rampUpUsersPerInterval) - ((numUsers % rampUpUsersPerInterval == 0) ? 1 : 0))
+		return ((numUsers / rampUpUsersPerInterval) - ((numUsers
+				% rampUpUsersPerInterval == 0) ? 1 : 0))
 				* rampUpInterval;
 	}
 
@@ -100,29 +102,39 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 	private LGWorkloadConfig createLRConfig(LoadConfig loadConfig) {
 		LGWorkloadConfig lrConfig = new LGWorkloadConfig();
 
-		lrConfig.setCoolDownIntervalLength(loadConfig.getCoolDownIntervalLength());
-		lrConfig.setCoolDownUsersPerInterval(loadConfig.getCoolDownUsersPerInterval());
+		lrConfig.setCoolDownIntervalLength(loadConfig
+				.getCoolDownIntervalLength());
+		lrConfig.setCoolDownUsersPerInterval(loadConfig
+				.getCoolDownUsersPerInterval());
 		lrConfig.setExperimentDuration(loadConfig.getExperimentDuration());
 		lrConfig.setNumUsers(loadConfig.getNumUsers());
 		lrConfig.setRampUpIntervalLength(loadConfig.getRampUpIntervalLength());
-		lrConfig.setRampUpUsersPerInterval(loadConfig.getRampUpUsersPerInterval());
+		lrConfig.setRampUpUsersPerInterval(loadConfig
+				.getRampUpUsersPerInterval());
 
-		lrConfig.setLoadGeneratorPath(LpeStringUtils.getPropertyOrFail(getProperties(), LRConfigKeys.CONTROLLER_EXE,
-				null));
+		lrConfig.setLoadGeneratorPath(LpeStringUtils.getPropertyOrFail(
+				getProperties(), LRConfigKeys.CONTROLLER_EXE, null));
 
-		lrConfig.setResultPath(LpeStringUtils.getPropertyOrFail(getProperties(), LRConfigKeys.RESULT_DIR, null));
-		lrConfig.setScenarioPath(LpeStringUtils.getPropertyOrFail(getProperties(), LRConfigKeys.SCENARIO_FILE, null));
-		lrConfig.setSchedulingMode(SchedulingMode.valueOf(LpeStringUtils.getPropertyOrFail(getProperties(),
-				LRConfigKeys.EXPERIMENT_SCHEDULING_MODE, SchedulingMode.dynamicScheduling.toString())));
-		lrConfig.setvUserInitMode(VUserInitializationMode.valueOf(LpeStringUtils.getPropertyOrFail(getProperties(),
-				LRConfigKeys.EXPERIMENT_USER_INIT_MODE, VUserInitializationMode.beforeRunning.toString())));
+		lrConfig.setResultPath(LpeStringUtils.getPropertyOrFail(
+				getProperties(), LRConfigKeys.RESULT_DIR, null));
+		lrConfig.setScenarioPath(LpeStringUtils.getPropertyOrFail(
+				getProperties(), LRConfigKeys.SCENARIO_FILE, null));
+		lrConfig.setSchedulingMode(SchedulingMode.valueOf(LpeStringUtils
+				.getPropertyOrFail(getProperties(),
+						LRConfigKeys.EXPERIMENT_SCHEDULING_MODE,
+						SchedulingMode.dynamicScheduling.toString())));
+		lrConfig.setvUserInitMode(VUserInitializationMode
+				.valueOf(LpeStringUtils.getPropertyOrFail(getProperties(),
+						LRConfigKeys.EXPERIMENT_USER_INIT_MODE,
+						VUserInitializationMode.beforeRunning.toString())));
 
 		return lrConfig;
 	}
 
 	@Override
 	public void waitForWarmupPhaseTermination() throws WorkloadException {
-		while (System.currentTimeMillis() < experimentStartTime + rampUpDuration) {
+		while (System.currentTimeMillis() < experimentStartTime
+				+ rampUpDuration) {
 			try {
 				Thread.sleep(POLLING_INTERVAL);
 			} catch (InterruptedException e) {
@@ -134,7 +146,8 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 
 	@Override
 	public void waitForExperimentPhaseTermination() throws WorkloadException {
-		while (System.currentTimeMillis() < experimentStartTime + rampUpDuration + experimentDuration) {
+		while (System.currentTimeMillis() < experimentStartTime
+				+ rampUpDuration + experimentDuration) {
 			try {
 				Thread.sleep(POLLING_INTERVAL);
 			} catch (InterruptedException e) {
