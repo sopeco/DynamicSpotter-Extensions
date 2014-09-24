@@ -109,7 +109,7 @@ public class LoadRunnerMeasurementClient extends AbstractMeasurementAdapter {
 			List<AbstractRecord> records = new ArrayList<>();
 			for (String transactionName : lgData.getTransactionNames()) {
 				for (TimeSpan tSpan : lgData.getTimesForTransaction(transactionName)) {
-					records.add(new ResponseTimeRecord(tSpan.getStart(), transactionName, tSpan.getStop()));
+					records.add(new ResponseTimeRecord(tSpan.getStart(), transactionName, tSpan.getStop()-tSpan.getStart()));
 				}
 			}
 

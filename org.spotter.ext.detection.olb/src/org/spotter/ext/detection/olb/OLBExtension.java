@@ -41,6 +41,7 @@ public class OLBExtension extends AbstractDetectionExtension {
 	protected static final String OLB_SCOPE_KEY = "scopes";
 	protected static final String OLB_SCOPE_ENTRY_POINT = "entryPoint";
 	protected static final String OLB_SCOPE_SYNC = "sync";
+	protected static final String OLB_SCOPE_CLIENT = "client";
 	protected static final String REQUIRED_CONFIDENCE_LEVEL_KEY = "confidenceLevel";
 	protected static final String REQUIRED_SIGNIFICANT_STEPS_KEY = "numSignificantSteps";
 	protected static final String CPU_UTILIZATION_THRESHOLD_KEY = "cpuThreshold";
@@ -104,6 +105,8 @@ public class OLBExtension extends AbstractDetectionExtension {
 		Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(OLB_SCOPE_ENTRY_POINT);
 		scopeOptions.add(OLB_SCOPE_SYNC);
+		scopeOptions.add(OLB_SCOPE_CLIENT);
+		
 
 		scopeParameter.setOptions(scopeOptions);
 		scopeParameter.setDefaultValue(OLB_SCOPE_SYNC);

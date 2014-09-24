@@ -47,7 +47,7 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 	private ConfigParameterDescription createAnalysisPathParameter() {
 		ConfigParameterDescription analysisPathParameter = new ConfigParameterDescription(LRConfigKeys.ANALYSIS_EXE,
 				LpeSupportedTypes.String);
-		analysisPathParameter.setADirectory(true);
+		analysisPathParameter.setADirectory(false);
 		analysisPathParameter.setMandatory(true);
 		analysisPathParameter.setDefaultValue("");
 		analysisPathParameter.setDescription("The path to the Analysis.exe file of the Loadrunner installation.");
@@ -69,7 +69,7 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 	private ConfigParameterDescription createResultDirParameter() {
 		ConfigParameterDescription resultDirParameter = new ConfigParameterDescription(LRConfigKeys.RESULT_DIR,
 				LpeSupportedTypes.String);
-		resultDirParameter.setADirectory(true);
+		resultDirParameter.setADirectory(false);
 		resultDirParameter.setMandatory(true);
 		resultDirParameter.setDefaultValue("");
 		resultDirParameter.setDescription("The path to the result directory.");
