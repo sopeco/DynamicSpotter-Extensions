@@ -283,21 +283,21 @@ public class DBOverheadDetectionController extends AbstractDetectionController {
 		result.setDetected(false);
 		for (String operation : operationRequestAmountMapping.keySet()) {
 			double meanQueriesPerTransaction = LpeNumericUtils.average(operationRequestAmountMapping.get(operation));
-			long minNumQueueries = LpeNumericUtils.min(operationRequestAmountMapping.get(operation));
+			long minNumQueries = LpeNumericUtils.min(operationRequestAmountMapping.get(operation));
 			long maxNumQueueries = LpeNumericUtils.max(operationRequestAmountMapping.get(operation));
-			long range = maxNumQueueries - minNumQueueries;
+			long range = maxNumQueueries - minNumQueries;
 
 			if (meanQueriesPerTransaction >= 3 || range >= 3) {
 				result.setDetected(true);
 				result.addMessage("******************************************************");
-				result.addMessage("Transaciton: " + operation);
+				result.addMessage("Transaction: " + operation);
 				result.addMessage("Queries per Transaction: " + meanQueriesPerTransaction);
-				result.addMessage("Range of Number of Queueries: " + minNumQueueries + " to " + maxNumQueueries);
+				result.addMessage("Range of Number of Queries: " + minNumQueries + " to " + maxNumQueueries);
 			} else {
 				result.addMessage("******************************************************");
-				result.addMessage("Transaciton: " + operation);
+				result.addMessage("Transaction: " + operation);
 				result.addMessage("Queries per Transaction: " + meanQueriesPerTransaction);
-				result.addMessage("Range of Number of Queueries: " + minNumQueueries + " to " + maxNumQueueries);
+				result.addMessage("Range of Number of Queries: " + minNumQueries + " to " + maxNumQueueries);
 			}
 		}
 	}
