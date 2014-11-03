@@ -24,10 +24,20 @@ import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
+import org.spotter.shared.result.model.ProblemOccurrence;
 import org.spotter.shared.result.model.SpotterResult;
 
+/**
+ * A test detection controller.
+ */
 public class TestDetection extends AbstractDetectionController {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param provider
+	 *            the provider of the extension
+	 */
 	public TestDetection(IExtension<IDetectionController> provider) {
 		super(provider);
 	}
@@ -46,8 +56,21 @@ public class TestDetection extends AbstractDetectionController {
 	protected SpotterResult analyze(DatasetCollection data) {
 
 		SpotterResult result = new SpotterResult();
+		String message = "Detected a test bottleneck!";
+
+		String methodA = "methodA()";
+		ProblemOccurrence occurrenceA = new ProblemOccurrence(methodA, message);
+		String methodB = "methodB()";
+		ProblemOccurrence occurrenceB = new ProblemOccurrence(methodB, message);
+		String methodC = "methodC()";
+		ProblemOccurrence occurrenceC = new ProblemOccurrence(methodC, message);
+
+		result.addProblemOccurrence(occurrenceA);
+		result.addProblemOccurrence(occurrenceB);
+		result.addProblemOccurrence(occurrenceC);
+
 		result.setDetected(true);
-		result.addMessage("Detection run finished successfully!");
+		result.addMessage("Test detection run finished successfully!");
 
 		return result;
 	}
