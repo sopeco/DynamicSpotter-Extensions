@@ -81,7 +81,7 @@ public class HighMemFootprintDetectionController extends AbstractDetectionContro
 	@Override
 	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		instrumentApplication(getInstrumentationDescription());
-		runExperiment(HighMemFootprintDetectionController.class, 1);
+		runExperiment(this, 1);
 		uninstrumentApplication();
 	}
 

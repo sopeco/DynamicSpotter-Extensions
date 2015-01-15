@@ -67,7 +67,7 @@ public class RTHiccupsDetectionController extends AbstractDetectionController {
 
 	@Override
 	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
-		executeDefaultExperimentSeries(RTHiccupsDetectionController.class, 1, getInstrumentationDescription());
+		executeDefaultExperimentSeries(this, 1, getInstrumentationDescription());
 	}
 
 	@Override

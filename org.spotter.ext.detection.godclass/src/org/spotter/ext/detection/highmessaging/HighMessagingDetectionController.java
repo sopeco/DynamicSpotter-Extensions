@@ -73,7 +73,7 @@ public class HighMessagingDetectionController extends AbstractDetectionControlle
 
 	@Override
 	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
-		executeDefaultExperimentSeries(HighMessagingDetectionController.class, EXPERIMENT_STEPS,
+		executeDefaultExperimentSeries(this, EXPERIMENT_STEPS,
 				getInstrumentationDescription());
 	}
 

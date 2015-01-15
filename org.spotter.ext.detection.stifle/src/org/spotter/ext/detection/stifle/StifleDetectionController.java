@@ -62,7 +62,7 @@ public class StifleDetectionController extends AbstractDetectionController {
 	@Override
 	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		instrumentApplication(getInstrumentationDescription());
-		runExperiment(StifleDetectionController.class, 1);
+		runExperiment(this, 1);
 		uninstrumentApplication();
 	}
 

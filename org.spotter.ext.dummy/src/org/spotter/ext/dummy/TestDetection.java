@@ -49,7 +49,7 @@ public class TestDetection extends AbstractDetectionController {
 
 	@Override
 	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
-		executeDefaultExperimentSeries(TestDetection.class, 1, new InstrumentationDescription());
+		executeDefaultExperimentSeries(this, 1, new InstrumentationDescription());
 	}
 
 	@Override

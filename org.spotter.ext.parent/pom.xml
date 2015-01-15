@@ -18,6 +18,7 @@
 		<module>../org.spotter.ext.instrumentation</module>
 		<module>../org.spotter.ext.jmeter.client</module>
 		<module>../org.spotter.ext.loadrunner.client</module>
+		<module>../org.spotter.ext.detection.collection</module>
 		<module>../org.spotter.ext.detection.gcoverloading</module>
 		<module>../org.spotter.ext.detection.godclass</module>
 		<module>../org.spotter.ext.detection.highmemory</module>
@@ -190,6 +191,13 @@
 					</properties>
 					<useDefaultExcludes>true</useDefaultExcludes>
 				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>format</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 
