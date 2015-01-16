@@ -1,0 +1,3 @@
+org.spotter.ext.detection.perfproblem.PerfProblemExtension
+org.spotter.ext.detection.appHiccups.AppHiccupsExtension
+org.spotter.ext.detection.continuousViolation.ContinuousViolationExtension

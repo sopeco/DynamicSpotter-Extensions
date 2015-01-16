@@ -81,7 +81,7 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 	@Override
 	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		instrumentApplication(getInstrumentationDescription());
-		runExperiment(EmptySemiTrucksDetectionController.class, 1);
+		runExperiment(this, 1);
 		uninstrumentApplication();
 	}
 
