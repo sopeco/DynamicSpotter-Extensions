@@ -39,10 +39,17 @@ public class NaiveStrategy implements IHiccupAnalysisStrategy {
 				}
 				currentHiccup.setEndTimestamp(timestamp);
 			} else {
-				currentHiccup.setMaxHiccupResponseTime(maxRT);
+				if (currentHiccup != null) {
+					currentHiccup.setMaxHiccupResponseTime(maxRT);
+				}
+
 				currentHiccup = null;
 				maxRT = Double.MIN_VALUE;
 			}
+		}
+		
+		if (currentHiccup != null) {
+			currentHiccup.setMaxHiccupResponseTime(maxRT);
 		}
 
 		return hiccups;

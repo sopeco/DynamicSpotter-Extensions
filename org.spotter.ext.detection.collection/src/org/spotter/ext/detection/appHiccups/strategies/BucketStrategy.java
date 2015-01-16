@@ -48,8 +48,10 @@ public class BucketStrategy implements IHiccupAnalysisStrategy {
 						}
 						currentHiccup.setEndTimestamp(bucketSeries.getKeyMax());
 					} else {
-						currentHiccup.setMaxHiccupResponseTime(maxRT);
-						currentHiccup = null;
+						if (currentHiccup != null) {
+							currentHiccup.setMaxHiccupResponseTime(maxRT);
+							currentHiccup = null;
+						}
 						maxRT = Double.MIN_VALUE;
 					}
 				}
@@ -57,6 +59,29 @@ public class BucketStrategy implements IHiccupAnalysisStrategy {
 				bucketStart = timestamp;
 			}
 			bucketSeries.add(responsetimeSeries.get(i));
+		}
+
+		if (bucketSeries != null && bucketSeries.size() > 0) {
+			// analyze previous bucket
+			List<Double> responseTimes = bucketSeries.getValueListAsDouble();
+			int reqViolationsCount = countRequirementViolations(perfReqThreshold, responseTimes);
+
+			double percentageViolations = ((double) reqViolationsCount) / ((double) responseTimes.size());
+			if (percentageViolations > 1.0 - perfReqConfidence) {
+				// new hiccup started
+				maxRT = Math.max(maxRT, bucketSeries.getValueMax());
+				if (currentHiccup == null) {
+					// new hiccup begin detected
+					currentHiccup = new Hiccup();
+					currentHiccup.setStartTimestamp(bucketSeries.getKeyMin());
+					hiccups.add(currentHiccup);
+				}
+				currentHiccup.setEndTimestamp(bucketSeries.getKeyMax());
+			} 
+			
+			if (currentHiccup != null) {
+				currentHiccup.setMaxHiccupResponseTime(maxRT);
+			}
 		}
 
 		return hiccups;

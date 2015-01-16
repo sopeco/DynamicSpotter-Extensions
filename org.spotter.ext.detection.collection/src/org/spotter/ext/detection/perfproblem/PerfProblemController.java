@@ -95,8 +95,8 @@ public class PerfProblemController extends AbstractDetectionController {
 			ParameterSelection selectOperation = new ParameterSelection().select(ResponseTimeRecord.PAR_OPERATION,
 					operation);
 			Dataset operationSpecificDataset = selectOperation.applyTo(rtDataset);
-			List<Double> responseTimes = operationSpecificDataset.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME,
-					Double.class);
+			List<Long> responseTimes = operationSpecificDataset.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME,
+					Long.class);
 			int reqViolationsCount = countRequirementViolations(perfReqThreshold, responseTimes);
 
 			double percentageViolations = ((double) reqViolationsCount) / ((double) responseTimes.size());
@@ -111,9 +111,9 @@ public class PerfProblemController extends AbstractDetectionController {
 
 	}
 
-	private int countRequirementViolations(double perfReqThreshold, List<Double> responseTimes) {
+	private int countRequirementViolations(double perfReqThreshold, List<Long> responseTimes) {
 		int count = 0;
-		for (Double rt : responseTimes) {
+		for (Long rt : responseTimes) {
 			if (rt > perfReqThreshold) {
 				count++;
 			}

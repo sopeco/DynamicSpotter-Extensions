@@ -22,6 +22,7 @@ import org.lpe.common.util.NumericPairList;
 import org.spotter.ext.detection.appHiccups.IHiccupAnalysisStrategy;
 import org.spotter.ext.detection.appHiccups.utils.Hiccup;
 import org.spotter.ext.detection.appHiccups.utils.HiccupDetectionConfig;
+import org.spotter.ext.detection.utils.Utils;
 
 /**
  * Applies Mean Value Analysis in order to identify hiccups.
@@ -43,7 +44,7 @@ public class MVAStrategy implements IHiccupAnalysisStrategy {
 
 			timestamp = responsetimeSeries.get(i).getKey();
 			responseTime = responsetimeSeries.get(i).getValue();
-			mvaResponseTime = calculateWindowAverage(responsetimeSeries, i, hiccupConfig.getMvaWindowSize());
+			mvaResponseTime = Utils.calculateWindowAverage(responsetimeSeries, i, hiccupConfig.getMvaWindowSize());
 
 			if (mvaResponseTime > perfReqThreshold) {
 				maxRT = Math.max(maxRT, responseTime);
@@ -55,36 +56,20 @@ public class MVAStrategy implements IHiccupAnalysisStrategy {
 				}
 				currentHiccup.setEndTimestamp(timestamp);
 			} else {
-				currentHiccup.setMaxHiccupResponseTime(maxRT);
-				currentHiccup = null;
+				if (currentHiccup != null) {
+					currentHiccup.setMaxHiccupResponseTime(maxRT);
+					currentHiccup = null;
+				}
 				maxRT = Double.MIN_VALUE;
 			}
+		}
+
+		if (currentHiccup != null) {
+			currentHiccup.setMaxHiccupResponseTime(maxRT);
 		}
 
 		return hiccups;
 	}
 
-	/**
-	 * Calculates the mean value for the given window of a series.
-	 * 
-	 * @param pairs
-	 *            list of pairs
-	 * @param windowCenter
-	 *            index of the window center
-	 * @param windowSize
-	 *            window size
-	 * @return mean value
-	 */
-	public static double calculateWindowAverage(NumericPairList<Long, Double> pairs, int windowCenter, int windowSize) {
-		double mva = 0.0;
-
-		int windowStart = Math.max(windowCenter - (windowSize / 2), 0);
-		int windowEnd = Math.min(windowCenter + (windowSize / 2), pairs.size() - 1);
-
-		for (int j = windowStart; j <= windowEnd; j++) {
-			mva += pairs.get(j).getValue();
-		}
-		mva = mva / (double) (windowEnd - windowStart + 1);
-		return mva;
-	}
+	
 }

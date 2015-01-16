@@ -21,6 +21,7 @@ import org.spotter.ext.detection.appHiccups.strategies.MVAStrategy;
 import org.spotter.ext.detection.appHiccups.strategies.NaiveStrategy;
 import org.spotter.ext.detection.appHiccups.utils.Hiccup;
 import org.spotter.ext.detection.appHiccups.utils.HiccupDetectionConfig;
+import org.spotter.ext.detection.utils.Utils;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
 
@@ -56,6 +57,11 @@ public class AppHiccupsController extends AbstractDetectionController implements
 				String.valueOf(HiccupDetectionConfig.MOVING_AVERAGE_WINDOW_SIZE_DEFAULT));
 		hiccupDetectionConfig.setMvaWindowSize(Integer.parseInt(mvaWindowSize));
 
+		String bucketStepStr = getProblemDetectionConfiguration().getProperty(
+				HiccupDetectionConfig.BUCKET_STEP_KEY,
+				String.valueOf(HiccupDetectionConfig.BUCKET_STEP_DEFAULT));
+		hiccupDetectionConfig.setBucketStep(Integer.parseInt(bucketStepStr));
+		
 		String maxHiccupTimeProportionStr = getProblemDetectionConfiguration().getProperty(
 				AppHiccupsExtension.MAX_HICCUPS_TIME_PROPORTION_KEY,
 				String.valueOf(AppHiccupsExtension.MAX_HICCUPS_TIME_PROPORTION_DEFAULT));
@@ -89,7 +95,7 @@ public class AppHiccupsController extends AbstractDetectionController implements
 
 	@Override
 	protected SpotterResult analyze(DatasetCollection data) {
-		double perfReqThreshold = GlobalConfiguration.getInstance().getPropertyAsInteger(
+		long perfReqThreshold = GlobalConfiguration.getInstance().getPropertyAsInteger(
 				ConfigKeys.PERFORMANCE_REQUIREMENT_THRESHOLD, ConfigKeys.DEFAULT_PERFORMANCE_REQUIREMENT_THRESHOLD);
 		double perfReqConfidence = GlobalConfiguration.getInstance().getPropertyAsDouble(
 				ConfigKeys.PERFORMANCE_REQUIREMENT_CONFIDENCE, ConfigKeys.DEFAULT_PERFORMANCE_REQUIREMENT_CONFIDENCE);
@@ -110,7 +116,7 @@ public class AppHiccupsController extends AbstractDetectionController implements
 					operation);
 			Dataset operationSpecificDataset = selectOperation.applyTo(rtDataset);
 
-			NumericPairList<Long, Double> responseTimeSeries = toTimestampRTPairs(operationSpecificDataset);
+			NumericPairList<Long, Double> responseTimeSeries = Utils.toTimestampRTPairs(operationSpecificDataset);
 			// sort chronologically
 			responseTimeSeries.sort();
 			List<Hiccup> hiccups = analysisStrategyImpl.findHiccups(responseTimeSeries, hiccupDetectionConfig,
@@ -135,23 +141,6 @@ public class AppHiccupsController extends AbstractDetectionController implements
 	public InstrumentationDescription getInstrumentationDescription() {
 		// no additional instrumentation required
 		return null;
-	}
-
-	/**
-	 * Creates from a response time dataset a list of timestamp response time
-	 * pairs.
-	 * 
-	 * @param rtDataSet
-	 *            dataset to read from
-	 * @return list of timestamp response time pairs
-	 */
-	public static NumericPairList<Long, Double> toTimestampRTPairs(Dataset rtDataSet) {
-		NumericPairList<Long, Double> responseTimeSeries = new NumericPairList<>();
-		for (ResponseTimeRecord rtRecord : rtDataSet.getRecords(ResponseTimeRecord.class)) {
-			responseTimeSeries.add(rtRecord.getTimeStamp(), (double) rtRecord.getResponseTime());
-		}
-
-		return responseTimeSeries;
 	}
 
 }
