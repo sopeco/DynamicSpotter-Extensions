@@ -33,6 +33,7 @@ import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
+import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
 
@@ -43,6 +44,8 @@ import org.spotter.shared.result.model.SpotterResult;
  * 
  */
 public class PerfProblemController extends AbstractDetectionController {
+
+	private static final double _100_PERCENT = 100.0;
 
 	/**
 	 * Constructor.
@@ -105,10 +108,22 @@ public class PerfProblemController extends AbstractDetectionController {
 				result.setDetected(true);
 			}
 
+			createChart(perfReqThreshold, perfReqConfidence, result, operation, responseTimes);
 		}
 
 		return result;
 
+	}
+
+	private void createChart(double perfReqThreshold, double perfReqConfidence, SpotterResult result, String operation,
+			List<Long> responseTimes) {
+		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		chartBuilder.startChart("CDF - " + operation, "Response Time [ms]", "Cummulative Probability [%]");
+		chartBuilder.addCDFSeries(responseTimes, "CDF");
+		chartBuilder.addHorizontalLine(perfReqConfidence * _100_PERCENT, "Requirements Confidence");
+		chartBuilder.addVerticalLine(perfReqThreshold, "Performance Requirement");
+
+		getResultManager().storeImageChartResource(chartBuilder.build(), "cummulativeDistribution", result);
 	}
 
 	private int countRequirementViolations(double perfReqThreshold, List<Long> responseTimes) {
@@ -124,7 +139,6 @@ public class PerfProblemController extends AbstractDetectionController {
 	@Override
 	public long getExperimentSeriesDuration() {
 		return ProgressManager.getInstance().calculateDefaultExperimentSeriesDuration(1);
-
 	}
 
 }

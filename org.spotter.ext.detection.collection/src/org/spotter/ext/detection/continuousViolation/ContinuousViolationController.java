@@ -5,11 +5,15 @@ import org.aim.api.exceptions.MeasurementException;
 import org.aim.api.measurement.dataset.Dataset;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.api.measurement.dataset.ParameterSelection;
+import org.aim.artifacts.probes.ResponsetimeProbe;
 import org.aim.artifacts.records.ResponseTimeRecord;
+import org.aim.artifacts.scopes.EntryPointScope;
 import org.aim.description.InstrumentationDescription;
+import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.NumericPairList;
+import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.core.detection.IExperimentReuser;
@@ -18,6 +22,7 @@ import org.spotter.ext.detection.continuousViolation.strategies.BucketStrategy;
 import org.spotter.ext.detection.continuousViolation.strategies.MVAStrategy;
 import org.spotter.ext.detection.continuousViolation.strategies.PercentileStrategy;
 import org.spotter.ext.detection.continuousViolation.util.AnalysisConfig;
+import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.ext.detection.utils.Utils;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
@@ -109,26 +114,46 @@ public class ContinuousViolationController extends AbstractDetectionController i
 					perfReqConfidence);
 
 			if (detected) {
-				result.addMessage("Detected continuous violation of performance requirements in operation: " + operation);
+				result.addMessage("Detected continuous violation of performance requirements in operation: "
+						+ operation);
 				result.setDetected(true);
 			}
+
+			createChart(perfReqThreshold, result, operation, responseTimeSeries);
 		}
 
 		return result;
 	}
 
-	@Override
-	public InstrumentationDescription getInstrumentationDescription() {
-		return null;
+	private void createChart(double perfReqThreshold, SpotterResult result, String operation,
+			NumericPairList<Long, Double> responseTimeSeries) {
+		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		chartBuilder.startChart(operation, "Experiment Time [ms]", "Response Time [ms]");
+		chartBuilder.addScatterSeries(responseTimeSeries, "Response Times");
+		chartBuilder.addHorizontalLine(perfReqThreshold, "Perf. Requirement");
+		getResultManager().storeImageChartResource(chartBuilder.build(), "Response Times", result);
 	}
 
 	@Override
 	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
-		// not required
+		executeDefaultExperimentSeries(this, 1, createInstrumentationDescription());
+	}
+
+	@Override
+	public InstrumentationDescription getInstrumentationDescription() {
+		// no additional instrumentation required
+		return null;
+	}
+
+	private InstrumentationDescription createInstrumentationDescription() {
+		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
+				.entityDone();
+		return idBuilder.build();
 	}
 
 	@Override
 	public long getExperimentSeriesDuration() {
-		return 0;
+		return ProgressManager.getInstance().calculateDefaultExperimentSeriesDuration(1);
 	}
 }

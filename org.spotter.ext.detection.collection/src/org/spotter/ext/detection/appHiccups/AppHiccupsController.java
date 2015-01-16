@@ -7,11 +7,15 @@ import org.aim.api.exceptions.MeasurementException;
 import org.aim.api.measurement.dataset.Dataset;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.api.measurement.dataset.ParameterSelection;
+import org.aim.artifacts.probes.ResponsetimeProbe;
 import org.aim.artifacts.records.ResponseTimeRecord;
+import org.aim.artifacts.scopes.EntryPointScope;
 import org.aim.description.InstrumentationDescription;
+import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.NumericPairList;
+import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.core.detection.IExperimentReuser;
@@ -21,6 +25,7 @@ import org.spotter.ext.detection.appHiccups.strategies.MVAStrategy;
 import org.spotter.ext.detection.appHiccups.strategies.NaiveStrategy;
 import org.spotter.ext.detection.appHiccups.utils.Hiccup;
 import org.spotter.ext.detection.appHiccups.utils.HiccupDetectionConfig;
+import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.ext.detection.utils.Utils;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
@@ -57,11 +62,10 @@ public class AppHiccupsController extends AbstractDetectionController implements
 				String.valueOf(HiccupDetectionConfig.MOVING_AVERAGE_WINDOW_SIZE_DEFAULT));
 		hiccupDetectionConfig.setMvaWindowSize(Integer.parseInt(mvaWindowSize));
 
-		String bucketStepStr = getProblemDetectionConfiguration().getProperty(
-				HiccupDetectionConfig.BUCKET_STEP_KEY,
+		String bucketStepStr = getProblemDetectionConfiguration().getProperty(HiccupDetectionConfig.BUCKET_STEP_KEY,
 				String.valueOf(HiccupDetectionConfig.BUCKET_STEP_DEFAULT));
 		hiccupDetectionConfig.setBucketStep(Integer.parseInt(bucketStepStr));
-		
+
 		String maxHiccupTimeProportionStr = getProblemDetectionConfiguration().getProperty(
 				AppHiccupsExtension.MAX_HICCUPS_TIME_PROPORTION_KEY,
 				String.valueOf(AppHiccupsExtension.MAX_HICCUPS_TIME_PROPORTION_DEFAULT));
@@ -82,16 +86,7 @@ public class AppHiccupsController extends AbstractDetectionController implements
 		}
 	}
 
-	@Override
-	public long getExperimentSeriesDuration() {
-		// no experiments executed
-		return 0;
-	}
-
-	@Override
-	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
-		// not required
-	}
+	
 
 	@Override
 	protected SpotterResult analyze(DatasetCollection data) {
@@ -128,19 +123,63 @@ public class AppHiccupsController extends AbstractDetectionController implements
 				hiccupsDuration += hiccup.getEndTimestamp() - hiccup.getStartTimestamp();
 			}
 
-			if (!hiccups.isEmpty() && hiccupsDuration < maxHiccupTimeProportion * experimentDuration) {
+			if (hiccups.size() > 1 && hiccupsDuration < maxHiccupTimeProportion * experimentDuration) {
 				result.addMessage("Detected hiccup behaviour in operation: " + operation);
 				result.setDetected(true);
+				createChart(result, operation, responseTimeSeries, hiccups, perfReqThreshold);
+
 			}
+
 		}
 
 		return result;
 	}
 
+	private void createChart(SpotterResult result, String operation, NumericPairList<Long, Double> responseTimeSeries,
+			List<Hiccup> hiccups, long perfReqThreshold) {
+		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		chartBuilder.startChart(operation, "Experiment Time [ms]", "Response Time [ms]");
+		chartBuilder.addScatterSeries(responseTimeSeries, "Response Times");
+		chartBuilder.addHorizontalLine(perfReqThreshold, "Perf. Requirement");
+		long minTimestamp = responseTimeSeries.getKeyMin();
+		long maxTimestamp = responseTimeSeries.getKeyMax();
+		double minRT = responseTimeSeries.getValueMin().doubleValue();
+
+		NumericPairList<Long, Double> hiccupSeries = new NumericPairList<>();
+		hiccupSeries.add(minTimestamp, minRT);
+		for (Hiccup hiccup : hiccups) {
+			hiccupSeries.add(hiccup.getStartTimestamp(), minRT);
+			hiccupSeries.add(hiccup.getStartTimestamp(), hiccup.getMaxHiccupResponseTime());
+			hiccupSeries.add(hiccup.getEndTimestamp(), hiccup.getMaxHiccupResponseTime());
+			hiccupSeries.add(hiccup.getEndTimestamp(), minRT);
+		}
+		hiccupSeries.add(maxTimestamp, minRT);
+
+		chartBuilder.addLineSeries(hiccupSeries, "Hiccups");
+		getResultManager().storeImageChartResource(chartBuilder.build(), "Hiccups", result);
+	}
+
+	@Override
+	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
+		executeDefaultExperimentSeries(this, 1, createInstrumentationDescription());
+	}
+	
 	@Override
 	public InstrumentationDescription getInstrumentationDescription() {
 		// no additional instrumentation required
 		return null;
+	}
+
+	private InstrumentationDescription createInstrumentationDescription() {
+		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
+				.entityDone();
+		return idBuilder.build();
+	}
+
+	@Override
+	public long getExperimentSeriesDuration() {
+		return ProgressManager.getInstance().calculateDefaultExperimentSeriesDuration(1);
 	}
 
 }
