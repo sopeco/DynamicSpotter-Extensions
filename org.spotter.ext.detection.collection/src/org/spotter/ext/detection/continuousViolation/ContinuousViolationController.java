@@ -135,7 +135,7 @@ public class ContinuousViolationController extends AbstractDetectionController i
 	}
 
 	@Override
-	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
+	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		executeDefaultExperimentSeries(this, 1, createInstrumentationDescription());
 	}
 

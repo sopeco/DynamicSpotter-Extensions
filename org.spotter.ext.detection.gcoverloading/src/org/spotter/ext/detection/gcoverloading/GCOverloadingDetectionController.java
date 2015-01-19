@@ -49,7 +49,7 @@ public class GCOverloadingDetectionController extends AbstractDetectionControlle
 	}
 
 	@Override
-	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
+	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		// TODO Auto-generated method stub
 
 	}

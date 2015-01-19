@@ -77,7 +77,7 @@ public class RampDetectionController extends AbstractDetectionController {
 	}
 
 	@Override
-	protected void executeExperiments() throws InstrumentationException, MeasurementException {
+	public void executeExperiments() throws InstrumentationException, MeasurementException {
 		try {
 
 			instrumentApplication(getInstrumentationDescription());

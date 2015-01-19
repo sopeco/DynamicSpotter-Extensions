@@ -60,7 +60,7 @@ public class GodClassDetectionController extends AbstractDetectionController {
 	}
 
 	@Override
-	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
+	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 
 		executeDefaultExperimentSeries(this, EXPERIMENT_STEPS,
 				getInstrumentationDescription());

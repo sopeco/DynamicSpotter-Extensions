@@ -59,7 +59,7 @@ public class PerfProblemController extends AbstractDetectionController {
 	}
 
 	@Override
-	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
+	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		executeDefaultExperimentSeries(this, 1, getInstrumentationDescription());
 	}
 
