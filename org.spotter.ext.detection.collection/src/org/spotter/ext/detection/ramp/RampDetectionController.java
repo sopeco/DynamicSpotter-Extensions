@@ -116,7 +116,7 @@ public class RampDetectionController extends AbstractDetectionController {
 
 	/**
 	 * 
-	 * @return the worlöoad adapter
+	 * @return the worload adapter
 	 */
 	public IWorkloadAdapter workloadAdapter() {
 		return getWorkloadAdapter();
