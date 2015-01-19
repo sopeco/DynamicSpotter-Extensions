@@ -80,7 +80,7 @@ public class GCHiccupDetectionController extends AbstractDetectionController imp
 	}
 
 	@Override
-	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
+	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		// TODO Auto-generated method stub
 
 	}

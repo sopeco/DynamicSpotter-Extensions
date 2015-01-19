@@ -3,6 +3,8 @@ package org.spotter.ext.detection.continuousViolation.strategies;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lpe.common.util.LpeNumericUtils;
+import org.lpe.common.util.NumericPair;
 import org.lpe.common.util.NumericPairList;
 import org.spotter.ext.detection.continuousViolation.IViolationAnalysisStrategy;
 import org.spotter.ext.detection.continuousViolation.util.AnalysisConfig;
@@ -17,9 +19,49 @@ import org.spotter.ext.detection.continuousViolation.util.Bucket;
  */
 public class BucketStrategy implements IViolationAnalysisStrategy {
 
+	private static final int NUM_COARSE_GRAINED_BUCKETS = 5;
+	private static final double EPSILON_PERCENTAGE = 0.1;
+
 	@Override
 	public boolean analyze(NumericPairList<Long, Double> responsetimeSeries, AnalysisConfig analysisConfig,
 			double perfReqThreshold, double perfReqConfidence) {
+		boolean bucketsCovered = checkBucketCoverage(responsetimeSeries, analysisConfig, perfReqThreshold,
+				perfReqConfidence);
+
+		boolean equallyDistributed = checkEqualDistribution(responsetimeSeries);
+
+		return equallyDistributed && bucketsCovered;
+	}
+
+	private boolean checkEqualDistribution(NumericPairList<Long, Double> responsetimeSeries) {
+		double overallMean = LpeNumericUtils.average(responsetimeSeries.getValueArrayAsDouble());
+		long minTimestamp = responsetimeSeries.getKeyMin();
+		long maxTimestamp = responsetimeSeries.getKeyMax();
+		long step = ((maxTimestamp - minTimestamp) / NUM_COARSE_GRAINED_BUCKETS) + 1L;
+		long nextBorder = minTimestamp + step;
+		List<Double> values = new ArrayList<>();
+		for (NumericPair<Long, Double> pair : responsetimeSeries) {
+			if (pair.getKey() > nextBorder) {
+				if (!checkPartMean(overallMean, values)) {
+					return false;
+				}
+				nextBorder += step;
+				values.clear();
+			}
+			values.add(pair.getValue());
+		}
+		return checkPartMean(overallMean, values);
+	}
+
+	private boolean checkPartMean(double overallMean, List<Double> values) {
+		double tmpMean = LpeNumericUtils.average(values);
+		return tmpMean >= (overallMean - overallMean * EPSILON_PERCENTAGE)
+				&& tmpMean <= (overallMean + overallMean * EPSILON_PERCENTAGE);
+
+	}
+
+	private boolean checkBucketCoverage(NumericPairList<Long, Double> responsetimeSeries,
+			AnalysisConfig analysisConfig, double perfReqThreshold, double perfReqConfidence) {
 		List<Bucket> buckets = new ArrayList<Bucket>();
 
 		long bucketStart = Long.MIN_VALUE;

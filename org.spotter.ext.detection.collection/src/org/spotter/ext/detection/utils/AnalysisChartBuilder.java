@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.lpe.common.util.LpeNumericUtils;
+import org.lpe.common.util.NumericPair;
 import org.lpe.common.util.NumericPairList;
 
 import com.xeiam.xchart.Chart;
@@ -39,11 +40,12 @@ import com.xeiam.xchart.StyleManager.LegendPosition;
  * 
  */
 public final class AnalysisChartBuilder {
+	private static final double _100_PERCENT = 100.0;
 	private static final int IMAGE_WIDTH = 800;
 	private static final int IMAGE_HEIGHT = 500;
 
-	private static final Color[] COLORS = { Color.BLACK, Color.BLUE, Color.ORANGE, Color.GREEN, Color.YELLOW,
-			Color.PINK };
+	private static final Color[] COLORS = { Color.BLACK, Color.RED, Color.BLUE, Color.ORANGE, Color.GREEN,
+			Color.YELLOW, Color.PINK };
 
 	private int seriesCounter = 0;
 	private Chart chart = null;
@@ -69,10 +71,66 @@ public final class AnalysisChartBuilder {
 		return chart;
 	}
 
+	public void addUtilizationScatterSeries(NumericPairList<? extends Number, ? extends Number> valuePairs,
+			String seriesTitle, boolean scale) {
+		updateAxisRanges(valuePairs.getKeyMin().doubleValue(), valuePairs.getKeyMax().doubleValue(), 0.0, _100_PERCENT);
+		Series scatterSeries;
+		NumericPairList<Double, Double> scaledPairs = new NumericPairList<>();
+
+		if (scale) {
+			for (NumericPair<? extends Number, ? extends Number> pair : valuePairs) {
+				scaledPairs.add(pair.getKey().doubleValue(), pair.getValue().doubleValue() * _100_PERCENT);
+			}
+			scatterSeries = chart.addSeries(seriesTitle, scaledPairs.getKeyListAsNumbers(),
+					scaledPairs.getValueListAsNumbers());
+		} else {
+			scatterSeries = chart.addSeries(seriesTitle, valuePairs.getKeyListAsNumbers(),
+					valuePairs.getValueListAsNumbers());
+		}
+
+		scatterSeries.setLineStyle(SeriesLineStyle.NONE);
+		scatterSeries.setMarker(SeriesMarker.SQUARE);
+		scatterSeries.setMarkerColor(COLORS[seriesCounter]);
+		seriesCounter++;
+	}
+
+	public void addUtilizationLineSeries(NumericPairList<? extends Number, ? extends Number> valuePairs,
+			String seriesTitle, boolean scale) {
+		updateAxisRanges(valuePairs.getKeyMin().doubleValue(), valuePairs.getKeyMax().doubleValue(), 0.0, _100_PERCENT);
+		Series scatterSeries;
+		NumericPairList<Double, Double> scaledPairs = new NumericPairList<>();
+
+		if (scale) {
+			for (NumericPair<? extends Number, ? extends Number> pair : valuePairs) {
+				scaledPairs.add(pair.getKey().doubleValue(), pair.getValue().doubleValue() * _100_PERCENT);
+			}
+			scatterSeries = chart.addSeries(seriesTitle, scaledPairs.getKeyListAsNumbers(),
+					scaledPairs.getValueListAsNumbers());
+		} else {
+			scatterSeries = chart.addSeries(seriesTitle, valuePairs.getKeyListAsNumbers(),
+					valuePairs.getValueListAsNumbers());
+		}
+		scatterSeries.setLineStyle(SeriesLineStyle.DASH_DASH);
+		scatterSeries.setMarker(SeriesMarker.SQUARE);
+		scatterSeries.setMarkerColor(COLORS[seriesCounter]);
+		seriesCounter++;
+	}
+
 	public void addScatterSeries(NumericPairList<? extends Number, ? extends Number> valuePairs, String seriesTitle) {
 		updateAxisRanges(valuePairs);
 		Series scatterSeries = chart.addSeries(seriesTitle, valuePairs.getKeyListAsNumbers(),
 				valuePairs.getValueListAsNumbers());
+		scatterSeries.setLineStyle(SeriesLineStyle.NONE);
+		scatterSeries.setMarker(SeriesMarker.CIRCLE);
+		scatterSeries.setMarkerColor(COLORS[seriesCounter]);
+		seriesCounter++;
+	}
+
+	public void addScatterSeriesWithErrorBars(NumericPairList<? extends Number, ? extends Number> valuePairs,
+			List<Number> errors, String seriesTitle) {
+		updateAxisRanges(valuePairs);
+		Series scatterSeries = chart.addSeries(seriesTitle, valuePairs.getKeyListAsNumbers(),
+				valuePairs.getValueListAsNumbers(), errors);
 		scatterSeries.setLineStyle(SeriesLineStyle.NONE);
 		scatterSeries.setMarker(SeriesMarker.CIRCLE);
 		scatterSeries.setMarkerColor(COLORS[seriesCounter]);

@@ -77,7 +77,7 @@ public class OLBDetectionController extends AbstractDetectionController {
 	}
 
 	@Override
-	protected void executeExperiments() throws InstrumentationException,
+	public void executeExperiments() throws InstrumentationException,
 			MeasurementException, WorkloadException {
 		executeDefaultExperimentSeries(this,
 				experimentSteps, getInstrumentationDescription());

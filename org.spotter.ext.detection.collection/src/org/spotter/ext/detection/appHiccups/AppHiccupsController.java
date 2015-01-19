@@ -160,7 +160,7 @@ public class AppHiccupsController extends AbstractDetectionController implements
 	}
 
 	@Override
-	protected void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
+	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		executeDefaultExperimentSeries(this, 1, createInstrumentationDescription());
 	}
 	
