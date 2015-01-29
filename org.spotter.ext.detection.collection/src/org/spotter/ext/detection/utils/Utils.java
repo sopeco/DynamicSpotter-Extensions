@@ -87,4 +87,16 @@ public final class Utils {
 		Collections.sort(tmpList);
 		return tmpList.get(indexPercentile);
 	}
+	
+	public static long meanInterRequestTime(NumericPairList<Long, Double> responsetimeSeries) {
+		long diffSum = 0L;
+		long prevTimestamp = -1;
+		for (Long ts : responsetimeSeries.getKeyList()) {
+			if (prevTimestamp >= 0L) {
+				diffSum += ts - prevTimestamp;
+			}
+			prevTimestamp = ts;
+		}
+		return diffSum / (long) (responsetimeSeries.size() - 1);
+	}
 }

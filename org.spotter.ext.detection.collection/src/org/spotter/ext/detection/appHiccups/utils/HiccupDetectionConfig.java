@@ -32,9 +32,7 @@ public class HiccupDetectionConfig {
 	public static final int MOVING_AVERAGE_WINDOW_SIZE_DEFAULT = 11;
 	private int mvaWindowSize; // should be an odd number
 
-	public static final String BUCKET_STEP_KEY = "bucketWidthKey";
-	public static final long BUCKET_STEP_DEFAULT = 1000;
-	private int bucketStep; // should be an odd number
+
 
 	/**
 	 * @return the mvaWindowSize
@@ -52,20 +50,6 @@ public class HiccupDetectionConfig {
 	}
 
 	/**
-	 * @return the bucketStep
-	 */
-	public int getBucketStep() {
-		return bucketStep;
-	}
-
-	/**
-	 * @param bucketStep the bucketStep to set
-	 */
-	public void setBucketStep(int bucketStep) {
-		this.bucketStep = bucketStep;
-	}
-	
-	/**
 	 * 
 	 * @return set of configuration parameters for hiccup detection
 	 */
@@ -77,15 +61,10 @@ public class HiccupDetectionConfig {
 		mvaWindowSizeParameter.setDefaultValue(String.valueOf(MOVING_AVERAGE_WINDOW_SIZE_DEFAULT));
 		mvaWindowSizeParameter.setMandatory(false);
 		
-		ConfigParameterDescription bucketStepParameter = new ConfigParameterDescription(
-				BUCKET_STEP_KEY, LpeSupportedTypes.Integer);
-		bucketStepParameter.setDescription("ONLY for Bucket Analysis Strategy! Defines the bucket width in milliseconds.");
-		bucketStepParameter.setDefaultValue(String.valueOf(BUCKET_STEP_DEFAULT));
-		bucketStepParameter.setMandatory(false);
+		
 		
 		Set<ConfigParameterDescription> set = new HashSet<>();
 		set.add(mvaWindowSizeParameter);
-		set.add(bucketStepParameter);
 		return set;
 	}
 

@@ -19,21 +19,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.lpe.common.util.NumericPairList;
+import org.spotter.core.detection.DetectionResultManager;
 import org.spotter.ext.detection.appHiccups.IHiccupAnalysisStrategy;
 import org.spotter.ext.detection.appHiccups.utils.Hiccup;
 import org.spotter.ext.detection.appHiccups.utils.HiccupDetectionConfig;
 import org.spotter.ext.detection.utils.Utils;
+import org.spotter.shared.result.model.SpotterResult;
 
 /**
- * Applies Mean Value Analysis in order to identify hiccups.
+ * Applies Moving Average Analysis in order to identify hiccups.
  * 
  * @author Alexander Wert
  * 
  */
-public class MVAStrategy implements IHiccupAnalysisStrategy {
+public class MovingPercentileStrategy implements IHiccupAnalysisStrategy {
 	@Override
 	public List<Hiccup> findHiccups(final NumericPairList<Long, Double> responsetimeSeries,
-			final HiccupDetectionConfig hiccupConfig, double perfReqThreshold, double perfReqConfidence) {
+			final HiccupDetectionConfig hiccupConfig, double perfReqThreshold, double perfReqConfidence, DetectionResultManager resultManager, SpotterResult result) {
 		List<Hiccup> hiccups = new ArrayList<Hiccup>();
 		Hiccup currentHiccup = null;
 		double maxRT = Double.MIN_VALUE;
@@ -44,7 +46,8 @@ public class MVAStrategy implements IHiccupAnalysisStrategy {
 
 			timestamp = responsetimeSeries.get(i).getKey();
 			responseTime = responsetimeSeries.get(i).getValue();
-			mvaResponseTime = Utils.calculateWindowAverage(responsetimeSeries, i, hiccupConfig.getMvaWindowSize());
+			mvaResponseTime = Utils.calculateWindowPercentile(responsetimeSeries, perfReqConfidence, i,
+					hiccupConfig.getMvaWindowSize());
 
 			if (mvaResponseTime > perfReqThreshold) {
 				maxRT = Math.max(maxRT, responseTime);
@@ -71,5 +74,4 @@ public class MVAStrategy implements IHiccupAnalysisStrategy {
 		return hiccups;
 	}
 
-	
 }

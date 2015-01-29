@@ -21,6 +21,7 @@ public class AnalysisConfig {
 	public static final long BUCKET_STEP_DEFAULT = 1000;
 	private int bucketStep; // should be an odd number
 	
+
 	
 	public static final String MIN_BUCKET_TIME_PROPORTION_KEY = "minBucketTimeProportion";
 	public static final double MIN_BUCKET_TIME_PROPORTION_DEFAULT = 0.8;
@@ -85,6 +86,8 @@ public class AnalysisConfig {
 		parameter.setDescription("For Bucket Analysis ONLY! This parameter determines the minimum number of buckets that "
 				+ "must violate requirements in order to detect that problem.");
 
+		
+		
 		
 		Set<ConfigParameterDescription> set = new HashSet<>();
 		set.add(mvaWindowSizeParameter);

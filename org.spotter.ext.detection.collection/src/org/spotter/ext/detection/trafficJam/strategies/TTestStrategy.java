@@ -44,10 +44,11 @@ public class TTestStrategy implements ITrafficJamStrategy {
 						AbstractDetectionController.NUMBER_OF_USERS_KEY, prevNumUsers).select(
 						ResponseTimeRecord.PAR_OPERATION, operation);
 
-				List<Long> currentValues = selectionCurrent.applyTo(dataset).getValues(
-						ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class);
-				List<Long> prevValues = selectionPrev.applyTo(dataset).getValues(ResponseTimeRecord.PAR_RESPONSE_TIME,
-						Long.class);
+				List<Long> currentValues = LpeNumericUtils.filterOutliersUsingIQR(selectionCurrent.applyTo(dataset)
+						.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class));
+				List<Long> prevValues = LpeNumericUtils.filterOutliersUsingIQR(selectionPrev.applyTo(dataset)
+						.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class));
+
 				List<Double> sums1 = new ArrayList<>();
 				List<Double> sums2 = new ArrayList<>();
 				LpeNumericUtils.createNormalDistributionByBootstrapping(prevValues, currentValues, sums1, sums2);

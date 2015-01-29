@@ -29,11 +29,13 @@ import org.aim.description.InstrumentationDescription;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
+import org.lpe.common.util.NumericPairList;
 import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.detection.utils.AnalysisChartBuilder;
+import org.spotter.ext.detection.utils.Utils;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
 
@@ -98,8 +100,9 @@ public class PerfProblemController extends AbstractDetectionController {
 			ParameterSelection selectOperation = new ParameterSelection().select(ResponseTimeRecord.PAR_OPERATION,
 					operation);
 			Dataset operationSpecificDataset = selectOperation.applyTo(rtDataset);
-			List<Long> responseTimes = operationSpecificDataset.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME,
-					Long.class);
+
+			NumericPairList<Long, Double> responseTimeSeries = Utils.toTimestampRTPairs(operationSpecificDataset);
+			List<Double> responseTimes = responseTimeSeries.getValueList();
 			int reqViolationsCount = countRequirementViolations(perfReqThreshold, responseTimes);
 
 			double percentageViolations = ((double) reqViolationsCount) / ((double) responseTimes.size());
@@ -108,7 +111,7 @@ public class PerfProblemController extends AbstractDetectionController {
 				result.setDetected(true);
 			}
 
-			createChart(perfReqThreshold, perfReqConfidence, result, operation, responseTimes);
+			createChart(perfReqThreshold, perfReqConfidence, result, operation, responseTimes, responseTimeSeries);
 		}
 
 		return result;
@@ -116,7 +119,7 @@ public class PerfProblemController extends AbstractDetectionController {
 	}
 
 	private void createChart(double perfReqThreshold, double perfReqConfidence, SpotterResult result, String operation,
-			List<Long> responseTimes) {
+			List<Double> responseTimes, NumericPairList<Long, Double> responseTimeSeries) {
 		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
 		chartBuilder.startChart("CDF - " + operation, "Response Time [ms]", "Cummulative Probability [%]");
 		chartBuilder.addCDFSeries(responseTimes, "CDF");
@@ -124,11 +127,18 @@ public class PerfProblemController extends AbstractDetectionController {
 		chartBuilder.addVerticalLine(perfReqThreshold, "Performance Requirement");
 
 		getResultManager().storeImageChartResource(chartBuilder.build(), "cummulativeDistribution", result);
+
+		chartBuilder = new AnalysisChartBuilder();
+		chartBuilder.startChart(operation, "Experiment Time [ms]", "Response Time [ms]");
+		chartBuilder.addScatterSeries(responseTimeSeries, "Response Times");
+		chartBuilder.addHorizontalLine(perfReqThreshold, "Performance Requirement");
+
+		getResultManager().storeImageChartResource(chartBuilder.build(), "Response Times", result);
 	}
 
-	private int countRequirementViolations(double perfReqThreshold, List<Long> responseTimes) {
+	private int countRequirementViolations(double perfReqThreshold, List<Double> responseTimes) {
 		int count = 0;
-		for (Long rt : responseTimes) {
+		for (Double rt : responseTimes) {
 			if (rt > perfReqThreshold) {
 				count++;
 			}

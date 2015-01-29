@@ -9,6 +9,7 @@ import org.lpe.common.util.NumericPairList;
 import org.spotter.ext.detection.continuousViolation.IViolationAnalysisStrategy;
 import org.spotter.ext.detection.continuousViolation.util.AnalysisConfig;
 import org.spotter.ext.detection.continuousViolation.util.Bucket;
+import org.spotter.ext.detection.utils.Utils;
 
 /**
  * Analyzes continuous performance requirement violation by iterating over
@@ -67,9 +68,10 @@ public class BucketStrategy implements IViolationAnalysisStrategy {
 		long bucketStart = Long.MIN_VALUE;
 		long timestamp;
 		NumericPairList<Long, Double> bucketSeries = null;
+		long bucketStep = Utils.meanInterRequestTime(responsetimeSeries) * 50;
 		for (int i = 0; i < responsetimeSeries.size(); i++) {
 			timestamp = responsetimeSeries.get(i).getKey();
-			if (timestamp > bucketStart + analysisConfig.getBucketStep()) {
+			if (timestamp > bucketStart + bucketStep) {
 				// new bucket started
 				if (bucketSeries != null) {
 					// analyze previous bucket
@@ -101,7 +103,7 @@ public class BucketStrategy implements IViolationAnalysisStrategy {
 			buckets.add(bucket);
 		}
 		int numViolatingBuckets = countViolatingBuckets(buckets);
-		return ((double) numViolatingBuckets) / ((double) buckets.size()) > analysisConfig.getMinBucketTimeProportion();
+		return ((double) numViolatingBuckets) / ((double) buckets.size()) > (analysisConfig.getMinBucketTimeProportion());
 	}
 
 	private int countRequirementViolations(double perfReqThreshold, List<Double> responseTimes) {
