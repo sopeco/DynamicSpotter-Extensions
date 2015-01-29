@@ -21,11 +21,11 @@ public class AppHiccupsExtension extends AbstractDetectionExtension {
 			+ "represents the problem of periodically violated performancerequirements.";
 
 	protected static final String APP_HICCUPS_STRATEGY_KEY = "strategy";
-	protected static final String MVA_STRATEGY = "mean value analysis";
-	protected static final String NAIVE_STRATEGY = "simple analysis";
+	protected static final String MVA_STRATEGY = "moving percentile analysis";
+	protected static final String DBSCAN_STRATEGY = "DBSCAN analysis";
 	protected static final String BUCKET_STRATEGY = "bucket analysis";
 	protected static final String MAX_HICCUPS_TIME_PROPORTION_KEY = "maxHiccupsTimeProportion";
-	protected static final double MAX_HICCUPS_TIME_PROPORTION_DEFAULT = 0.4;
+	protected static final double MAX_HICCUPS_TIME_PROPORTION_DEFAULT = 0.3;
 
 	@Override
 	public IDetectionController createExtensionArtifact() {
@@ -44,7 +44,7 @@ public class AppHiccupsExtension extends AbstractDetectionExtension {
 		Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(MVA_STRATEGY);
 		scopeOptions.add(BUCKET_STRATEGY);
-		scopeOptions.add(NAIVE_STRATEGY);
+		scopeOptions.add(DBSCAN_STRATEGY);
 		scopeParameter.setOptions(scopeOptions);
 		scopeParameter.setDefaultValue(MVA_STRATEGY);
 		scopeParameter.setDescription("This parameter determines the strategy, "

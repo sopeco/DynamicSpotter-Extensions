@@ -5,7 +5,9 @@ import org.aim.api.exceptions.MeasurementException;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.artifacts.probes.ResponsetimeProbe;
 import org.aim.artifacts.sampler.CPUSampler;
+import org.aim.artifacts.sampler.NetworkIOSampler;
 import org.aim.artifacts.scopes.EntryPointScope;
+import org.aim.artifacts.scopes.JDBCScope;
 import org.aim.description.InstrumentationDescription;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
@@ -16,6 +18,7 @@ import org.spotter.core.detection.IDetectionController;
 import org.spotter.core.detection.IExperimentReuser;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.detection.olb.strategies.QTStrategy;
+import org.spotter.ext.detection.olb.strategies.TTestCpuThresholdStrategy;
 import org.spotter.shared.result.model.SpotterResult;
 
 /**
@@ -30,6 +33,7 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 
 	private int experimentSteps;
 	private String analysisStrategy;
+	private String scope;
 	private IOLBAnalysisStrategy analysisStrategyImpl;
 	private boolean reuser = false;
 
@@ -45,6 +49,8 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 
 	@Override
 	public void loadProperties() {
+		scope = getProblemDetectionConfiguration().getProperty(OLBExtension.SCOPE_KEY, OLBExtension.ENTRY_SCOPE);
+
 		analysisStrategy = getProblemDetectionConfiguration().getProperty(OLBExtension.DETECTION_STRATEGY_KEY,
 				OLBExtension.QUEUEING_THEORY_STRATEGY);
 
@@ -52,7 +58,9 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 		case OLBExtension.QUEUEING_THEORY_STRATEGY:
 			analysisStrategyImpl = new QTStrategy();
 			break;
-
+		case OLBExtension.T_TEST_CPU_THRESHOLD_STRATEGY:
+			analysisStrategyImpl = new TTestCpuThresholdStrategy();
+			break;
 		default:
 			analysisStrategyImpl = new QTStrategy();
 		}
@@ -89,10 +97,27 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 	public InstrumentationDescription getInstrumentationDescription() {
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		if (!reuser) {
-			idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
-					.entityDone();
+			switch (scope) {
+			case OLBExtension.SYNC_SCOPE:
+				// TODO...
+				throw new UnsupportedOperationException("Sync scope is not supported yet!");
+			case OLBExtension.DB_SCOPE:
+				idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
+						.entityDone();
+				break;
+			case OLBExtension.ENTRY_SCOPE:
+				idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
+						.entityDone();
+				break;
+			default:
+				idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
+						.entityDone();
+				break;
+			}
+
 		}
 		idBuilder.newSampling(CPUSampler.class.getName(), SAMPLING_DELAY);
+		idBuilder.newSampling(NetworkIOSampler.class.getName(), SAMPLING_DELAY);
 		return idBuilder.build();
 	}
 

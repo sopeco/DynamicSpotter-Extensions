@@ -21,8 +21,8 @@ import org.spotter.core.detection.IDetectionController;
 import org.spotter.core.detection.IExperimentReuser;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.detection.appHiccups.strategies.BucketStrategy;
-import org.spotter.ext.detection.appHiccups.strategies.MVAStrategy;
-import org.spotter.ext.detection.appHiccups.strategies.NaiveStrategy;
+import org.spotter.ext.detection.appHiccups.strategies.DBSCANStrategy;
+import org.spotter.ext.detection.appHiccups.strategies.MovingPercentileStrategy;
 import org.spotter.ext.detection.appHiccups.utils.Hiccup;
 import org.spotter.ext.detection.appHiccups.utils.HiccupDetectionConfig;
 import org.spotter.ext.detection.utils.AnalysisChartBuilder;
@@ -62,10 +62,6 @@ public class AppHiccupsController extends AbstractDetectionController implements
 				String.valueOf(HiccupDetectionConfig.MOVING_AVERAGE_WINDOW_SIZE_DEFAULT));
 		hiccupDetectionConfig.setMvaWindowSize(Integer.parseInt(mvaWindowSize));
 
-		String bucketStepStr = getProblemDetectionConfiguration().getProperty(HiccupDetectionConfig.BUCKET_STEP_KEY,
-				String.valueOf(HiccupDetectionConfig.BUCKET_STEP_DEFAULT));
-		hiccupDetectionConfig.setBucketStep(Integer.parseInt(bucketStepStr));
-
 		String maxHiccupTimeProportionStr = getProblemDetectionConfiguration().getProperty(
 				AppHiccupsExtension.MAX_HICCUPS_TIME_PROPORTION_KEY,
 				String.valueOf(AppHiccupsExtension.MAX_HICCUPS_TIME_PROPORTION_DEFAULT));
@@ -73,20 +69,18 @@ public class AppHiccupsController extends AbstractDetectionController implements
 
 		switch (analysisStrategy) {
 		case AppHiccupsExtension.MVA_STRATEGY:
-			analysisStrategyImpl = new MVAStrategy();
+			analysisStrategyImpl = new MovingPercentileStrategy();
 			break;
-		case AppHiccupsExtension.NAIVE_STRATEGY:
-			analysisStrategyImpl = new NaiveStrategy();
+		case AppHiccupsExtension.DBSCAN_STRATEGY:
+			analysisStrategyImpl = new DBSCANStrategy();
 			break;
 		case AppHiccupsExtension.BUCKET_STRATEGY:
 			analysisStrategyImpl = new BucketStrategy();
 			break;
 		default:
-			analysisStrategyImpl = new MVAStrategy();
+			analysisStrategyImpl = new MovingPercentileStrategy();
 		}
 	}
-
-	
 
 	@Override
 	protected SpotterResult analyze(DatasetCollection data) {
@@ -115,7 +109,7 @@ public class AppHiccupsController extends AbstractDetectionController implements
 			// sort chronologically
 			responseTimeSeries.sort();
 			List<Hiccup> hiccups = analysisStrategyImpl.findHiccups(responseTimeSeries, hiccupDetectionConfig,
-					perfReqThreshold, perfReqConfidence);
+					perfReqThreshold, perfReqConfidence, getResultManager(), result);
 
 			long experimentDuration = responseTimeSeries.getKeyMax() - responseTimeSeries.getKeyMin();
 			long hiccupsDuration = 0;
@@ -163,7 +157,7 @@ public class AppHiccupsController extends AbstractDetectionController implements
 	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		executeDefaultExperimentSeries(this, 1, createInstrumentationDescription());
 	}
-	
+
 	@Override
 	public InstrumentationDescription getInstrumentationDescription() {
 		// no additional instrumentation required

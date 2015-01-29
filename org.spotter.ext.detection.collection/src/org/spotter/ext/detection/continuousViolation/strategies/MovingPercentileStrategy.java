@@ -6,22 +6,23 @@ import org.spotter.ext.detection.continuousViolation.util.AnalysisConfig;
 import org.spotter.ext.detection.utils.Utils;
 
 /**
- * Analyzes continuous violation of performance requirements by mean value
+ * Analyzes continuous violation of performance requirements by percentile value
  * analysis.
  * 
  * @author Alexander Wert
  * 
  */
-public class MVAStrategy implements IViolationAnalysisStrategy {
+public class MovingPercentileStrategy implements IViolationAnalysisStrategy {
 
 	@Override
 	public boolean analyze(NumericPairList<Long, Double> responsetimeSeries, AnalysisConfig analysisConfig,
 			double perfReqThreshold, double perfReqConfidence) {
-		double mvaResponseTime = 0.0;
+		double percentileValue = 0.0;
 		for (int i = 0; i < responsetimeSeries.size(); i++) {
-			mvaResponseTime = Utils.calculateWindowAverage(responsetimeSeries, i, analysisConfig.getMvaWindowSize());
+			percentileValue = Utils.calculateWindowPercentile(responsetimeSeries, perfReqConfidence, i,
+					analysisConfig.getMvaWindowSize());
 
-			if (mvaResponseTime < perfReqThreshold) {
+			if (percentileValue < perfReqThreshold) {
 				return false;
 			}
 		}

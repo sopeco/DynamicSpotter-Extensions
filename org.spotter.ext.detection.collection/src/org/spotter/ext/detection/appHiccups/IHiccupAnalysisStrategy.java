@@ -2,9 +2,12 @@ package org.spotter.ext.detection.appHiccups;
 
 import java.util.List;
 
+import org.junit.experimental.results.ResultMatchers;
 import org.lpe.common.util.NumericPairList;
+import org.spotter.core.detection.DetectionResultManager;
 import org.spotter.ext.detection.appHiccups.utils.Hiccup;
 import org.spotter.ext.detection.appHiccups.utils.HiccupDetectionConfig;
+import org.spotter.shared.result.model.SpotterResult;
 
 /**
  * Analysis Strategy Interface for Application Hiccups detection.
@@ -27,5 +30,5 @@ public interface IHiccupAnalysisStrategy {
 	 * @return list of hiccups
 	 */
 	List<Hiccup> findHiccups(final NumericPairList<Long, Double> responsetimeSeries,
-			final HiccupDetectionConfig hiccupConfig, double perfReqThreshold, double perfReqConfidence);
+			final HiccupDetectionConfig hiccupConfig, double perfReqThreshold, double perfReqConfidence, DetectionResultManager resultManager, SpotterResult result);
 }

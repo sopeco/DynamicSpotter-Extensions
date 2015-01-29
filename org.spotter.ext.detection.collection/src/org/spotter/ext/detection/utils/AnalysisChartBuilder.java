@@ -45,7 +45,7 @@ public final class AnalysisChartBuilder {
 	private static final int IMAGE_HEIGHT = 500;
 
 	private static final Color[] COLORS = { Color.BLACK, Color.RED, Color.BLUE, Color.ORANGE, Color.GREEN,
-			Color.YELLOW, Color.PINK };
+			Color.YELLOW, Color.PINK, Color.MAGENTA };
 
 	private int seriesCounter = 0;
 	private Chart chart = null;
@@ -61,6 +61,13 @@ public final class AnalysisChartBuilder {
 		chart = new ChartBuilder().width(IMAGE_WIDTH).height(IMAGE_HEIGHT).title(title).xAxisTitle(xLabel)
 				.yAxisTitle(yLabel).build();
 		chart.getStyleManager().setLegendPosition(LegendPosition.InsideSE);
+	}
+	
+	public void startChartWithoutLegend(String title, String xLabel, String yLabel) {
+		chart = new ChartBuilder().width(IMAGE_WIDTH).height(IMAGE_HEIGHT).title(title).xAxisTitle(xLabel)
+				.yAxisTitle(yLabel).build();
+		chart.getStyleManager().setLegendPosition(LegendPosition.InsideSE);
+		chart.getStyleManager().setLegendVisible(false);
 	}
 
 	public Chart build() {
@@ -90,7 +97,7 @@ public final class AnalysisChartBuilder {
 
 		scatterSeries.setLineStyle(SeriesLineStyle.NONE);
 		scatterSeries.setMarker(SeriesMarker.SQUARE);
-		scatterSeries.setMarkerColor(COLORS[seriesCounter]);
+		scatterSeries.setMarkerColor(COLORS[seriesCounter % COLORS.length]);
 		seriesCounter++;
 	}
 
@@ -112,7 +119,7 @@ public final class AnalysisChartBuilder {
 		}
 		scatterSeries.setLineStyle(SeriesLineStyle.DASH_DASH);
 		scatterSeries.setMarker(SeriesMarker.SQUARE);
-		scatterSeries.setMarkerColor(COLORS[seriesCounter]);
+		scatterSeries.setMarkerColor(COLORS[seriesCounter % COLORS.length]);
 		seriesCounter++;
 	}
 
@@ -122,7 +129,7 @@ public final class AnalysisChartBuilder {
 				valuePairs.getValueListAsNumbers());
 		scatterSeries.setLineStyle(SeriesLineStyle.NONE);
 		scatterSeries.setMarker(SeriesMarker.CIRCLE);
-		scatterSeries.setMarkerColor(COLORS[seriesCounter]);
+		scatterSeries.setMarkerColor(COLORS[seriesCounter % COLORS.length]);
 		seriesCounter++;
 	}
 
@@ -133,7 +140,7 @@ public final class AnalysisChartBuilder {
 				valuePairs.getValueListAsNumbers(), errors);
 		scatterSeries.setLineStyle(SeriesLineStyle.NONE);
 		scatterSeries.setMarker(SeriesMarker.CIRCLE);
-		scatterSeries.setMarkerColor(COLORS[seriesCounter]);
+		scatterSeries.setMarkerColor(COLORS[seriesCounter % COLORS.length]);
 		seriesCounter++;
 	}
 
@@ -143,7 +150,7 @@ public final class AnalysisChartBuilder {
 				valuePairs.getValueListAsNumbers());
 		scatterSeries.setLineStyle(SeriesLineStyle.SOLID);
 		scatterSeries.setMarker(SeriesMarker.NONE);
-		scatterSeries.setMarkerColor(COLORS[seriesCounter]);
+		scatterSeries.setMarkerColor(COLORS[seriesCounter % COLORS.length]);
 		seriesCounter++;
 	}
 
@@ -179,7 +186,7 @@ public final class AnalysisChartBuilder {
 		Series scatterSeries = chart.addSeries(seriesTitle, xValues, yValues);
 		scatterSeries.setLineStyle(SeriesLineStyle.SOLID);
 		scatterSeries.setMarker(SeriesMarker.NONE);
-		scatterSeries.setMarkerColor(COLORS[seriesCounter]);
+		scatterSeries.setMarkerColor(COLORS[seriesCounter % COLORS.length]);
 		seriesCounter++;
 	}
 
@@ -193,7 +200,7 @@ public final class AnalysisChartBuilder {
 		Series scatterSeries = chart.addSeries(seriesTitle, xValues, yValues);
 		scatterSeries.setLineStyle(SeriesLineStyle.SOLID);
 		scatterSeries.setMarker(SeriesMarker.NONE);
-		scatterSeries.setMarkerColor(COLORS[seriesCounter]);
+		scatterSeries.setMarkerColor(COLORS[seriesCounter % COLORS.length]);
 		seriesCounter++;
 	}
 
@@ -207,7 +214,7 @@ public final class AnalysisChartBuilder {
 		Series scatterSeries = chart.addSeries(seriesTitle, xValues, yValues);
 		scatterSeries.setLineStyle(SeriesLineStyle.SOLID);
 		scatterSeries.setMarker(SeriesMarker.NONE);
-		scatterSeries.setMarkerColor(COLORS[seriesCounter]);
+		scatterSeries.setMarkerColor(COLORS[seriesCounter % COLORS.length]);
 		seriesCounter++;
 	}
 

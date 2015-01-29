@@ -3,7 +3,6 @@ package org.spotter.ext.detection.olb;
 import java.util.Properties;
 
 import org.aim.api.measurement.dataset.DatasetCollection;
-import org.spotter.ext.detection.trafficJam.TrafficJamDetectionController;
 import org.spotter.shared.result.model.SpotterResult;
 
 /**

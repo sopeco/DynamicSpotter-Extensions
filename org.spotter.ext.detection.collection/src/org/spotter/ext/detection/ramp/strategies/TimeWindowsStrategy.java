@@ -235,6 +235,10 @@ public class TimeWindowsStrategy implements IRampDetectionStrategy {
 				Dataset datasetCurrent = selectionCurrent.applyTo(rtDataset);
 				Dataset datasetPrev = selectionPrev.applyTo(rtDataset);
 
+				double prevMean = LpeNumericUtils.average(datasetPrev.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME,
+						Long.class));
+				double currentMean = LpeNumericUtils.average(datasetCurrent.getValues(
+						ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class));
 				// maybe the operation could not be found in one of the current
 				// selections
 				if (datasetCurrent == null || datasetPrev == null) {
@@ -248,12 +252,12 @@ public class TimeWindowsStrategy implements IRampDetectionStrategy {
 						datasetCurrent.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class), sums1, sums2);
 				double pValue = LpeNumericUtils.tTest(sums2, sums1);
 
-				if (pValue <= requiredSignificanceLevel) {
+				if (pValue <= requiredSignificanceLevel && currentMean > prevMean) {
 					if (firstSignificantStep < 0) {
 						firstSignificantStep = prevStep;
 					}
 					significantSteps++;
-				} else if (pValue > requiredSignificanceLevel) {
+				} else {
 					firstSignificantStep = -1;
 					significantSteps = 0;
 				}

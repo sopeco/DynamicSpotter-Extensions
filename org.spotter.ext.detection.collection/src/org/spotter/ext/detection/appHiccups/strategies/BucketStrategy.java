@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.lpe.common.util.NumericPairList;
+import org.spotter.core.detection.DetectionResultManager;
 import org.spotter.ext.detection.appHiccups.IHiccupAnalysisStrategy;
 import org.spotter.ext.detection.appHiccups.utils.Hiccup;
 import org.spotter.ext.detection.appHiccups.utils.HiccupDetectionConfig;
+import org.spotter.ext.detection.utils.Utils;
+import org.spotter.shared.result.model.SpotterResult;
 
 /**
  * Bucket strategy devides the experiment time in fixed-sizes buckets and
@@ -20,16 +23,17 @@ public class BucketStrategy implements IHiccupAnalysisStrategy {
 
 	@Override
 	public List<Hiccup> findHiccups(NumericPairList<Long, Double> responsetimeSeries,
-			HiccupDetectionConfig hiccupConfig, double perfReqThreshold, double perfReqConfidence) {
+			HiccupDetectionConfig hiccupConfig, double perfReqThreshold, double perfReqConfidence, DetectionResultManager resultManager, SpotterResult result) {
 		List<Hiccup> hiccups = new ArrayList<Hiccup>();
 		Hiccup currentHiccup = null;
 		double maxRT = Double.MIN_VALUE;
 		long bucketStart = Long.MIN_VALUE;
 		long timestamp;
+		long bucketStep = Utils.meanInterRequestTime(responsetimeSeries)* 50;
 		NumericPairList<Long, Double> bucketSeries = null;
 		for (int i = 0; i < responsetimeSeries.size(); i++) {
 			timestamp = responsetimeSeries.get(i).getKey();
-			if (timestamp > bucketStart + hiccupConfig.getBucketStep()) {
+			if (timestamp > bucketStart + bucketStep) {
 				// new bucket started
 				if (bucketSeries != null) {
 					// analyze previous bucket
@@ -77,8 +81,8 @@ public class BucketStrategy implements IHiccupAnalysisStrategy {
 					hiccups.add(currentHiccup);
 				}
 				currentHiccup.setEndTimestamp(bucketSeries.getKeyMax());
-			} 
-			
+			}
+
 			if (currentHiccup != null) {
 				currentHiccup.setMaxHiccupResponseTime(maxRT);
 			}
@@ -86,6 +90,8 @@ public class BucketStrategy implements IHiccupAnalysisStrategy {
 
 		return hiccups;
 	}
+
+
 
 	private int countRequirementViolations(double perfReqThreshold, List<Double> responseTimes) {
 		int count = 0;

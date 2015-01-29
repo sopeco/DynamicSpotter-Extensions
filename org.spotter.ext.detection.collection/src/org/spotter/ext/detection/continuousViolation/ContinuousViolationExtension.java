@@ -21,8 +21,8 @@ public class ContinuousViolationExtension extends AbstractDetectionExtension {
 			+ "violated continuously under high load.";
 	
 	protected static final String VIOLATION_DETECTION_STRATEGY_KEY = "strategy";
-	protected static final String MVA_STRATEGY = "mean value analysis";
-	protected static final String PERCENTILE_STRATEGY = "percentile analysis";
+	protected static final String DBSCAN_STRATEGY = "DBSCAN analysis";
+	protected static final String PERCENTILE_STRATEGY = "moving percentile analysis";
 	protected static final String BUCKET_STRATEGY = "bucket analysis";
 
 	@Override
@@ -40,15 +40,17 @@ public class ContinuousViolationExtension extends AbstractDetectionExtension {
 				LpeSupportedTypes.String);
 
 		Set<String> scopeOptions = new HashSet<>();
-		scopeOptions.add(MVA_STRATEGY);
+		scopeOptions.add(DBSCAN_STRATEGY);
 		scopeOptions.add(BUCKET_STRATEGY);
 		scopeOptions.add(PERCENTILE_STRATEGY);
 		scopeParameter.setOptions(scopeOptions);
-		scopeParameter.setDefaultValue(MVA_STRATEGY);
+		scopeParameter.setDefaultValue(DBSCAN_STRATEGY);
 		scopeParameter.setDescription("This parameter determines the strategy, "
 				+ "used to analyse continuous violation of requirements.");
 		return scopeParameter;
 	}
+	
+
 
 	
 
