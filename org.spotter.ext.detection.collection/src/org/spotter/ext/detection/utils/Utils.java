@@ -9,7 +9,7 @@ import org.aim.artifacts.records.ResponseTimeRecord;
 import org.lpe.common.util.NumericPairList;
 
 /**
- * Contians utility functions for analysis of measurement data.
+ * Contains utility functions for analysis of measurement data.
  * 
  * @author Alexander Wert
  * 
@@ -20,8 +20,7 @@ public final class Utils {
 	}
 
 	/**
-	 * Creates from a response time dataset a list of timestamp response time
-	 * pairs.
+	 * Creates a list of timestamp response time pairs from a response time dataset.
 	 * 
 	 * @param rtDataSet
 	 *            dataset to read from
@@ -78,7 +77,7 @@ public final class Utils {
 		int windowStart = Math.max(windowCenter - (windowSize / 2), 0);
 		int windowEnd = Math.min(windowCenter + (windowSize / 2), pairs.size() - 1);
 		int actualWindowSize = (windowEnd - windowStart) + 1;
-		int indexPercentile = (int) Math.ceil(((double) actualWindowSize) * percentile);
+		int indexPercentile = Math.min(actualWindowSize - 1, (int) Math.ceil(((double) actualWindowSize) * percentile));
 		List<Double> tmpList = new ArrayList<>(actualWindowSize);
 
 		for (int j = windowStart; j <= windowEnd; j++) {
