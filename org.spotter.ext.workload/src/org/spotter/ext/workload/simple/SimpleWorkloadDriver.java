@@ -16,6 +16,7 @@
 package org.spotter.ext.workload.simple;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Properties;
@@ -247,8 +248,13 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 			urlClassLoader = new URLClassLoader(urls, this.getClass().getClassLoader());
 
 			vUserClass = urlClassLoader.loadClass(userScriptClassNAme);
-		} catch (Exception e) {
+		} catch (MalformedURLException e) {
 			throw new WorkloadException(e);
+		} catch (ClassNotFoundException e) {
+			// Cannot include ClassNotFoundException because it is not parsable
+			// as JSON string due to unrecognized field ("ex" instead of
+			// "exception")
+			throw new WorkloadException("Could not find specified class '" + e.getMessage() + "'");
 		}
 		return vUserClass;
 	}
