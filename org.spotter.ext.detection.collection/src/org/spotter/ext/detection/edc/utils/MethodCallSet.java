@@ -33,12 +33,14 @@ public class MethodCallSet {
 		}
 
 		boolean newCallIsParentCall = false;
+		Set<MethodCall> callsToRemove = new HashSet<>();
 		for (MethodCall existingCall : callsForThidId) {
 			if (call.addCall(existingCall)) {
 				newCallIsParentCall = true;
-				callsForThidId.remove(existingCall);
+				callsToRemove.add(existingCall);
 			}
 		}
+		callsForThidId.removeAll(callsToRemove);
 
 		if (newCallIsParentCall) {
 			callsForThidId.add(call);
@@ -57,6 +59,41 @@ public class MethodCallSet {
 		}
 
 		callsForThidId.add(call);
+	}
+	
+	public boolean addCallIfNested(MethodCall call) {
+		boolean added = false;
+		
+		for (MethodCall existingCall : getMethodCalls()) {
+			if (existingCall.addCall(call)) {
+				added = true;
+				break;
+			}
+		}
+		
+		return added;
+	}
+	
+	public boolean addCallIfNotNested(MethodCall call) {
+		boolean nestedCall = false;
+		
+		for (MethodCall existingCall : getMethodCalls()) {
+			if (existingCall.isParentOf(call)) {
+				nestedCall = true;
+				break;
+			}
+		}
+		
+		if (!nestedCall) {
+			Set<MethodCall> callsPerId = methodCallsPerThreadId.get(call.getThreadId());
+			if (callsPerId == null) {
+				callsPerId = new HashSet<>();
+				methodCallsPerThreadId.put(call.getThreadId(), callsPerId);
+			}
+			callsPerId.add(call);
+		}
+		
+		return nestedCall;
 	}
 
 	/**
@@ -161,6 +198,16 @@ public class MethodCallSet {
 		subset.addAllCalls(callsOfLayer);
 		return subset;
 	}
+	
+	public MethodCallSet getSubsetOfLowestLayer() {
+		MethodCallSet finalSet = new MethodCallSet();
+		
+		for (MethodCall call : getMethodCalls()) {
+			finalSet.addAllCalls(call.getFinalCalls());
+		}
+		
+		return finalSet;
+	}
 
 	/**
 	 * Generates a new {@code MethodCallSet} with all calls of the given layer
@@ -227,7 +274,15 @@ public class MethodCallSet {
 	 *            Call to be removed
 	 */
 	public void removeCall(MethodCall call) {
-		methodCallsPerThreadId.get(call.getThreadId()).remove(call);
+		Set<MethodCall> calls = methodCallsPerThreadId.get(call.getThreadId());
+		
+		if (calls.contains(call)) {
+			methodCallsPerThreadId.remove(call);
+		} else {
+			for (MethodCall parentCall : calls) {
+				parentCall.removeCall(call);
+			}
+		}
 	}
 
 	/**

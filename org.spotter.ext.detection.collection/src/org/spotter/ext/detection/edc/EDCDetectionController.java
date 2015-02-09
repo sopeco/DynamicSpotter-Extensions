@@ -9,8 +9,8 @@ import java.util.TreeSet;
 
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
+import org.aim.api.measurement.AbstractRecord;
 import org.aim.api.measurement.dataset.Dataset;
-import org.aim.api.measurement.dataset.DatasetBuilder;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.api.measurement.dataset.Parameter;
 import org.aim.api.measurement.dataset.ParameterSelection;
@@ -54,6 +54,7 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 	private static final String NAME_SINGLE_USER_EXP = "singleUserExp";
 	private static final String NAME_MAIN_EXP = "mainExp";
 	private static final String NAME_STACK_TRACE_EXP = "stackTraceExp";
+	private static final String NAME_HIERARCHY_EXP = "hierarchyExp";
 
 	private boolean reuser = false;
 	private double instrumentationGranularity;
@@ -94,7 +95,7 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 			return 0;
 		} else {
 			return Integer.parseInt(LpeStringUtils.getPropertyOrFail(GlobalConfiguration.getInstance().getProperties(),
-					ConfigKeys.WORKLOAD_MAXUSERS, null));
+					ConfigKeys.WORKLOAD_MAXUSERS, null)) * 4;
 		}
 	}
 
@@ -103,6 +104,10 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 		if (!reuser) {
 			int maxUsers = Integer.parseInt(LpeStringUtils.getPropertyOrFail(GlobalConfiguration.getInstance()
 					.getProperties(), ConfigKeys.WORKLOAD_MAXUSERS, null));
+
+			instrumentApplication(getServletHierarchyDescription());
+			runExperiment(this, 1, NAME_HIERARCHY_EXP);
+			uninstrumentApplication();
 
 			instrumentApplication(getMainInstrumentationDescription(false));
 			runExperiment(this, 1, NAME_SINGLE_USER_EXP);
@@ -122,6 +127,8 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 	protected SpotterResult analyze(DatasetCollection data) {
 		SpotterResult result = new SpotterResult();
 
+		ParameterSelection selectHierarchyExp = new ParameterSelection()
+				.select(KEY_EXPERIMENT_NAME, NAME_HIERARCHY_EXP);
 		ParameterSelection selectSingleUserExp = new ParameterSelection().select(KEY_EXPERIMENT_NAME,
 				NAME_SINGLE_USER_EXP);
 		ParameterSelection selectMultiUserExp = new ParameterSelection().select(KEY_EXPERIMENT_NAME, NAME_MAIN_EXP);
@@ -135,10 +142,13 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 			return result;
 		}
 
+		Dataset hierarchyResponseTimes = selectHierarchyExp.applyTo(rtDataset);
 		Dataset singleUserResponseTimes = selectSingleUserExp.applyTo(rtDataset);
 		Dataset multiUserResponseTimes = selectMultiUserExp.applyTo(rtDataset);
+		rtDataset = null;
 
 		Dataset sqlDataset = data.getDataSet(SQLQueryRecord.class);
+		preprocessQueries(sqlDataset);
 
 		if (sqlDataset == null || sqlDataset.size() == 0) {
 			result.setDetected(false);
@@ -149,6 +159,7 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 		Dataset singleUserQueries = selectSingleUserExp.applyTo(sqlDataset);
 		Dataset multiUserQueries = selectMultiUserExp.applyTo(sqlDataset);
 		Dataset stackTraceQueries = selectStackTraceExp.applyTo(sqlDataset);
+		sqlDataset = null;
 
 		Dataset ttDataset = data.getDataSet(ThreadTracingRecord.class);
 
@@ -160,6 +171,7 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 
 		Dataset singleUserThreadTracing = selectSingleUserExp.applyTo(ttDataset);
 		Dataset multiUserThreadTracing = selectMultiUserExp.applyTo(ttDataset);
+		ttDataset = null;
 
 		Dataset stDataset = data.getDataSet(StackTraceRecord.class);
 
@@ -170,12 +182,16 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 		}
 
 		Dataset stackTraces = selectStackTraceExp.applyTo(stDataset);
+		stDataset = null;
 
 		// Select servlets with requirements violating response times
 
-		MethodCallSet servletQueryHierarchy = getServletQueryCallHierarchy(
-				getMethodCallHierarchy(multiUserResponseTimes, multiUserThreadTracing), multiUserResponseTimes,
-				multiUserQueries, multiUserThreadTracing);
+		MethodCallSet servletHierarchy = getMethodCallSetOfMethods(extractUniqueMethodNames(hierarchyResponseTimes),
+				multiUserResponseTimes, multiUserThreadTracing);
+		MethodCallSet servletQueryHierarchy = servletHierarchy.getSubsetOfLowestLayer();
+		addQueriesToMethodCallSet(servletQueryHierarchy, multiUserResponseTimes, multiUserQueries,
+				multiUserThreadTracing);
+
 		Set<String> criticalServlets = new TreeSet<>();
 
 		for (String methodName : servletQueryHierarchy.getUniqueMethods()) {
@@ -188,7 +204,7 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 				}
 			}
 
-			if (numberOfReqViolatingCalls / callsOfMethod.size() > 1.0 - perfReqConfidence) {
+			if ((double) numberOfReqViolatingCalls / (double) callsOfMethod.size() > 1.0 - perfReqConfidence) {
 				criticalServlets.add(methodName);
 			}
 		}
@@ -220,9 +236,9 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 		// Drop queries having a bigger relative response time for one user than
 		// for many users
 
-		MethodCallSet singleUserServletQueryHierarchy = getServletQueryCallHierarchy(
-				getMethodCallHierarchy(singleUserResponseTimes, singleUserThreadTracing), singleUserResponseTimes,
-				singleUserQueries, singleUserThreadTracing);
+		MethodCallSet singleUserServletQueryHierarchy = servletHierarchy.getSubsetOfLowestLayer();
+		addQueriesToMethodCallSet(singleUserServletQueryHierarchy, singleUserResponseTimes, singleUserQueries,
+				singleUserThreadTracing);
 
 		for (String query : violatingReqQueriesART.keySet()) {
 			List<Double> singleUserRRTs = getRelativeQueryResponseTimes(query, singleUserServletQueryHierarchy);
@@ -230,10 +246,16 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 
 			if (avgRRTDiff < perfReqRelativeQueryRTDiff) {
 				violatingReqQueriesART.remove(query);
-			} else {
+
 				for (MethodCall queryCall : servletQueryHierarchy.getCallsOfMethodAtLayer(query, 1)) {
 					servletQueryHierarchy.removeCall(queryCall);
 				}
+			}
+		}
+
+		for (MethodCall call : servletQueryHierarchy.getMethodCalls()) {
+			if (call.getCalledOperations().size() == 0) {
+				servletQueryHierarchy.removeCall(call);
 			}
 		}
 
@@ -247,22 +269,15 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 			messageBuilder.append(servlet);
 			messageBuilder.append("\nQueries are:");
 
-			Set<String> queriesOfServlet = new TreeSet<>();
-			for (MethodCall servletCall : servletQueryHierarchy.getCallsOfMethodAtLayer(servlet, 0)) {
-				for (MethodCall queryCall : servletCall.getCalledOperations()) {
-					queriesOfServlet.add(queryCall.getOperation());
-				}
-			}
-
-			for (String query : queriesOfServlet) {
+			for (String query : violatingReqQueriesART.keySet()) {
 				double relativeRT = violatingReqQueriesART.get(query);
 
 				messageBuilder.append("\n");
 				messageBuilder.append(query);
-				messageBuilder.append("\n\tWith average relative response time of ");
+				messageBuilder.append("\n\tAverage relative response time: ");
 				messageBuilder.append(relativeRT);
 				messageBuilder.append(" ms)");
-				messageBuilder.append("\n\tWith stack trace");
+				messageBuilder.append("\n\tStack trace:");
 
 				for (String stackTraceString : getStackTracesOfQuery(query, stackTraceQueries, stackTraces)) {
 					if (stackTraceString.contains(servlet)) {
@@ -283,6 +298,65 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 		return result;
 	}
 
+	private void preprocessQueries(Dataset queries) {
+		for (SQLQueryRecord record : queries.getRecords(SQLQueryRecord.class)) {
+			record.setQueryString(LpeStringUtils.getGeneralizedQuery(record.getQueryString()));
+		}
+	}
+
+	private Set<String> extractUniqueMethodNames(Dataset responseTimes) {
+		Set<String> uniqueNames = new TreeSet<>();
+
+		for (ResponseTimeRecord rtRecord : responseTimes.getRecords(ResponseTimeRecord.class)) {
+			uniqueNames.add(rtRecord.getOperation());
+		}
+
+		return uniqueNames;
+	}
+
+	private MethodCallSet getMethodCallSetOfMethods(Set<String> methodNames, Dataset responseTimes,
+			Dataset threadTracing) {
+		MethodCallSet servletCallSet = new MethodCallSet();
+
+		for (ResponseTimeRecord rtRec : responseTimes.getRecords(ResponseTimeRecord.class)) {
+			if (methodNames.contains(rtRec.getOperation())) {
+				Dataset ttSet = selectCallID(rtRec.getCallId()).applyTo(threadTracing);
+				if (ttSet == null) {
+					continue;
+				}
+				long threadId = ttSet.getRecords(ThreadTracingRecord.class).get(0).getThreadId();
+				servletCallSet.addCall(new MethodCall(rtRec.getOperation(), rtRec.getTimeStamp(), rtRec.getTimeStamp()
+						+ rtRec.getResponseTime(), threadId));
+			}
+		}
+
+		return servletCallSet;
+	}
+
+	private void addQueriesToMethodCallSet(MethodCallSet set, Dataset responseTimes, Dataset queries,
+			Dataset threadTracing) {
+		for (SQLQueryRecord sqlRecord : queries.getRecords(SQLQueryRecord.class)) {
+			Dataset querySet = selectCallID(sqlRecord.getCallId()).applyTo(responseTimes);
+			if (querySet == null) {
+				continue;
+			}
+			ResponseTimeRecord rtRecord = querySet.getRecords(ResponseTimeRecord.class).get(0);
+
+			Dataset ttSet = selectCallID(sqlRecord.getCallId()).applyTo(threadTracing);
+			if (ttSet == null) {
+				continue;
+			}
+			ThreadTracingRecord ttRecord = ttSet.getRecords(ThreadTracingRecord.class).get(0);
+
+			set.addCallIfNested(new MethodCall(sqlRecord.getQueryString(), rtRecord.getTimeStamp(), rtRecord
+					.getTimeStamp() + rtRecord.getResponseTime(), ttRecord.getThreadId()));
+		}
+	}
+
+	private ParameterSelection selectCallID(long callId) {
+		return new ParameterSelection().select(AbstractRecord.PAR_CALL_ID, callId);
+	}
+
 	private Set<String> getStackTracesOfQuery(String query, Dataset queries, Dataset stackTraces) {
 		Set<String> stackTraceSet = new TreeSet<>();
 
@@ -290,118 +364,15 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 		List<SQLQueryRecord> queryRecords = selectQuery.applyTo(queries).getRecords(SQLQueryRecord.class);
 
 		for (SQLQueryRecord queryRecord : queryRecords) {
-			ParameterSelection selectCallId = new ParameterSelection().select(StackTraceRecord.PAR_CALL_ID,
-					queryRecord.getCallId());
-			StackTraceRecord stackTraceRecord = selectCallId.applyTo(stackTraces).getRecords(StackTraceRecord.class)
-					.get(0);
+			Dataset stSet = selectCallID(queryRecord.getCallId()).applyTo(stackTraces);
+			if (stSet == null) {
+				continue;
+			}
+			StackTraceRecord stackTraceRecord = stSet.getRecords(StackTraceRecord.class).get(0);
 			stackTraceSet.add(stackTraceRecord.getStackTrace());
 		}
 
 		return stackTraceSet;
-	}
-
-	private MethodCallSet getServletQueryCallHierarchy(MethodCallSet allMethodCallsHierarchy, Dataset responseTimes,
-			Dataset queries, Dataset threadTracing) {
-		MethodCallSet servletQueryCalls = allMethodCallsHierarchy.getFlatSubsetAtLayer(0);
-
-		for (SQLQueryRecord queryRecord : queries.getRecords(SQLQueryRecord.class)) {
-			if (queryRecord.getQueryString() == null || queryRecord.getQueryString().equals("")) {
-				continue;
-			}
-			
-			ParameterSelection selectCallId = new ParameterSelection().select(ResponseTimeRecord.PAR_CALL_ID,
-					queryRecord.getCallId());
-			ResponseTimeRecord queryResponseTimeRecord = selectCallId.applyTo(responseTimes)
-					.getRecords(ResponseTimeRecord.class).get(0);
-			ThreadTracingRecord queryThreadTracingRecord = selectCallId.applyTo(threadTracing)
-					.getRecords(ThreadTracingRecord.class).get(0);
-
-			servletQueryCalls.addCall(new MethodCall(queryRecord.getQueryString(), queryResponseTimeRecord
-					.getTimeStamp(),
-					queryResponseTimeRecord.getTimeStamp() + queryResponseTimeRecord.getResponseTime(),
-					queryThreadTracingRecord.getThreadId()));
-		}
-
-		return servletQueryCalls;
-	}
-
-	private MethodCallSet getMethodCallHierarchy(Dataset responseTimes, Dataset threadTracing) {
-		MethodCallSet methodCalls = new MethodCallSet();
-
-		for (ResponseTimeRecord callingRTRec : responseTimes.getRecords(ResponseTimeRecord.class)) {
-			ParameterSelection selectCallingThreadTracing = new ParameterSelection().select(
-					ThreadTracingRecord.PAR_CALL_ID, callingRTRec.getCallId());
-			ThreadTracingRecord callingThreadTracingRecord = selectCallingThreadTracing.applyTo(threadTracing)
-					.getRecords(ThreadTracingRecord.class).get(0);
-			MethodCall call = new MethodCall(callingRTRec.getOperation(), callingRTRec.getTimeStamp(),
-					callingRTRec.getTimeStamp() + callingRTRec.getResponseTime(),
-					callingThreadTracingRecord.getThreadId());
-
-			methodCalls.addCall(call);
-		}
-
-		return methodCalls;
-	}
-
-	private Set<String> getCalledQueries(String servlet, Dataset responseTimes, Dataset queries, Dataset threadTracing) {
-		Set<String> calledQueries = new TreeSet<>();
-
-		Set<Parameter> emptyParameterSet = new TreeSet<>();
-		DatasetBuilder queryRTSetBuilder = new DatasetBuilder(ResponseTimeRecord.class);
-		for (SQLQueryRecord queryRecord : queries.getRecords(SQLQueryRecord.class)) {
-			ParameterSelection selectRT = new ParameterSelection().select(ResponseTimeRecord.PAR_CALL_ID,
-					queryRecord.getCallId());
-			ResponseTimeRecord responseTimeRecord = selectRT.applyTo(responseTimes)
-					.getRecords(ResponseTimeRecord.class).get(0);
-			queryRTSetBuilder.addRecord(responseTimeRecord, emptyParameterSet);
-		}
-		Dataset queryResponseTimes = queryRTSetBuilder.build();
-
-		for (ResponseTimeRecord callingRTRec : responseTimes.getRecords(ResponseTimeRecord.class)) {
-			if (!servlet.equals(callingRTRec.getOperation())) {
-				continue;
-			}
-
-			ParameterSelection selectCallingThreadTracing = new ParameterSelection().select(
-					ThreadTracingRecord.PAR_CALL_ID, callingRTRec.getCallId());
-			ThreadTracingRecord callingThreadTracingRecord = selectCallingThreadTracing.applyTo(threadTracing)
-					.getRecords(ThreadTracingRecord.class).get(0);
-
-			ParameterSelection selectCalledQueriesRTs = new ParameterSelection();
-			selectCalledQueriesRTs.largerOrEquals(ResponseTimeRecord.PAR_TIMESTAMP, callingRTRec.getTimeStamp());
-			selectCalledQueriesRTs
-					.smallerOrEquals(ResponseTimeRecord.PAR_RESPONSE_TIME, callingRTRec.getResponseTime());
-			Dataset calledQueriesRTs = selectCalledQueriesRTs.applyTo(queryResponseTimes);
-
-			if (calledQueriesRTs != null) {
-				for (ResponseTimeRecord queryRTRecord : calledQueriesRTs.getRecords(ResponseTimeRecord.class)) {
-					if (queryRTRecord.getTimeStamp() + queryRTRecord.getResponseTime() > callingRTRec.getTimeStamp()
-							+ callingRTRec.getResponseTime()) {
-						continue;
-					}
-
-					ParameterSelection selectCalledThreadTracing = new ParameterSelection().select(
-							ThreadTracingRecord.PAR_CALL_ID, queryRTRecord.getCallId());
-					ThreadTracingRecord calledThreadTracingRecord = selectCalledThreadTracing.applyTo(threadTracing)
-							.getRecords(ThreadTracingRecord.class).get(0);
-
-					if (calledThreadTracingRecord.getThreadId() != callingThreadTracingRecord.getThreadId()) {
-						continue;
-					}
-
-					ParameterSelection selectCalledQueries = new ParameterSelection().select(
-							SQLQueryRecord.PAR_CALL_ID, queryRTRecord.getCallId());
-					SQLQueryRecord calledQueryRecord = selectCalledQueries.applyTo(queries)
-							.getRecords(SQLQueryRecord.class).get(0);
-
-					if (calledQueryRecord.getQueryString() == null || calledQueryRecord.getQueryString().equals("")) {
-						calledQueries.add(calledQueryRecord.getQueryString());
-					}
-				}
-			}
-		}
-
-		return calledQueries;
 	}
 
 	private List<Double> getRelativeQueryResponseTimes(String query, MethodCallSet servletQueryHierarchy) {
@@ -410,8 +381,8 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 		for (MethodCall servletCall : servletQueryHierarchy.getMethodCalls()) {
 			for (MethodCall queryCall : servletCall.getCalledOperations()) {
 				if (queryCall.getOperation().equals(query)) {
-					relativeResponseTimes.add((double) servletCall.getResponseTime()
-							/ (double) queryCall.getResponseTime());
+					relativeResponseTimes.add((double) queryCall.getResponseTime()
+							/ (double) servletCall.getResponseTime());
 				}
 			}
 		}
@@ -442,6 +413,14 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(StackTraceProbe.MODEL_PROBE)
 				.addProbe(SQLQueryProbe.MODEL_PROBE).entityDone();
+
+		return idBuilder.build();
+	}
+
+	private InstrumentationDescription getServletHierarchyDescription() {
+		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
+				.entityDone();
 
 		return idBuilder.build();
 	}

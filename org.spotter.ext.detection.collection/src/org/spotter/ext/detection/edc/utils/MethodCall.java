@@ -103,6 +103,10 @@ public class MethodCall {
 	 * @return the calledOperations
 	 */
 	public Set<MethodCall> getCalledOperations() {
+		if (calledOperations == null) {
+			calledOperations = new HashSet<>();
+		}
+		
 		return calledOperations;
 	}
 
@@ -113,6 +117,32 @@ public class MethodCall {
 	 */
 	public double getResponseTime() {
 		return getExitTime() - getEnterTime();
+	}
+
+	public Set<MethodCall> getFinalCalls() {
+		Set<MethodCall> finalCalls = new HashSet<>();
+
+		if (getCalledOperations() == null || getCalledOperations().isEmpty()) {
+			finalCalls.add(this);
+		} else {
+			for (MethodCall childCall : getCalledOperations()) {
+				finalCalls.addAll(childCall.getFinalCalls());
+			}
+		}
+
+		return finalCalls;
+	}
+
+	/**
+	 * Returns iff the given call is a nested call of this.
+	 * 
+	 * @param call
+	 *            Method call to be tested
+	 * @return Iff the given call is a nested call
+	 */
+	public boolean isParentOf(MethodCall call) {
+		return this.getThreadId() == call.getThreadId() && this.getEnterTime() <= call.getEnterTime()
+				&& this.getExitTime() >= call.getExitTime();
 	}
 
 	/**
@@ -141,6 +171,10 @@ public class MethodCall {
 	 * @return Iff the call could be added as subcall
 	 */
 	public boolean addCall(MethodCall newCall) {
+		if (this.equals(newCall)) {
+			return true;
+		}
+		
 		if (this.getThreadId() == newCall.getThreadId() && this.getEnterTime() <= newCall.getEnterTime()
 				&& this.getExitTime() >= newCall.getExitTime()) {
 			if (this.calledOperations == null) {
@@ -169,6 +203,31 @@ public class MethodCall {
 		} else {
 			return false;
 		}
+	}
+	
+	public boolean removeCall(MethodCall call) {
+		if (this.equals(call)) {
+			return false;
+		}
+		
+		if (this.getThreadId() == call.getThreadId() && this.getEnterTime() <= call.getEnterTime()
+				&& this.getExitTime() >= call.getExitTime()) {
+			for (MethodCall subCall : getCalledOperations()) {
+				if (subCall.equals(call)) {
+					calledOperations.remove(call);
+					return true;
+				}
+			}
+			
+			for (MethodCall subCall : getCalledOperations()) {
+				if (subCall.getThreadId() == call.getThreadId() && subCall.getEnterTime() <= call.getEnterTime()
+						&& subCall.getExitTime() >= call.getExitTime()) {
+					return subCall.removeCall(call);
+				}
+			}
+		}
+		
+		return false;
 	}
 
 	@Override
