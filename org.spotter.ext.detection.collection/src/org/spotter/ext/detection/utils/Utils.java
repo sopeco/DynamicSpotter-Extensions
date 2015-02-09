@@ -20,7 +20,8 @@ public final class Utils {
 	}
 
 	/**
-	 * Creates a list of timestamp response time pairs from a response time dataset.
+	 * Creates a list of timestamp response time pairs from a response time
+	 * dataset.
 	 * 
 	 * @param rtDataSet
 	 *            dataset to read from
@@ -77,7 +78,8 @@ public final class Utils {
 		int windowStart = Math.max(windowCenter - (windowSize / 2), 0);
 		int windowEnd = Math.min(windowCenter + (windowSize / 2), pairs.size() - 1);
 		int actualWindowSize = (windowEnd - windowStart) + 1;
-		int indexPercentile = Math.min(actualWindowSize - 1, (int) Math.ceil(((double) actualWindowSize) * percentile));
+		int indexPercentile = (int) Math.floor(((double) actualWindowSize) * percentile);
+
 		List<Double> tmpList = new ArrayList<>(actualWindowSize);
 
 		for (int j = windowStart; j <= windowEnd; j++) {
@@ -86,7 +88,7 @@ public final class Utils {
 		Collections.sort(tmpList);
 		return tmpList.get(indexPercentile);
 	}
-	
+
 	public static long meanInterRequestTime(NumericPairList<Long, Double> responsetimeSeries) {
 		long diffSum = 0L;
 		long prevTimestamp = -1;
