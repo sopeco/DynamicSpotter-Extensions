@@ -3,6 +3,14 @@ package org.spotter.ext.detection.edc.utils;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This class represents an instantiation of a method which may call another
+ * method.
+ * 
+ * @author Henning Schulz
+ * @see MethodCallSet
+ * 
+ */
 public class MethodCall {
 
 	private String operation;
@@ -11,6 +19,18 @@ public class MethodCall {
 	private long exitTime;
 	private long threadId;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param operation
+	 *            Method name
+	 * @param enterTime
+	 *            Enter time
+	 * @param exitTime
+	 *            Exit time
+	 * @param threadId
+	 *            Thread ID
+	 */
 	public MethodCall(String operation, long enterTime, long exitTime, long threadId) {
 		super();
 		this.operation = operation;
@@ -86,15 +106,40 @@ public class MethodCall {
 		return calledOperations;
 	}
 
+	/**
+	 * Returns the response time.
+	 * 
+	 * @return the response time
+	 */
 	public double getResponseTime() {
 		return getExitTime() - getEnterTime();
 	}
 
+	/**
+	 * Adds a call as nested method call.
+	 * 
+	 * @param operation
+	 *            Method name
+	 * @param enterTime
+	 *            Enter time
+	 * @param exitTime
+	 *            Exit time
+	 * @param threadId
+	 *            Thread ID
+	 * @return Iff the call could be added as subcall
+	 */
 	public boolean addCall(String operation, long enterTime, long exitTime, long threadId) {
 		MethodCall call = new MethodCall(operation, enterTime, exitTime, threadId);
 		return addCall(call);
 	}
 
+	/**
+	 * Adds a call as nested method call.
+	 * 
+	 * @param newCall
+	 *            Method call to be added
+	 * @return Iff the call could be added as subcall
+	 */
 	public boolean addCall(MethodCall newCall) {
 		if (this.getThreadId() == newCall.getThreadId() && this.getEnterTime() <= newCall.getEnterTime()
 				&& this.getExitTime() >= newCall.getExitTime()) {
@@ -116,10 +161,10 @@ public class MethodCall {
 						getCalledOperations().remove(childCall);
 					}
 				}
-				
+
 				this.calledOperations.add(newCall);
 			}
-			
+
 			return true;
 		} else {
 			return false;
@@ -144,9 +189,9 @@ public class MethodCall {
 		int multi = 29;
 
 		hashCode = hashCode * multi + getOperation().hashCode();
-		hashCode = hashCode * multi + (int)(getEnterTime() & 0xFFFFFFFF);
-		hashCode = hashCode * multi + (int)(getExitTime() & 0xFFFFFFFF);
-		hashCode = hashCode * multi + (int)(getThreadId() & 0xFFFFFFFF);
+		hashCode = hashCode * multi + (int) (getEnterTime() & 0xFFFFFFFF);
+		hashCode = hashCode * multi + (int) (getExitTime() & 0xFFFFFFFF);
+		hashCode = hashCode * multi + (int) (getThreadId() & 0xFFFFFFFF);
 
 		return hashCode;
 	}

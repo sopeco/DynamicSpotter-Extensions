@@ -300,11 +300,15 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 		return stackTraceSet;
 	}
 
-	private MethodCallSet getServletQueryCallHierarchy(MethodCallSet allCallsHierarchy, Dataset responseTimes,
+	private MethodCallSet getServletQueryCallHierarchy(MethodCallSet allMethodCallsHierarchy, Dataset responseTimes,
 			Dataset queries, Dataset threadTracing) {
-		MethodCallSet servletQueryCalls = allCallsHierarchy.getSubsetAtLayer(0);
+		MethodCallSet servletQueryCalls = allMethodCallsHierarchy.getFlatSubsetAtLayer(0);
 
 		for (SQLQueryRecord queryRecord : queries.getRecords(SQLQueryRecord.class)) {
+			if (queryRecord.getQueryString() == null || queryRecord.getQueryString().equals("")) {
+				continue;
+			}
+			
 			ParameterSelection selectCallId = new ParameterSelection().select(ResponseTimeRecord.PAR_CALL_ID,
 					queryRecord.getCallId());
 			ResponseTimeRecord queryResponseTimeRecord = selectCallId.applyTo(responseTimes)
@@ -390,7 +394,9 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 					SQLQueryRecord calledQueryRecord = selectCalledQueries.applyTo(queries)
 							.getRecords(SQLQueryRecord.class).get(0);
 
-					calledQueries.add(calledQueryRecord.getQueryString());
+					if (calledQueryRecord.getQueryString() == null || calledQueryRecord.getQueryString().equals("")) {
+						calledQueries.add(calledQueryRecord.getQueryString());
+					}
 				}
 			}
 		}
