@@ -1,6 +1,7 @@
 org.spotter.ext.detection.perfproblem.PerfProblemExtension
 org.spotter.ext.detection.appHiccups.AppHiccupsExtension
 org.spotter.ext.detection.continuousViolation.ContinuousViolationExtension
+org.spotter.ext.detection.dbcongestion.DBCongestionExtension
 org.spotter.ext.detection.ramp.RampExtension
 org.spotter.ext.detection.trafficJam.TrafficJamExtension
 org.spotter.ext.detection.olb.OLBExtension
