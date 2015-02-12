@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.spotter.ext.measurement.mysql;
+package org.spotter.ext.measurement.database;
 
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
@@ -30,13 +30,13 @@ import org.spotter.core.measurement.IMeasurementAdapter;
 public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 
 	private static final String EXTENSION_DESCRIPTION = "The DBMS sampling measurement satellite adapter is used to connect "
-														+ "to a MySQL DBMS and to query the database status.";
-	
+			+ "to a MySQL DBMS and to query the database status.";
+
 	@Override
 	public String getName() {
 		return "measurement.satellite.adapter.sampling.dbms";
 	}
-	
+
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
 		return "DBMS Sampling Measurement Satellite Adapter";
@@ -45,15 +45,6 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 	@Override
 	public IMeasurementAdapter createExtensionArtifact() {
 		return new DBMSMeasurement(this);
-	}
-
-	private ConfigParameterDescription createSamplingDelayParameter() {
-		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(
-				DBMSMeasurement.SAMPLING_DELAY, LpeSupportedTypes.Long);
-		samplingDelayParameter.setDefaultValue(String.valueOf(DBMSMeasurement.DEFAULT_DELAY));
-		samplingDelayParameter.setDescription("The sampling interval in milliseconds.");
-
-		return samplingDelayParameter;
 	}
 
 	private ConfigParameterDescription createConnectionStringParameter() {
@@ -65,20 +56,9 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 		return samplingDelayParameter;
 	}
 
-	private ConfigParameterDescription createCollectorTypeParameter() {
-		ConfigParameterDescription collectorTypeParameter = new ConfigParameterDescription(
-				DBMSMeasurement.COLLECTOR_TYPE_KEY, LpeSupportedTypes.String);
-		collectorTypeParameter.setMandatory(true);
-		collectorTypeParameter.setDescription("Type to use for data collector");
-
-		return collectorTypeParameter;
-	}
-
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(createSamplingDelayParameter());
 		addConfigParameter(createConnectionStringParameter());
-		addConfigParameter(createCollectorTypeParameter());
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 

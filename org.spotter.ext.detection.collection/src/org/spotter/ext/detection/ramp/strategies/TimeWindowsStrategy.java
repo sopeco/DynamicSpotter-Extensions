@@ -23,13 +23,13 @@ import org.lpe.common.util.NumericPairList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spotter.core.ProgressManager;
+import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.workload.LoadConfig;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.detection.ramp.IRampDetectionStrategy;
 import org.spotter.ext.detection.ramp.RampDetectionController;
 import org.spotter.ext.detection.ramp.RampExtension;
-import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
 import org.spotter.shared.status.DiagnosisStatus;
@@ -170,7 +170,7 @@ public class TimeWindowsStrategy implements IRampDetectionStrategy {
 		mainDetectionController.workloadAdapter().waitForFinishedLoad();
 	}
 
-	private InstrumentationDescription getInstrumentationDescription() {
+	public InstrumentationDescription getInstrumentationDescription() {
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
 				.entityDone();
@@ -295,12 +295,11 @@ public class TimeWindowsStrategy implements IRampDetectionStrategy {
 
 	private void createChart(String operation, SpotterResult result, NumericPairList<Integer, Double> chartData,
 			NumericPairList<Integer, Double> chartDataMeans, List<Number> confidenceIntervals) {
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(operation, "Experiment", "Response Time [ms]");
-		chartBuilder.addScatterSeries(chartData, "Response Times");
+//		chartBuilder.addTimeSeries(chartData, "Response Times");
 		chartBuilder.addScatterSeriesWithErrorBars(chartDataMeans, confidenceIntervals, "Confidence Intervals");
-		chartBuilder.build();
-		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder.build(), "Ramp Detection (TW)",
+		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Ramp Detection (TW)",
 				result);
 	}
 

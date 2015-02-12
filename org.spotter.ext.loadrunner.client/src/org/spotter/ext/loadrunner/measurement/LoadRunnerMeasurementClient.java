@@ -28,6 +28,7 @@ import org.aim.api.exceptions.MeasurementException;
 import org.aim.api.measurement.AbstractRecord;
 import org.aim.api.measurement.MeasurementData;
 import org.aim.artifacts.records.ResponseTimeRecord;
+import org.aim.description.InstrumentationDescription;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.lpe.common.loadgenerator.config.LGMeasurementConfig;
@@ -175,6 +176,18 @@ public class LoadRunnerMeasurementClient extends AbstractMeasurementAdapter {
 		} catch (IOException e) {
 			throw new MeasurementException(e);
 		}
+	}
+
+	@Override
+	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void resetMonitoring() throws MeasurementException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

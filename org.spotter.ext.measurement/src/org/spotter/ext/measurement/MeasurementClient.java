@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import org.aim.api.exceptions.MeasurementException;
 import org.aim.api.measurement.MeasurementData;
 import org.aim.artifacts.instrumentation.InstrumentationClient;
+import org.aim.description.InstrumentationDescription;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.measurement.AbstractMeasurementAdapter;
 
@@ -84,11 +85,21 @@ public class MeasurementClient extends AbstractMeasurementAdapter {
 
 	}
 
-
-
 	@Override
 	public void storeReport(String path) throws MeasurementException {
 		// nothing to do here.
+	}
+
+	@Override
+	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
+		// already covered by instrument in corresponding instrumentation part
+
+	}
+
+	@Override
+	public void resetMonitoring() throws MeasurementException {
+		// already covered by uninstrument in corresponding instrumentation part
+
 	}
 
 }

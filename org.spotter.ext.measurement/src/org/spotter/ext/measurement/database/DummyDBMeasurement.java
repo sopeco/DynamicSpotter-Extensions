@@ -1,4 +1,4 @@
-package org.spotter.ext.measurement.mysql;
+package org.spotter.ext.measurement.database;
 
 import java.io.OutputStream;
 import java.util.Properties;
@@ -13,6 +13,8 @@ import org.aim.api.measurement.collector.AbstractDataSource;
 import org.aim.api.measurement.collector.CollectorFactory;
 import org.aim.artifacts.measurement.collector.FileDataSource;
 import org.aim.artifacts.measurement.collector.MemoryDataSource;
+import org.aim.description.InstrumentationDescription;
+import org.aim.description.sampling.SamplingDescription;
 import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.system.LpeSystemUtils;
@@ -33,6 +35,7 @@ public class DummyDBMeasurement extends AbstractMeasurementAdapter implements Ru
 	private long delay;
 	private String host;
 	private String port;
+	private boolean samplerActivated = false;
 	protected static final long DEFAULT_DELAY = 500;
 
 	private Client client;
@@ -48,41 +51,47 @@ public class DummyDBMeasurement extends AbstractMeasurementAdapter implements Ru
 
 	@Override
 	public void enableMonitoring() throws MeasurementException {
-		measurementTask = LpeSystemUtils.submitTask(this);
+		if (samplerActivated) {
+			measurementTask = LpeSystemUtils.submitTask(this);
+		}
+
 	}
 
 	@Override
 	public void disableMonitoring() throws MeasurementException {
-		try {
-			running = false;
-			measurementTask.get();
+		if (samplerActivated) {
+			try {
+				running = false;
+				measurementTask.get();
 
-		} catch (Exception e) {
-			throw new MeasurementException(e);
+			} catch (Exception e) {
+				throw new MeasurementException(e);
+			}
 		}
 	}
 
 	@Override
 	public MeasurementData getMeasurementData() throws MeasurementException {
-		return dataSource.read();
+		if (samplerActivated) {
+			return dataSource.read();
+		} else {
+			return new MeasurementData();
+		}
 	}
 
 	@Override
 	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
-		try {
-			dataSource.pipeToOutputStream(oStream);
-		} catch (MeasurementException e) {
-			throw new RuntimeException(e);
+		if (samplerActivated) {
+			try {
+				dataSource.pipeToOutputStream(oStream);
+			} catch (MeasurementException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
 	@Override
 	public void initialize() throws MeasurementException {
-		if (getProperties().containsKey(DummyDBMeasurementExtension.SAMPLING_DELAY)) {
-			delay = Long.valueOf(getProperties().getProperty(DummyDBMeasurementExtension.SAMPLING_DELAY));
-		} else {
-			delay = DEFAULT_DELAY;
-		}
 
 		if (getProperties().containsKey(DummyDBMeasurementExtension.HOST)) {
 			host = getProperties().getProperty(DummyDBMeasurementExtension.HOST);
@@ -103,8 +112,7 @@ public class DummyDBMeasurement extends AbstractMeasurementAdapter implements Ru
 			instanceId++;
 		}
 
-		dataSource = CollectorFactory.createDataSource(MemoryDataSource.class.getName(),
-				collectorProperties);
+		dataSource = CollectorFactory.createDataSource(MemoryDataSource.class.getName(), collectorProperties);
 
 	}
 
@@ -141,6 +149,24 @@ public class DummyDBMeasurement extends AbstractMeasurementAdapter implements Ru
 	@Override
 	public void storeReport(String path) throws MeasurementException {
 		// nothing to do here
+	}
+
+	@Override
+	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
+		for (SamplingDescription sDescr : monitoringDescription.getSamplingDescriptions()) {
+			if (sDescr.getResourceName().equals(SamplingDescription.SAMPLER_DATABASE_STATISTICS)) {
+				samplerActivated = true;
+				delay = sDescr.getDelay();
+				break;
+			}
+		}
+
+	}
+
+	@Override
+	public void resetMonitoring() throws MeasurementException {
+		samplerActivated = false;
+
 	}
 
 }

@@ -19,6 +19,7 @@ import org.spotter.core.detection.IExperimentReuser;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.detection.olb.strategies.QTStrategy;
 import org.spotter.ext.detection.olb.strategies.TTestCpuThresholdStrategy;
+import org.spotter.ext.detection.trafficJam.TrafficJamExtension;
 import org.spotter.shared.result.model.SpotterResult;
 
 /**
@@ -49,6 +50,12 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 
 	@Override
 	public void loadProperties() {
+		String experimentStepsStr = getProblemDetectionConfiguration().getProperty(
+				OLBExtension.EXPERIMENT_STEPS_KEY);
+		experimentSteps = experimentStepsStr != null ? Integer.parseInt(experimentStepsStr)
+				: OLBExtension.EXPERIMENT_STEPS_DEFAULT;
+
+		
 		scope = getProblemDetectionConfiguration().getProperty(OLBExtension.SCOPE_KEY, OLBExtension.ENTRY_SCOPE);
 
 		analysisStrategy = getProblemDetectionConfiguration().getProperty(OLBExtension.DETECTION_STRATEGY_KEY,

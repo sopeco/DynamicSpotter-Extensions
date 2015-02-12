@@ -14,6 +14,7 @@ import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.NumericPairList;
 import org.spotter.core.ProgressManager;
+import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.core.detection.IExperimentReuser;
@@ -22,7 +23,6 @@ import org.spotter.ext.detection.continuousViolation.strategies.BucketStrategy;
 import org.spotter.ext.detection.continuousViolation.strategies.DBSCANStrategy;
 import org.spotter.ext.detection.continuousViolation.strategies.MovingPercentileStrategy;
 import org.spotter.ext.detection.continuousViolation.util.AnalysisConfig;
-import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.ext.detection.utils.Utils;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
@@ -59,10 +59,6 @@ public class ContinuousViolationController extends AbstractDetectionController i
 				AnalysisConfig.MOVING_AVERAGE_WINDOW_SIZE_KEY,
 				String.valueOf(AnalysisConfig.MOVING_AVERAGE_WINDOW_SIZE_DEFAULT));
 		analysisConfig.setMvaWindowSize(Integer.parseInt(mvaWindowSize));
-
-		String bucketStepStr = getProblemDetectionConfiguration().getProperty(AnalysisConfig.BUCKET_STEP_KEY,
-				String.valueOf(AnalysisConfig.BUCKET_STEP_DEFAULT));
-		analysisConfig.setBucketStep(Integer.parseInt(bucketStepStr));
 
 		String minBucketTimeProportionStr = getProblemDetectionConfiguration().getProperty(
 				AnalysisConfig.MIN_BUCKET_TIME_PROPORTION_KEY,
@@ -127,11 +123,11 @@ public class ContinuousViolationController extends AbstractDetectionController i
 
 	private void createChart(double perfReqThreshold, SpotterResult result, String operation,
 			NumericPairList<Long, Double> responseTimeSeries) {
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(operation, "Experiment Time [ms]", "Response Time [ms]");
-		chartBuilder.addScatterSeries(responseTimeSeries, "Response Times");
+		chartBuilder.addTimeSeries(responseTimeSeries, "Response Times");
 		chartBuilder.addHorizontalLine(perfReqThreshold, "Perf. Requirement");
-		getResultManager().storeImageChartResource(chartBuilder.build(), "Response Times", result);
+		getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
 	}
 
 	@Override

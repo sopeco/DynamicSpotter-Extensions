@@ -10,11 +10,11 @@ import org.aim.api.measurement.dataset.ParameterSelection;
 import org.aim.artifacts.records.CPUUtilizationRecord;
 import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPairList;
+import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.ext.detection.olb.IOLBAnalysisStrategy;
 import org.spotter.ext.detection.olb.OLBDetectionController;
 import org.spotter.ext.detection.olb.OLBExtension;
-import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.shared.result.model.SpotterResult;
 
 public class TTestCpuThresholdStrategy implements IOLBAnalysisStrategy {
@@ -71,10 +71,10 @@ public class TTestCpuThresholdStrategy implements IOLBAnalysisStrategy {
 			cpuMeans.add(numUsers, meanCpuUtil);
 		}
 
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart("CPU Utilization - " + processId, "number of users", "Mean Utilization [%]");
 		chartBuilder.addUtilizationLineSeries(cpuMeans, "CPU Utilization", true);
-		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder.build(), "CPU Utilization",
+		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "CPU Utilization",
 				result);
 		return cpuUtilized;
 	}

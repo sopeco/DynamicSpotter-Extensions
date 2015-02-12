@@ -1,4 +1,6 @@
 org.spotter.ext.measurement.MeasurementExtension
 org.spotter.ext.measurement.jmsserver.JmsServerMeasurementExtension
-org.spotter.ext.measurement.mysql.DBMSMeasurementExtension
+org.spotter.ext.measurement.database.DBMSMeasurementExtension
+org.spotter.ext.measurement.database.HDBMeasurementExtension
+org.spotter.ext.measurement.database.DummyDBMeasurementExtension
 org.spotter.ext.measurement.resourcemonitoring.ResourceMonitoringExtension

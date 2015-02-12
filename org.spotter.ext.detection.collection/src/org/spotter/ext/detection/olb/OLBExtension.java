@@ -19,12 +19,13 @@ public class OLBExtension extends AbstractDetectionExtension {
 	private static final String EXTENSION_DESCRIPTION = "The One Lane Bridge anti-pattern is a typical software bottleneck. ";
 
 	public static final String CPU_UTILIZATION_THRESHOLD_KEY = "cpuThreshold";
-
+	public static final String EXPERIMENT_STEPS_KEY = "numExperiments";
 	public static final double CPU_UTILIZATION_THRESHOLD_DEFAULT = 90.0;
 	protected static final String SCOPE_KEY = "scope";
 	protected static final String ENTRY_SCOPE = "entry point scope";
 	protected static final String SYNC_SCOPE = "synchronization scope";
 	protected static final String DB_SCOPE = "database scope";
+	public static final int EXPERIMENT_STEPS_DEFAULT = 4;
 	
 	protected static final String DETECTION_STRATEGY_KEY = "strategy";
 	protected static final String QUEUEING_THEORY_STRATEGY = "queueing theory strategy";
@@ -63,7 +64,15 @@ public class OLBExtension extends AbstractDetectionExtension {
 				+ "used to analyse the OLB anti-pattern.");
 		return scopeParameter;
 	}
-	
+	private ConfigParameterDescription createNumExperimentsParameter() {
+		ConfigParameterDescription numExperimentsParameter = new ConfigParameterDescription(EXPERIMENT_STEPS_KEY,
+				LpeSupportedTypes.Integer);
+		numExperimentsParameter.setDefaultValue(String.valueOf(EXPERIMENT_STEPS_DEFAULT));
+		numExperimentsParameter.setRange(String.valueOf(2), String.valueOf(Integer.MAX_VALUE));
+		numExperimentsParameter.setDescription("Number of experiments to execute with "
+				+ "different number of users between 1 and max number of users.");
+		return numExperimentsParameter;
+	}
 	private ConfigParameterDescription createScopeParameter() {
 		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(SCOPE_KEY,
 				LpeSupportedTypes.String);
@@ -86,6 +95,7 @@ public class OLBExtension extends AbstractDetectionExtension {
 		addConfigParameter(createCpuThresholdParameter());
 		addConfigParameter(createStrategyParameter());
 		addConfigParameter(createScopeParameter());
+		addConfigParameter(createNumExperimentsParameter());
 	}
 
 }

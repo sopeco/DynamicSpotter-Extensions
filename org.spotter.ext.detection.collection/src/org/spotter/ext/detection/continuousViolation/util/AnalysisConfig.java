@@ -17,9 +17,7 @@ public class AnalysisConfig {
 	public static final int MOVING_AVERAGE_WINDOW_SIZE_DEFAULT = 11;
 	private int mvaWindowSize; // should be an odd number
 
-	public static final String BUCKET_STEP_KEY = "bucketWidthKey";
-	public static final long BUCKET_STEP_DEFAULT = 1000;
-	private int bucketStep; // should be an odd number
+
 	
 
 	
@@ -43,20 +41,7 @@ public class AnalysisConfig {
 		this.mvaWindowSize = mvaWindowSize;
 	}
 
-	/**
-	 * @return the bucketStep
-	 */
-	public int getBucketStep() {
-		return bucketStep;
-	}
 
-	/**
-	 * @param bucketStep
-	 *            the bucketStep to set
-	 */
-	public void setBucketStep(int bucketStep) {
-		this.bucketStep = bucketStep;
-	}
 
 	
 	/**
@@ -72,13 +57,6 @@ public class AnalysisConfig {
 		mvaWindowSizeParameter.setDefaultValue(String.valueOf(MOVING_AVERAGE_WINDOW_SIZE_DEFAULT));
 		mvaWindowSizeParameter.setMandatory(false);
 
-		ConfigParameterDescription bucketStepParameter = new ConfigParameterDescription(BUCKET_STEP_KEY,
-				LpeSupportedTypes.Integer);
-		bucketStepParameter
-				.setDescription("ONLY for Bucket Analysis Strategy! Defines the bucket width in milliseconds.");
-		bucketStepParameter.setDefaultValue(String.valueOf(BUCKET_STEP_DEFAULT));
-		bucketStepParameter.setMandatory(false);
-
 		ConfigParameterDescription parameter = new ConfigParameterDescription(MIN_BUCKET_TIME_PROPORTION_KEY,
 				LpeSupportedTypes.Double);
 		parameter.setMandatory(false);
@@ -91,7 +69,6 @@ public class AnalysisConfig {
 		
 		Set<ConfigParameterDescription> set = new HashSet<>();
 		set.add(mvaWindowSizeParameter);
-		set.add(bucketStepParameter);
 		set.add(parameter);
 		return set;
 	}

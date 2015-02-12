@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.spotter.ext.measurement.mysql;
+package org.spotter.ext.measurement.database;
 
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -30,6 +30,8 @@ import org.aim.api.measurement.collector.AbstractDataSource;
 import org.aim.api.measurement.collector.CollectorFactory;
 import org.aim.artifacts.measurement.collector.FileDataSource;
 import org.aim.artifacts.records.DBStatisticsRecrod;
+import org.aim.description.InstrumentationDescription;
+import org.aim.description.sampling.SamplingDescription;
 import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.system.LpeSystemUtils;
@@ -47,9 +49,7 @@ import org.spotter.core.measurement.AbstractMeasurementAdapter;
 public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runnable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DBMSMeasurement.class);
-	public static final String SAMPLING_DELAY = "org.spotter.sampling.delay";
 	public static final String CONNECTION_STRING = "org.spotter.sampling.mysql.connectionString";
-	public static final String COLLECTOR_TYPE_KEY = "org.spotter.sampling.mysql.collectorType";
 	public static Integer instanceId = 1;
 	private AbstractDataSource dataSource;
 	private Future<?> measurementTask;
@@ -57,7 +57,7 @@ public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runna
 	private Connection jdbcConnection;
 	private PreparedStatement sqlStatement;
 	private boolean running;
-
+	private boolean samplerActivated = false;
 	private long delay;
 	private String dbConnectionString;
 	protected static final long DEFAULT_DELAY = 500;
@@ -82,31 +82,34 @@ public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runna
 
 	@Override
 	public void enableMonitoring() throws MeasurementException {
-
-		try {
-			jdbcConnection = DriverManager.getConnection(dbConnectionString);
-			sqlStatement = jdbcConnection.prepareStatement(SQL_QUERY);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		if (samplerActivated) {
+			try {
+				jdbcConnection = DriverManager.getConnection(dbConnectionString);
+				sqlStatement = jdbcConnection.prepareStatement(SQL_QUERY);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+			measurementTask = LpeSystemUtils.submitTask(this);
 		}
-		measurementTask = LpeSystemUtils.submitTask(this);
 
 	}
 
 	@Override
 	public void disableMonitoring() throws MeasurementException {
-		try {
-			running = false;
-			measurementTask.get();
-			if (sqlStatement != null) {
-				sqlStatement.close();
-			}
-			if (jdbcConnection != null) {
-				jdbcConnection.close();
-			}
+		if (samplerActivated) {
+			try {
+				running = false;
+				measurementTask.get();
+				if (sqlStatement != null) {
+					sqlStatement.close();
+				}
+				if (jdbcConnection != null) {
+					jdbcConnection.close();
+				}
 
-		} catch (Exception e) {
-			throw new MeasurementException(e);
+			} catch (Exception e) {
+				throw new MeasurementException(e);
+			}
 		}
 	}
 
@@ -126,11 +129,6 @@ public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runna
 
 	@Override
 	public void initialize() throws MeasurementException {
-		if (getProperties().containsKey(SAMPLING_DELAY)) {
-			delay = Long.valueOf(getProperties().getProperty(SAMPLING_DELAY));
-		} else {
-			delay = DEFAULT_DELAY;
-		}
 
 		if (getProperties().containsKey(CONNECTION_STRING)) {
 			dbConnectionString = getProperties().getProperty(CONNECTION_STRING);
@@ -138,19 +136,13 @@ public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runna
 			throw new RuntimeException("Connection String to database has not been specified!");
 		}
 
-		if (getProperties().containsKey(SAMPLING_DELAY)) {
-			delay = Long.valueOf(getProperties().getProperty(SAMPLING_DELAY));
-		} else {
-			delay = DEFAULT_DELAY;
-		}
 		Properties collectorProperties = GlobalConfiguration.getInstance().getProperties();
 		synchronized (instanceId) {
 			collectorProperties.setProperty(FileDataSource.ADDITIONAL_FILE_PREFIX_KEY, "MySQLSampler-" + instanceId);
 			instanceId++;
 		}
 
-		dataSource = CollectorFactory.createDataSource(getProperties().getProperty(COLLECTOR_TYPE_KEY),
-				collectorProperties);
+		dataSource = CollectorFactory.createDataSource(FileDataSource.class.getName(), collectorProperties);
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 		} catch (ClassNotFoundException e) {
@@ -229,5 +221,23 @@ public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runna
 	@Override
 	public void storeReport(String path) throws MeasurementException {
 		// nothing to do here
+	}
+
+	@Override
+	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
+		for (SamplingDescription sDescr : monitoringDescription.getSamplingDescriptions()) {
+			if (sDescr.getResourceName().equals(SamplingDescription.SAMPLER_DATABASE_STATISTICS)) {
+				samplerActivated = true;
+				delay = sDescr.getDelay();
+				break;
+			}
+		}
+
+	}
+
+	@Override
+	public void resetMonitoring() throws MeasurementException {
+		samplerActivated = false;
+
 	}
 }

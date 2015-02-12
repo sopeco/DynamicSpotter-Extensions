@@ -48,23 +48,7 @@ public class JmsServerMeasurementExtension extends AbstractMeasurmentExtension {
 		return new JmsServerMeasurement(this);
 	}
 
-	private ConfigParameterDescription createSamplingDelayParameter() {
-		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(
-				JmsServerMeasurement.SAMPLING_DELAY, LpeSupportedTypes.Long);
-		samplingDelayParameter.setDefaultValue(String.valueOf(JmsServerMeasurement.DEFAULT_DELAY));
-		samplingDelayParameter.setDescription("The sampling interval in milliseconds.");
 
-		return samplingDelayParameter;
-	}
-
-	private ConfigParameterDescription createCollectorTypeParameter() {
-		ConfigParameterDescription collectorTypeParameter = new ConfigParameterDescription(
-				JmsServerMeasurement.COLLECTOR_TYPE_KEY, LpeSupportedTypes.String);
-		collectorTypeParameter.setMandatory(true);
-		collectorTypeParameter.setDescription("Type to use for data collector");
-
-		return collectorTypeParameter;
-	}
 
 	private ConfigParameterDescription createServerConnectionStringParameter() {
 		ConfigParameterDescription collectorTypeParameter = new ConfigParameterDescription(
@@ -77,8 +61,6 @@ public class JmsServerMeasurementExtension extends AbstractMeasurmentExtension {
 
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(createSamplingDelayParameter());
-		addConfigParameter(createCollectorTypeParameter());
 		addConfigParameter(createServerConnectionStringParameter());
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}

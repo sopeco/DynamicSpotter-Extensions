@@ -16,10 +16,10 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPairList;
 import org.spotter.core.ProgressManager;
+import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.ext.detection.ramp.IRampDetectionStrategy;
 import org.spotter.ext.detection.ramp.RampDetectionController;
 import org.spotter.ext.detection.ramp.RampExtension;
-import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.ext.detection.utils.Utils;
 import org.spotter.shared.result.model.SpotterResult;
 
@@ -94,12 +94,12 @@ public class LinearRegressionStrategy implements IRampDetectionStrategy {
 		thresholdPoints.add(minTimestamp, intercept);
 		thresholdPoints.add(maxTimestamp, slopeThreshold * (double) (maxTimestamp - minTimestamp) + intercept);
 
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(operation, "Experiment Time [ms]", "Response Time [ms]");
-		chartBuilder.addScatterSeries(responseTimeSeries, "Response Times");
-		chartBuilder.addLineSeries(thresholdPoints, "Threshold Slope");
-		chartBuilder.addLineSeries(linRegressionPoints, "Regression Slope");
-		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder.build(),
+//		chartBuilder.addTimeSeries(responseTimeSeries, "Response Times");
+		chartBuilder.addTimeSeriesWithLine(thresholdPoints, "Threshold Slope");
+		chartBuilder.addTimeSeriesWithLine(linRegressionPoints, "Regression Slope");
+		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder,
 				"Ramp Detection (Lin)", result);
 	}
 
@@ -108,7 +108,7 @@ public class LinearRegressionStrategy implements IRampDetectionStrategy {
 		return ProgressManager.getInstance().calculateDefaultExperimentSeriesDuration(1);
 	}
 
-	private InstrumentationDescription getInstrumentationDescription() {
+	public InstrumentationDescription getInstrumentationDescription() {
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
 				.entityDone();
