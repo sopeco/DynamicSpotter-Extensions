@@ -5,16 +5,16 @@ import java.util.List;
 
 import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPairList;
+import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.DetectionResultManager;
 import org.spotter.ext.detection.appHiccups.IHiccupAnalysisStrategy;
 import org.spotter.ext.detection.appHiccups.utils.Hiccup;
 import org.spotter.ext.detection.appHiccups.utils.HiccupDetectionConfig;
-import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.shared.result.model.SpotterResult;
 
 public class DBSCANStrategy implements IHiccupAnalysisStrategy {
 
-	private static final int numMinNeighbours = 10;
+	private static final int numMinNeighbours = 50;
 
 	@Override
 	public List<Hiccup> findHiccups(NumericPairList<Long, Double> responsetimeSeries,
@@ -24,7 +24,7 @@ public class DBSCANStrategy implements IHiccupAnalysisStrategy {
 		double keyRange = responsetimeSeries.getKeyMax() - responsetimeSeries.getKeyMin();
 		double valueRange = responsetimeSeries.getValueMax() - responsetimeSeries.getValueMin();
 		double epsilon = LpeNumericUtils.meanNormalizedDistance(responsetimeSeries, keyRange, valueRange)
-				* (double) numMinNeighbours * 0.75;
+				* (double) numMinNeighbours * 0.04;
 		List<NumericPairList<Long, Double>> clusters = LpeNumericUtils.dbscanNormalized(responsetimeSeries, epsilon,
 				numMinNeighbours, keyRange, valueRange);
 
@@ -40,16 +40,16 @@ public class DBSCANStrategy implements IHiccupAnalysisStrategy {
 
 		}
 
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChartWithoutLegend("Clusters", "Experiment Time [ms]", "Response Time [ms]");
 
 		int i = 1;
 		for (NumericPairList<Long, Double> c : clusters) {
-			chartBuilder.addScatterSeries(c, "Cluster " + i);
+			chartBuilder.addTimeSeries(c, "Cluster " + i);
 			i++;
 		}
 		chartBuilder.addHorizontalLine(perfReqThreshold, "Performance Requirement");
-		resultManager.storeImageChartResource(chartBuilder.build(), "Response Time Clusters", result);
+		resultManager.storeImageChartResource(chartBuilder, "Response Time Clusters", result);
 		return hiccups;
 	}
 

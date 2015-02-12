@@ -6,3 +6,6 @@ org.spotter.ext.detection.ramp.RampExtension
 org.spotter.ext.detection.trafficJam.TrafficJamExtension
 org.spotter.ext.detection.olb.OLBExtension
 org.spotter.ext.detection.edc.EDCExtension
+org.spotter.ext.detection.dbcongestion.DBCongestionExtension
+org.spotter.ext.detection.stifle.StifleExtension
+

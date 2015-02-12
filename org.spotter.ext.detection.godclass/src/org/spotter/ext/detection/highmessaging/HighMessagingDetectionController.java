@@ -231,7 +231,7 @@ public class HighMessagingDetectionController extends AbstractDetectionControlle
 			writeMessageThroughputToFile(result, keys, values, "TP-" + queueName.replaceAll("\\.", "_"));
 			Chart chart = ChartExporter.createRawDataChart("Msg Throughput " + queueName, "Num Users",
 					"Msg Throughput [Msgs/s]", keys, values);
-			getResultManager().storeImageChartResource(chart, "TP-" + queueName, result);
+//			getResultManager().storeImageChartResource(chart, "TP-" + queueName, result);
 
 			// Analyzer a2 = new LinearAnalyzer2(result, keys, values,
 			// linThreshold);
@@ -325,10 +325,10 @@ public class HighMessagingDetectionController extends AbstractDetectionControlle
 				writeNetWorkUtilsToFile(result, keys, sendValues, receiveValues, "nwUtil-" + interfaceName);
 				Chart chartSent = ChartExporter.createRawDataChart("NW Util S " + interfaceName, "Num Users",
 						"Util [%]", keys, sendValues);
-				getResultManager().storeImageChartResource(chartSent, "nwUtil-SENT-" + interfaceName, result);
+//				getResultManager().storeImageChartResource(chartSent, "nwUtil-SENT-" + interfaceName, result);
 				Chart chartReceived = ChartExporter.createRawDataChart("NW Util R " + interfaceName, "Num Users",
 						"Util [%]", keys, receiveValues);
-				getResultManager().storeImageChartResource(chartReceived, "nwUtil-Received-" + interfaceName, result);
+//				getResultManager().storeImageChartResource(chartReceived, "nwUtil-Received-" + interfaceName, result);
 			}
 
 		}
@@ -354,7 +354,7 @@ public class HighMessagingDetectionController extends AbstractDetectionControlle
 
 			writeResponseTimesToFile(result, keys, rtValues, "RT-" + operation);
 			Chart chart = ChartExporter.createRawDataChart("RT-" + operation, "Num Users", " RT [ms]", keys, rtValues);
-			getResultManager().storeImageChartResource(chart, "RT-" + operation, result);
+//			getResultManager().storeImageChartResource(chart, "RT-" + operation, result);
 
 		}
 
@@ -373,7 +373,7 @@ public class HighMessagingDetectionController extends AbstractDetectionControlle
 
 		writeResponseTimesToFile(result, keys, rtValues, "RT-Aggregated");
 		Chart chart = ChartExporter.createRawDataChart("RT-Aggregated", "Num Users", " RT [ms]", keys, rtValues);
-		getResultManager().storeImageChartResource(chart, "RT-Aggregated", result);
+//		getResultManager().storeImageChartResource(chart, "RT-Aggregated", result);
 
 	}
 
@@ -395,7 +395,7 @@ public class HighMessagingDetectionController extends AbstractDetectionControlle
 			writeCPUUtilToFile(result, keys, cpuValues, "CPU-" + node.substring(0, Math.min(15, node.length())));
 			Chart chart = ChartExporter.createRawDataChart("CPU-" + node.substring(0, Math.min(15, node.length())),
 					"Num Users", "Util [%]", keys, cpuValues);
-			getResultManager().storeImageChartResource(chart, "CPU-" + node.substring(0, Math.min(15, node.length())), result);
+//			getResultManager().storeImageChartResource(chart, "CPU-" + node.substring(0, Math.min(15, node.length())), result);
 
 		}
 	}

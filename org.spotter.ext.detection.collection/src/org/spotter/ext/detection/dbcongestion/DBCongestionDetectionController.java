@@ -16,16 +16,17 @@ import org.aim.artifacts.records.DBStatisticsRecrod;
 import org.aim.artifacts.sampler.CPUSampler;
 import org.aim.description.InstrumentationDescription;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
+import org.aim.description.sampling.SamplingDescription;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPairList;
+import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.core.detection.IExperimentReuser;
 import org.spotter.exceptions.WorkloadException;
-import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
 
@@ -170,11 +171,11 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 			chartDataUtils.add(numUsers, meanCPUUtil);
 		}
 
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(processID, "Num Users", "CPU Utilization [%]");
 		chartBuilder.addScatterSeries(chartDataUtils, "Utilization");
 		chartBuilder.addHorizontalLine(cpuThreshold, "Threshold");
-		getResultManager().storeImageChartResource(chartBuilder.build(), "DB-CPU Utilization", result);
+		getResultManager().storeImageChartResource(chartBuilder, "DB-CPU Utilization", result);
 
 		return detected;
 	}
@@ -259,15 +260,15 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 			prevNumUsers = numUsers;
 		}
 
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(dbId, "Num Users", "Avg. LockTime [ms]");
 		chartBuilder.addScatterSeries(rawData, "Lock Times");
-		getResultManager().storeImageChartResource(chartBuilder.build(), "Lock Times", result);
+		getResultManager().storeImageChartResource(chartBuilder, "Lock Times", result);
 
-		chartBuilder = new AnalysisChartBuilder();
+		chartBuilder =AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(dbId, "Num Users", "CI: Lock Times [ms]");
 		chartBuilder.addScatterSeriesWithErrorBars(means, ci, "Lock Times");
-		getResultManager().storeImageChartResource(chartBuilder.build(), "Confidence Intervals", result);
+		getResultManager().storeImageChartResource(chartBuilder, "Confidence Intervals", result);
 
 		if (firstSignificantNumUsers > 0 && significantSteps >= requiredSignificantSteps) {
 			return true;
@@ -278,7 +279,8 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 	@Override
 	public InstrumentationDescription getInstrumentationDescription() {
 		InstrumentationDescriptionBuilder descrBuilder = new InstrumentationDescriptionBuilder();
-		descrBuilder.newSampling(CPUSampler.class.getName(), 50);
+		descrBuilder.newSampling(CPUSampler.class.getName(), 100);
+		descrBuilder.newSampling(SamplingDescription.SAMPLER_DATABASE_STATISTICS, 500);
 		return descrBuilder.build();
 	}
 

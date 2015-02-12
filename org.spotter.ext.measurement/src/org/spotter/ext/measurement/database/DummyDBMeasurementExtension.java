@@ -1,4 +1,4 @@
-package org.spotter.ext.measurement.mysql;
+package org.spotter.ext.measurement.database;
 
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
@@ -7,7 +7,6 @@ import org.spotter.core.measurement.IMeasurementAdapter;
 
 public class DummyDBMeasurementExtension extends AbstractMeasurmentExtension {
 
-	public static final String SAMPLING_DELAY = "sampling delay";
 	public static final String HOST = "host";
 	public static final String PORT = "port";
 
@@ -26,14 +25,7 @@ public class DummyDBMeasurementExtension extends AbstractMeasurmentExtension {
 		return new DummyDBMeasurement(this);
 	}
 
-	private ConfigParameterDescription createSamplingDelayParameter() {
-		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(SAMPLING_DELAY,
-				LpeSupportedTypes.Long);
-		samplingDelayParameter.setDefaultValue(String.valueOf(DBMSMeasurement.DEFAULT_DELAY));
-		samplingDelayParameter.setDescription("The sampling interval in milliseconds.");
 
-		return samplingDelayParameter;
-	}
 
 	private ConfigParameterDescription createHostParameter() {
 		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(HOST,
@@ -55,7 +47,6 @@ public class DummyDBMeasurementExtension extends AbstractMeasurmentExtension {
 
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(createSamplingDelayParameter());
 		addConfigParameter(createHostParameter());
 		addConfigParameter(createPortParameter());
 	}

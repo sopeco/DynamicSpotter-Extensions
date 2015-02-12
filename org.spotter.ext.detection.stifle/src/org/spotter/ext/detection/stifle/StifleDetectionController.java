@@ -62,7 +62,9 @@ public class StifleDetectionController extends AbstractDetectionController {
 	@Override
 	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		instrumentApplication(getInstrumentationDescription());
+		getMeasurementController().prepareMonitoring(getInstrumentationDescription());
 		runExperiment(this, 1);
+		getMeasurementController().resetMonitoring();
 		uninstrumentApplication();
 	}
 

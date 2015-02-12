@@ -22,6 +22,7 @@ import org.aim.description.InstrumentationDescription;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
+import org.spotter.core.detection.IExperimentReuser;
 import org.spotter.core.measurement.IMeasurementAdapter;
 import org.spotter.core.workload.IWorkloadAdapter;
 import org.spotter.exceptions.WorkloadException;
@@ -36,7 +37,7 @@ import org.spotter.shared.result.model.SpotterResult;
  * @author Alexander Wert
  * 
  */
-public class RampDetectionController extends AbstractDetectionController {
+public class RampDetectionController extends AbstractDetectionController implements IExperimentReuser {
 
 	private String analysisStrategy;
 	private IRampDetectionStrategy analysisStrategyImpl;
@@ -145,6 +146,14 @@ public class RampDetectionController extends AbstractDetectionController {
 			throw new RuntimeException(e);
 		}
 
+	}
+
+	@Override
+	public InstrumentationDescription getInstrumentationDescription() {
+		if (!analysisStrategy.equals(RampExtension.TIME_WINDOWS_STRATEGY)) {
+			return analysisStrategyImpl.getInstrumentationDescription();
+		}
+		return null;
 	}
 
 }

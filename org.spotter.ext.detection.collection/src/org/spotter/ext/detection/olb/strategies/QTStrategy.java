@@ -19,10 +19,10 @@ import org.aim.artifacts.records.ResponseTimeRecord;
 import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPair;
 import org.lpe.common.util.NumericPairList;
+import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.ext.detection.olb.IOLBAnalysisStrategy;
 import org.spotter.ext.detection.olb.OLBDetectionController;
-import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.shared.result.model.SpotterResult;
 
 /**
@@ -140,17 +140,17 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 	private void createChart(SpotterResult result, Set<String> utilsChartsCreatedFor, String operation,
 			NumericPairList<Integer, Double> responseTimes, String resourceId,
 			NumericPairList<Integer, Double> rtThresholdsForChart, NumericPairList<Integer, Double> cpuUtils) {
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(operation + " - " + resourceId, "number of users", "Response Time [ms]");
 		chartBuilder.addScatterSeries(responseTimes, "Avg. Response Times");
 		chartBuilder.addLineSeries(rtThresholdsForChart, "Threshold for Response Times");
-		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder.build(), "Response Times",
+		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Response Times",
 				result);
 		if (!utilsChartsCreatedFor.contains(resourceId)) {
-			chartBuilder = new AnalysisChartBuilder();
+			chartBuilder = AnalysisChartBuilder.getChartBuilder();
 			chartBuilder.startChart("CPU on " + resourceId, "number of users", "Utilization [%]");
 			chartBuilder.addUtilizationLineSeries(cpuUtils, "Utilization", true);
-			mainDetectionController.getResultManager().storeImageChartResource(chartBuilder.build(),
+			mainDetectionController.getResultManager().storeImageChartResource(chartBuilder,
 					"Utilization-" + resourceId, result);
 			utilsChartsCreatedFor.add(resourceId);
 		}

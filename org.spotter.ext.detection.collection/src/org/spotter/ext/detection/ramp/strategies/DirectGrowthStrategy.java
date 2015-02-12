@@ -18,10 +18,10 @@ import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPair;
 import org.lpe.common.util.NumericPairList;
 import org.spotter.core.ProgressManager;
+import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.ext.detection.ramp.IRampDetectionStrategy;
 import org.spotter.ext.detection.ramp.RampDetectionController;
 import org.spotter.ext.detection.ramp.RampExtension;
-import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.ext.detection.utils.Utils;
 import org.spotter.shared.result.model.SpotterResult;
 
@@ -117,9 +117,9 @@ public class DirectGrowthStrategy implements IRampDetectionStrategy {
 		double secondCIWidth = LpeNumericUtils.getConfidenceIntervalWidth(sums2.size(), secondStdDev,
 				requiredSignificanceLevel);
 
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(operation, "Experiment Time [ms]", "Response Time [ms]");
-		chartBuilder.addScatterSeries(responseTimeSeries, "Response Times");
+//		chartBuilder.addTimeSeries(responseTimeSeries, "Response Times");
 
 		NumericPairList<Long, Double> means = new NumericPairList<>();
 		List<Number> ci = new ArrayList<>();
@@ -128,9 +128,8 @@ public class DirectGrowthStrategy implements IRampDetectionStrategy {
 		means.add(minTimestamp + (3L * diff) / 4L, secondMean);
 		ci.add(secondCIWidth / 2.0);
 
-		chartBuilder.addScatterSeriesWithErrorBars(means, ci, "Confidence Intervals");
-		chartBuilder.build();
-		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder.build(), "Ramp Detection (DG)",
+		chartBuilder.addTimeSeriesWithErrorBars(means, ci, "Confidence Intervals");
+		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Ramp Detection (DG)",
 				result);
 	}
 
@@ -139,7 +138,7 @@ public class DirectGrowthStrategy implements IRampDetectionStrategy {
 		return ProgressManager.getInstance().calculateDefaultExperimentSeriesDuration(1);
 	}
 
-	private InstrumentationDescription getInstrumentationDescription() {
+	public InstrumentationDescription getInstrumentationDescription() {
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
 				.entityDone();

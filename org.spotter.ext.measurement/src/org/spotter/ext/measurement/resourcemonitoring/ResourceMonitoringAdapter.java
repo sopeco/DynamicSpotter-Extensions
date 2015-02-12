@@ -22,6 +22,7 @@ import org.aim.api.exceptions.MeasurementException;
 import org.aim.api.measurement.MeasurementData;
 import org.aim.artifacts.sampler.CPUSampler;
 import org.aim.artifacts.sampler.NetworkIOSampler;
+import org.aim.description.InstrumentationDescription;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.aim.resourcemonitoring.ResourceMonitoringClient;
 import org.lpe.common.extension.IExtension;
@@ -111,6 +112,18 @@ public class ResourceMonitoringAdapter extends AbstractMeasurementAdapter {
 	@Override
 	public void storeReport(String path) throws MeasurementException {
 		// nothing to do here.
+	}
+
+	@Override
+	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void resetMonitoring() throws MeasurementException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

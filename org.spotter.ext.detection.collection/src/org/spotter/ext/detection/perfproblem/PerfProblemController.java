@@ -31,10 +31,10 @@ import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.NumericPairList;
 import org.spotter.core.ProgressManager;
+import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
-import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.ext.detection.utils.Utils;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
@@ -120,20 +120,20 @@ public class PerfProblemController extends AbstractDetectionController {
 
 	private void createChart(double perfReqThreshold, double perfReqConfidence, SpotterResult result, String operation,
 			List<Double> responseTimes, NumericPairList<Long, Double> responseTimeSeries) {
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart("CDF - " + operation, "Response Time [ms]", "Cummulative Probability [%]");
 		chartBuilder.addCDFSeries(responseTimes, "CDF");
 		chartBuilder.addHorizontalLine(perfReqConfidence * _100_PERCENT, "Requirements Confidence");
 		chartBuilder.addVerticalLine(perfReqThreshold, "Performance Requirement");
 
-		getResultManager().storeImageChartResource(chartBuilder.build(), "cummulativeDistribution", result);
+		getResultManager().storeImageChartResource(chartBuilder, "cummulativeDistribution", result);
 
-		chartBuilder = new AnalysisChartBuilder();
+		chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(operation, "Experiment Time [ms]", "Response Time [ms]");
-		chartBuilder.addScatterSeries(responseTimeSeries, "Response Times");
+		chartBuilder.addTimeSeries(responseTimeSeries, "Response Times");
 		chartBuilder.addHorizontalLine(perfReqThreshold, "Performance Requirement");
 
-		getResultManager().storeImageChartResource(chartBuilder.build(), "Response Times", result);
+		getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
 	}
 
 	private int countRequirementViolations(double perfReqThreshold, List<Double> responseTimes) {

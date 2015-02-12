@@ -5,6 +5,7 @@ import java.util.Properties;
 import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
 import org.aim.api.measurement.dataset.DatasetCollection;
+import org.aim.description.InstrumentationDescription;
 import org.spotter.shared.result.model.SpotterResult;
 
 /**
@@ -55,4 +56,6 @@ public interface IRampDetectionStrategy {
 	 * @return estimated experiment duration
 	 */
 	long getExperimentSeriesDuration();
+	
+	 InstrumentationDescription getInstrumentationDescription();
 }

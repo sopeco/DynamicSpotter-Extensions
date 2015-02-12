@@ -163,8 +163,8 @@ public class OLBDetectionController extends AbstractDetectionController {
 
 			Chart utilChart = OLBImageExporter.createCpuUtilChart(cpuMeans,
 					cpuThreshold);
-			getResultManager().storeImageChartResource(utilChart,
-					"CPUUtilization", result);
+//			getResultManager().storeImageChartResource(utilChart,
+//					"CPUUtilization", result);
 
 			if (cpuUtilized) {
 				result.addMessage("CPU Utilization is quite high. The CPU is probably a bottleneck!");
@@ -223,8 +223,8 @@ public class OLBDetectionController extends AbstractDetectionController {
 			}
 			Chart rtChart = OLBImageExporter.createOperationRTChart(operation,
 					rtMeans, rtStDevs);
-			getResultManager().storeImageChartResource(rtChart,
-					"RT-" + operation.replace("\\.", "_"), result);
+//			getResultManager().storeImageChartResource(rtChart,
+//					"RT-" + operation.replace("\\.", "_"), result);
 		}
 	}
 
@@ -264,8 +264,8 @@ public class OLBDetectionController extends AbstractDetectionController {
 			}
 			Chart rtChart = OLBImageExporter.createOperationRTChart(monitor,
 					wtMeans, wtStDevs);
-			getResultManager().storeImageChartResource(rtChart,
-					"RT-" + monitor.replace("\\.", "_"), result);
+//			getResultManager().storeImageChartResource(rtChart,
+//					"RT-" + monitor.replace("\\.", "_"), result);
 		}
 
 	}

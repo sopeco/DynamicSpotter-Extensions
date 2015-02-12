@@ -10,11 +10,11 @@ import org.aim.api.measurement.dataset.ParameterSelection;
 import org.aim.artifacts.records.ResponseTimeRecord;
 import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPairList;
+import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.ext.detection.trafficJam.ITrafficJamStrategy;
 import org.spotter.ext.detection.trafficJam.TrafficJamDetectionController;
 import org.spotter.ext.detection.trafficJam.TrafficJamExtension;
-import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.shared.result.model.SpotterResult;
 
 public class TTestStrategy implements ITrafficJamStrategy {
@@ -96,16 +96,16 @@ public class TTestStrategy implements ITrafficJamStrategy {
 
 		}
 
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(operation, "Num Users", "Response Time [ms]");
 		chartBuilder.addScatterSeries(rawData, "Response Times");
-		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder.build(), "Response Times",
+		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Response Times",
 				result);
 
-		chartBuilder = new AnalysisChartBuilder();
+		chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(operation, "Num Users", "CI: Response Times [ms]");
 		chartBuilder.addScatterSeriesWithErrorBars(means, ci, "Response Times");
-		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder.build(),
+		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder,
 				"Confidence Intervals", result);
 
 		if (firstSignificantNumUsers > 0 && significantSteps >= requiredSignificantSteps) {

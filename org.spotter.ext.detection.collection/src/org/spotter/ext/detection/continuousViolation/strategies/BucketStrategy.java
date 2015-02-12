@@ -20,8 +20,8 @@ import org.spotter.ext.detection.utils.Utils;
  */
 public class BucketStrategy implements IViolationAnalysisStrategy {
 
-	private static final int NUM_COARSE_GRAINED_BUCKETS = 5;
-	private static final double EPSILON_PERCENTAGE = 0.1;
+	private static final int NUM_COARSE_GRAINED_BUCKETS = 3;
+	private static final double EPSILON_PERCENTAGE = 0.5;
 
 	@Override
 	public boolean analyze(NumericPairList<Long, Double> responsetimeSeries, AnalysisConfig analysisConfig,
@@ -68,7 +68,7 @@ public class BucketStrategy implements IViolationAnalysisStrategy {
 		long bucketStart = Long.MIN_VALUE;
 		long timestamp;
 		NumericPairList<Long, Double> bucketSeries = null;
-		long bucketStep = Utils.meanInterRequestTime(responsetimeSeries) * 50;
+		long bucketStep = Math.max(3000, Utils.meanInterRequestTime(responsetimeSeries) * 50);
 		for (int i = 0; i < responsetimeSeries.size(); i++) {
 			timestamp = responsetimeSeries.get(i).getKey();
 			if (timestamp > bucketStart + bucketStep) {

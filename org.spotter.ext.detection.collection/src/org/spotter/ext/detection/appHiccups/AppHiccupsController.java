@@ -16,6 +16,7 @@ import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.NumericPairList;
 import org.spotter.core.ProgressManager;
+import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.core.detection.IExperimentReuser;
@@ -25,7 +26,6 @@ import org.spotter.ext.detection.appHiccups.strategies.DBSCANStrategy;
 import org.spotter.ext.detection.appHiccups.strategies.MovingPercentileStrategy;
 import org.spotter.ext.detection.appHiccups.utils.Hiccup;
 import org.spotter.ext.detection.appHiccups.utils.HiccupDetectionConfig;
-import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.ext.detection.utils.Utils;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
@@ -131,9 +131,9 @@ public class AppHiccupsController extends AbstractDetectionController implements
 
 	private void createChart(SpotterResult result, String operation, NumericPairList<Long, Double> responseTimeSeries,
 			List<Hiccup> hiccups, long perfReqThreshold) {
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(operation, "Experiment Time [ms]", "Response Time [ms]");
-		chartBuilder.addScatterSeries(responseTimeSeries, "Response Times");
+		chartBuilder.addTimeSeries(responseTimeSeries, "Response Times");
 		chartBuilder.addHorizontalLine(perfReqThreshold, "Perf. Requirement");
 		long minTimestamp = responseTimeSeries.getKeyMin();
 		long maxTimestamp = responseTimeSeries.getKeyMax();
@@ -149,8 +149,8 @@ public class AppHiccupsController extends AbstractDetectionController implements
 		}
 		hiccupSeries.add(maxTimestamp, minRT);
 
-		chartBuilder.addLineSeries(hiccupSeries, "Hiccups");
-		getResultManager().storeImageChartResource(chartBuilder.build(), "Hiccups", result);
+		chartBuilder.addTimeSeriesWithLine(hiccupSeries, "Hiccups");
+		getResultManager().storeImageChartResource(chartBuilder, "Hiccups", result);
 	}
 
 	@Override

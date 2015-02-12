@@ -184,7 +184,7 @@ public class GCHiccupDetectionController extends AbstractDetectionController imp
 
 		Chart gcCpuChart = HiccupChartExporter.createGCCPUUtilChart(gcCPUTimes);
 		if (gcCpuChart != null) {
-			getResultManager().storeImageChartResource(gcCpuChart, "GC-CPU-Util", result);
+//			getResultManager().storeImageChartResource(gcCpuChart, "GC-CPU-Util", result);
 		}
 
 		for (String operation : rtDataSet.getValueSet(ResponseTimeRecord.PAR_OPERATION, String.class)) {
@@ -207,7 +207,7 @@ public class GCHiccupDetectionController extends AbstractDetectionController imp
 			Chart mvaChart = HiccupChartExporter.createHiccupMVAChartWithGCTimes(operation, mvaTimeSeries, hiccups,
 					guiltyFullGCTimestamps, innocentFullGCTimestamps);
 			if (mvaChart != null) {
-				getResultManager().storeImageChartResource(mvaChart, "GC-Hiccups", result);
+//				getResultManager().storeImageChartResource(mvaChart, "GC-Hiccups", result);
 			}
 
 		}
