@@ -1,3 +1,18 @@
+/**
+ * Copyright 2014 SAP AG
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.spotter.ext.detection.edc.strategies;
 
 import java.util.ArrayList;
@@ -22,11 +37,11 @@ import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.LpeStringUtils;
 import org.lpe.common.util.NumericPair;
 import org.lpe.common.util.NumericPairList;
+import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.ext.detection.edc.EDCDetectionController;
 import org.spotter.ext.detection.edc.IEDCAnalysisStrategy;
 import org.spotter.ext.detection.edc.utils.MethodCall;
 import org.spotter.ext.detection.edc.utils.MethodCallSet;
-import org.spotter.ext.detection.utils.AnalysisChartBuilder;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
 
@@ -269,7 +284,7 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 			NumericPairList<Long, Long> multiUserServletRTs, NumericPairList<Long, Long> multiUserQueryRTs,
 			NumericPairList<Long, Long> singleUserServletRTs, NumericPairList<Long, Long> singleUserQueryRTs,
 			SpotterResult result) {
-		AnalysisChartBuilder chartBuilder = new AnalysisChartBuilder();
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 
 		chartBuilder.startChart("Response Times", "Experiment Time [ms]", "Response Time [ms]");
 		chartBuilder.addScatterSeries(multiUserServletRTs, servlet + " with " + numMaxUsers + " users");
@@ -279,7 +294,7 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 
 		chartBuilder.addHorizontalLine(perfReqThreshold, "Performance Requirement");
 
-		controller.getResultManager().storeImageChartResource(chartBuilder.build(), "Response Times", result);
+		controller.getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
 	}
 
 	private NumericPairList<Long, Long> getServletResponseTimesOverTime(String servlet, Dataset responseTimes) {
