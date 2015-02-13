@@ -91,8 +91,7 @@ public class StifleDetectionController extends AbstractDetectionController {
 
 		SpotterResult result = new SpotterResult();
 		result.setDetected(false);
-		
-		
+
 		if (!stifleQueries.isEmpty()) {
 			result.setDetected(true);
 			StringBuilder strBuilder = new StringBuilder();
@@ -194,12 +193,12 @@ public class StifleDetectionController extends AbstractDetectionController {
 		// in this loop we will always be one index ahead of the element we
 		// currently analyze
 		ResponseTimeRecord currentRtRecord = null;
-		int SQLIndex = 0;
+		int sqlIndex = 0;
 		for (ResponseTimeRecord nextRtRecord : rtRecords) {
-			if (currentRtRecord != null) {
-
+			if (currentRtRecord == null) {
+				currentRtRecord = nextRtRecord;
+				continue;
 			}
-			currentRtRecord = nextRtRecord;
 
 			// the timespace is too inaccurate, hence we use the callId
 			long currentRTCallId = currentRtRecord.getCallId();
@@ -207,19 +206,19 @@ public class StifleDetectionController extends AbstractDetectionController {
 
 			// we skip the first SQL queries, which are not related to the first
 			// RT record
-			while (SQLIndex < sqlRecords.size() && sqlRecords.get(SQLIndex).getCallId() < currentRTCallId) {
-				SQLIndex++;
+			while (sqlIndex < sqlRecords.size() && sqlRecords.get(sqlIndex).getCallId() < currentRTCallId) {
+				sqlIndex++;
 			}
 
-			if (SQLIndex >= sqlRecords.size()) {
+			if (sqlIndex >= sqlRecords.size()) {
 				return stifleQueries;
 			}
 
 			Map<String, Integer> potentialStifles = new HashMap<>();
 
-			while (SQLIndex < sqlRecords.size() && sqlRecords.get(SQLIndex).getCallId() <= nextRTCallId) {
+			while (sqlIndex < sqlRecords.size() && sqlRecords.get(sqlIndex).getCallId() <= nextRTCallId) {
 
-				String query = sqlRecords.get(SQLIndex).getQueryString();
+				String query = sqlRecords.get(sqlIndex).getQueryString();
 
 				boolean found = false;
 				for (String alreadyObservedQuery : potentialStifles.keySet()) {
@@ -235,7 +234,7 @@ public class StifleDetectionController extends AbstractDetectionController {
 					potentialStifles.put(query, 1);
 				}
 
-				SQLIndex++;
+				sqlIndex++;
 
 			}
 			String operation = currentRtRecord.getOperation();
@@ -250,6 +249,7 @@ public class StifleDetectionController extends AbstractDetectionController {
 					for (StifleQuery tmpQuery : tmpStifleQueries) {
 						if (potStifle.getKey().equals(tmpQuery.getQuery())) {
 							sQuery = tmpQuery;
+							break;
 						}
 					}
 					if (sQuery == null) {
@@ -259,7 +259,7 @@ public class StifleDetectionController extends AbstractDetectionController {
 					sQuery.addOccurrence(potStifle.getValue());
 				}
 			}
-
+			currentRtRecord = nextRtRecord;
 		}
 
 		return stifleQueries;

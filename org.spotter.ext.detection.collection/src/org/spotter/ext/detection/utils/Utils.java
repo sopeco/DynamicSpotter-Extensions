@@ -5,8 +5,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.aim.api.measurement.dataset.Dataset;
+import org.aim.api.measurement.dataset.ParameterSelection;
 import org.aim.artifacts.records.ResponseTimeRecord;
 import org.lpe.common.util.NumericPairList;
+import org.spotter.core.detection.AbstractDetectionController;
 
 /**
  * Contains utility functions for analysis of measurement data.
@@ -31,6 +33,31 @@ public final class Utils {
 		NumericPairList<Long, Double> responseTimeSeries = new NumericPairList<>();
 		for (ResponseTimeRecord rtRecord : rtDataSet.getRecords(ResponseTimeRecord.class)) {
 			responseTimeSeries.add(rtRecord.getTimeStamp(), (double) rtRecord.getResponseTime());
+		}
+
+		return responseTimeSeries;
+	}
+
+	/**
+	 * Creates a list of user response time pairs from a response time dataset.
+	 * 
+	 * @param rtDataSet
+	 *            dataset to read from
+	 * @return list of user response time pairs
+	 */
+	public static NumericPairList<Integer, Double> toUserRTPairs(Dataset rtDataSet) {
+		NumericPairList<Integer, Double> responseTimeSeries = new NumericPairList<>();
+
+		List<Integer> users = new ArrayList<>(rtDataSet.getValueSet(AbstractDetectionController.NUMBER_OF_USERS_KEY,
+				Integer.class));
+		Collections.sort(users);
+		for (Integer numUsers : users) {
+			List<Long> respTimes = ParameterSelection.newSelection()
+					.select(AbstractDetectionController.NUMBER_OF_USERS_KEY, numUsers).applyTo(rtDataSet)
+					.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class);
+			for (Long val : respTimes) {
+				responseTimeSeries.add(numUsers, (double) val);
+			}
 		}
 
 		return responseTimeSeries;

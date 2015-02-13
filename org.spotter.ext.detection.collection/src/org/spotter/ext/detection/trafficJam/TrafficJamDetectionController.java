@@ -14,6 +14,7 @@ import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
+import org.spotter.ext.detection.trafficJam.strategies.LinearRegression;
 import org.spotter.ext.detection.trafficJam.strategies.TTestStrategy;
 import org.spotter.shared.result.model.SpotterResult;
 
@@ -41,7 +42,9 @@ public class TrafficJamDetectionController extends AbstractDetectionController {
 		case TrafficJamExtension.T_TEST_STRATEGY:
 			analysisStrategyImpl = new TTestStrategy();
 			break;
-
+		case TrafficJamExtension.LIN_REGRESSION_STRATEGY:
+			analysisStrategyImpl = new LinearRegression();
+			break;
 		default:
 			analysisStrategyImpl = new TTestStrategy();
 		}
