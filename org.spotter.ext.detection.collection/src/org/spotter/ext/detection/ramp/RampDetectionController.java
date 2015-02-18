@@ -99,7 +99,7 @@ public class RampDetectionController extends AbstractDetectionController impleme
 	public void instrument(InstrumentationDescription descr) {
 		try {
 			instrumentApplication(descr);
-		} catch (InstrumentationException e) {
+		} catch (InstrumentationException | MeasurementException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -110,7 +110,7 @@ public class RampDetectionController extends AbstractDetectionController impleme
 	public void uninstrument() {
 		try {
 			uninstrumentApplication();
-		} catch (InstrumentationException e) {
+		} catch (InstrumentationException | MeasurementException e) {
 			throw new RuntimeException(e);
 		}
 	}

@@ -15,6 +15,7 @@
  */
 package org.spotter.ext.measurement.jmsserver;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,12 +129,15 @@ public class JmsServerMeasurement extends AbstractMeasurementAdapter implements 
 	@Override
 	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
 		if (samplerActivated && messagingServerAvailable) {
+			dataSource.pipeToOutputStream(oStream);
+		} else {
 			try {
-				dataSource.pipeToOutputStream(oStream);
-			} catch (MeasurementException e) {
-				throw new RuntimeException(e);
+				oStream.close();
+			} catch (IOException e) {
+				throw new MeasurementException(e);
 			}
 		}
+
 	}
 
 	@Override
@@ -153,7 +157,7 @@ public class JmsServerMeasurement extends AbstractMeasurementAdapter implements 
 
 			MBeanServerConnection connection = connector.getMBeanServerConnection();
 
-			ObjectName mbeanName = new ObjectName("org.apache.activemq:type=Broker,brokerName=localhost");
+			ObjectName mbeanName = new ObjectName("org.apache.activemq:type=Broker,brokerName=myBroker");
 			mbean = MBeanServerInvocationHandler.newProxyInstance(connection, mbeanName, BrokerViewMBean.class, true);
 
 			queueMbeans = new ArrayList<>();
@@ -162,7 +166,7 @@ public class JmsServerMeasurement extends AbstractMeasurementAdapter implements 
 						connection, queueName, QueueViewMBean.class, true);
 				queueMbeans.add(tempQueueMbean);
 			}
-
+			messagingServerAvailable = true;
 		} catch (Exception e) {
 			LOGGER.error("Messaging Server not available!");
 			messagingServerAvailable = false;

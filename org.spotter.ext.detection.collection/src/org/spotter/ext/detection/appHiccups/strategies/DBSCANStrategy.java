@@ -14,7 +14,7 @@ import org.spotter.shared.result.model.SpotterResult;
 
 public class DBSCANStrategy implements IHiccupAnalysisStrategy {
 
-	private static final int numMinNeighbours = 50;
+	private static final int numMinNeighbours = 20;
 
 	@Override
 	public List<Hiccup> findHiccups(NumericPairList<Long, Double> responsetimeSeries,
@@ -23,8 +23,7 @@ public class DBSCANStrategy implements IHiccupAnalysisStrategy {
 		List<Hiccup> hiccups = new ArrayList<Hiccup>();
 		double keyRange = responsetimeSeries.getKeyMax() - responsetimeSeries.getKeyMin();
 		double valueRange = responsetimeSeries.getValueMax() - responsetimeSeries.getValueMin();
-		double epsilon = LpeNumericUtils.meanNormalizedDistance(responsetimeSeries, keyRange, valueRange)
-				* (double) numMinNeighbours * 0.04;
+		double epsilon = LpeNumericUtils.meanNormalizedDistance(responsetimeSeries, keyRange, valueRange);
 		List<NumericPairList<Long, Double>> clusters = LpeNumericUtils.dbscanNormalized(responsetimeSeries, epsilon,
 				numMinNeighbours, keyRange, valueRange);
 
@@ -45,7 +44,7 @@ public class DBSCANStrategy implements IHiccupAnalysisStrategy {
 
 		int i = 1;
 		for (NumericPairList<Long, Double> c : clusters) {
-			chartBuilder.addTimeSeries(c, "Cluster " + i);
+			chartBuilder.addFixScaledTimeSeries(c, "Cluster " + i, 1.0 / 1000.0 / 60.0);
 			i++;
 		}
 		chartBuilder.addHorizontalLine(perfReqThreshold, "Performance Requirement");

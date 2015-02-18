@@ -1,5 +1,6 @@
 package org.spotter.ext.measurement.database;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -90,10 +91,12 @@ public class HDBMeasurement extends AbstractMeasurementAdapter implements Runnab
 	@Override
 	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
 		if (samplerActivated) {
+			dataSource.pipeToOutputStream(oStream);
+		} else {
 			try {
-				dataSource.pipeToOutputStream(oStream);
-			} catch (MeasurementException e) {
-				throw new RuntimeException(e);
+				oStream.close();
+			} catch (IOException e) {
+				throw new MeasurementException(e);
 			}
 		}
 	}

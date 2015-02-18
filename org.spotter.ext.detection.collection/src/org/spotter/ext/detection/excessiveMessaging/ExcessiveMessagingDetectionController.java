@@ -33,9 +33,12 @@ import org.spotter.shared.result.model.SpotterResult;
 public class ExcessiveMessagingDetectionController extends AbstractDetectionController implements IExperimentReuser {
 	private static final int EXPERIMENT_STEPS = 5;
 	private static final double TCP_PACKET_SIZE = 1500;
+	private static final double SPEED_100_MBIT = 100000000;
+	private static final double EPSILON_PERCENT = 0.05;
 
 	private int requiredSignificantSteps;
 	private double requiredSignificanceLevel;
+	private String analysisStrategy;
 
 	public ExcessiveMessagingDetectionController(IExtension<IDetectionController> provider) {
 		super(provider);
@@ -53,6 +56,9 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 		requiredSignificanceLevel = 1.0 - (requiredConfidenceLevelStr != null ? Double
 				.parseDouble(requiredConfidenceLevelStr)
 				: ExcessiveMessagingExtension.REQUIRED_CONFIDENCE_LEVEL_DEFAULT);
+
+		analysisStrategy = getProblemDetectionConfiguration().getProperty(
+				ExcessiveMessagingExtension.DETECTION_STRATEGY_KEY);
 
 	}
 
@@ -84,7 +90,13 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 		}
 
 		Map<String, NumericPair<Double, Double>> networkSpeedsAndThresholds = calculateNetworkUtilizationThreshold(data);
-		boolean highUtilization = analyzeNetworkUtilization(data, result, networkSpeedsAndThresholds);
+		boolean highUtilization = false;
+		if (analysisStrategy.equals(ExcessiveMessagingExtension.THRESHOLD_STRATEGY)) {
+			highUtilization = analyzeNetworkUtilization(data, result, networkSpeedsAndThresholds);
+		} else {
+			highUtilization = analyzeNetworkUtilizationGrowth(data, result, networkSpeedsAndThresholds);
+		}
+
 		boolean queueSizesGrow = analyzeQueueSizes(data, result);
 
 		if (highUtilization || queueSizesGrow) {
@@ -141,7 +153,7 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 				prevSizes = qSizes;
 			}
 			AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-			chartBuilder.startChartWithoutLegend(queueName, "#Users", "Queue Size");
+			chartBuilder.startChartWithoutLegend(queueName, "Number of Users", "Queue Size");
 			chartBuilder.addScatterSeries(qSizesForChart, "Queue Size");
 			getResultManager().storeImageChartResource(chartBuilder, "QueueSize-" + queueName, result);
 
@@ -171,11 +183,24 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 				Dataset tmpDataset = ParameterSelection.newSelection()
 						.select(NetworkInterfaceInfoRecord.PAR_PROCESS_ID, node)
 						.select(NetworkInterfaceInfoRecord.PAR_NETWORK_INTERFACE, nwInterface).applyTo(nwInfoDataset);
-				double speed = LpeNumericUtils.min(tmpDataset.getValueSet(
+				double tmpSpeed = LpeNumericUtils.min(tmpDataset.getValueSet(
 						NetworkInterfaceInfoRecord.PAR_INTERFACE_SPEED, Long.class));
-				double packetRate = speed / (8.0 * TCP_PACKET_SIZE);
-				double threshold = packetRate * (Math.floor(TCP_PACKET_SIZE / avgMessageSize) + 1) * 0.5
-						* avgMessageSize;
+				// TODO: HACK WITH UNAVAILABLE NW_SPEED
+				if (tmpSpeed < 0) {
+					tmpSpeed = SPEED_100_MBIT;
+				}
+				double speed = tmpSpeed / 8.0;
+				double packetRate = speed / TCP_PACKET_SIZE;
+
+				// TODO: use that threshold only in cases when evg. message size
+				// smaller than TCP packet!!!
+				double threshold = 0.0;
+				if (avgMessageSize <= TCP_PACKET_SIZE) {
+					threshold = packetRate * (Math.floor(TCP_PACKET_SIZE / avgMessageSize) + 1) * 0.5 * avgMessageSize;
+				} else {
+					threshold = speed;
+				}
+				threshold = 0.9 * threshold;
 				result.put(interfaceName, new NumericPair<Double, Double>(speed, threshold));
 			}
 		}
@@ -233,13 +258,89 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 
 				AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 				chartBuilder.startChart(interfaceName, "#Users", "Utilization [%]");
-				chartBuilder.addScatterSeries(utils, "Network Utilization");
-				chartBuilder.addHorizontalLine(0.9 * utilizationThreshold / networkSpeed, "Threshold");
+				chartBuilder.addUtilizationLineSeries(utils, "Network Utilization", true);
+				chartBuilder.addHorizontalLine((utilizationThreshold / networkSpeed) * 100.0, "Threshold");
 				getResultManager().storeImageChartResource(chartBuilder, "Network" + interfaceName, result);
 			}
 
 		}
 		return highNWUtil;
+	}
+
+	private boolean analyzeNetworkUtilizationGrowth(DatasetCollection data, SpotterResult result,
+			Map<String, NumericPair<Double, Double>> speedThresholdPair) {
+		boolean stagnationDetected = false;
+		Dataset nwDataset = data.getDataSet(NetworkRecord.class);
+		List<Integer> users = new ArrayList<>(nwDataset.getValueSet(AbstractDetectionController.NUMBER_OF_USERS_KEY,
+				Integer.class));
+		Collections.sort(users);
+		for (String node : nwDataset.getValueSet(NetworkRecord.PAR_PROCESS_ID, String.class)) {
+			interfaceLoop: for (String nwInterface : nwDataset.getValueSet(NetworkRecord.PAR_NETWORK_INTERFACE,
+					String.class)) {
+
+				String interfaceName = getInterfaceName(node, nwInterface);
+				double networkSpeed = speedThresholdPair.get(interfaceName).getKey();
+				NumericPairList<Integer, Double> utils = new NumericPairList<>();
+
+				int numSignificantSteps = 0;
+				double prevUtil = -1;
+				double maxUtil = 0;
+				for (Integer numUsers : users) {
+					Dataset tmpDataset = ParameterSelection.newSelection()
+							.select(AbstractDetectionController.NUMBER_OF_USERS_KEY, numUsers)
+							.select(NetworkRecord.PAR_PROCESS_ID, node)
+							.select(NetworkRecord.PAR_NETWORK_INTERFACE, nwInterface).applyTo(nwDataset);
+					if (tmpDataset == null) {
+						continue interfaceLoop;
+					}
+					Set<Long> set = tmpDataset.getValueSet(NetworkRecord.PAR_TIMESTAMP, Long.class);
+					long startSend = LpeNumericUtils.min(set);
+					long endSend = LpeNumericUtils.max(set);
+					set = tmpDataset.getValueSet(NetworkRecord.PAR_TRANSFERRED_BYTES, Long.class);
+					long minNumSend = LpeNumericUtils.min(set);
+					long maxNumSend = LpeNumericUtils.max(set);
+					set = tmpDataset.getValueSet(NetworkRecord.PAR_RECEIVED_BYTES, Long.class);
+					long minNumReceived = LpeNumericUtils.min(set);
+					long maxNumReceived = LpeNumericUtils.max(set);
+
+					double sent = ((double) (maxNumSend - minNumSend) * 1000.0) / (double) (endSend - startSend);
+					double received = ((double) (maxNumReceived - minNumReceived) * 1000.0)
+							/ (double) (endSend - startSend);
+
+					double bandWidthUsage = Math.max(sent, received);
+					double util = bandWidthUsage / networkSpeed;
+					utils.add(numUsers, util);
+
+					if (maxUtil < util) {
+						maxUtil = util;
+					}
+
+					if (prevUtil < 0) {
+						prevUtil = util;
+						continue;
+					}
+
+					if (util > prevUtil * (1.0 + EPSILON_PERCENT)) {
+						prevUtil = util;
+						numSignificantSteps = 0;
+					} else {
+						numSignificantSteps++;
+					}
+
+				}
+				if (numSignificantSteps >= requiredSignificantSteps && maxUtil > 0.5) {
+					stagnationDetected = true;
+					result.addMessage("Network interface " + interfaceName + " has a stagnating growth");
+				}
+
+				AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
+				chartBuilder.startChart(interfaceName, "#Users", "Utilization [%]");
+				chartBuilder.addUtilizationLineSeries(utils, "Network Utilization", true);
+				getResultManager().storeImageChartResource(chartBuilder, "Network" + interfaceName, result);
+			}
+
+		}
+		return stagnationDetected;
 	}
 
 	private String getInterfaceName(String node, String nwInterface) {
