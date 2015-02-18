@@ -141,6 +141,10 @@ public class MethodCall {
 	 * @return Iff the given call is a nested call
 	 */
 	public boolean isParentOf(MethodCall call) {
+		if (this.getEnterTime() == call.getEnterTime() && call.getEnterTime() == call.getExitTime()) {
+			return false;
+		}
+
 		return this.getThreadId() == call.getThreadId() && this.getEnterTime() <= call.getEnterTime()
 				&& this.getExitTime() >= call.getExitTime();
 	}
@@ -175,8 +179,7 @@ public class MethodCall {
 			return true;
 		}
 
-		if (this.getThreadId() == newCall.getThreadId() && this.getEnterTime() <= newCall.getEnterTime()
-				&& this.getExitTime() >= newCall.getExitTime()) {
+		if (this.isParentOf(newCall)) {
 			if (this.calledOperations == null) {
 				this.calledOperations = new HashSet<>();
 			}
@@ -213,8 +216,7 @@ public class MethodCall {
 			return false;
 		}
 
-		if (this.getThreadId() == call.getThreadId() && this.getEnterTime() <= call.getEnterTime()
-				&& this.getExitTime() >= call.getExitTime()) {
+		if (this.isParentOf(call)) {
 			for (MethodCall subCall : getCalledOperations()) {
 				if (subCall.equals(call)) {
 					calledOperations.remove(call);
@@ -223,8 +225,7 @@ public class MethodCall {
 			}
 
 			for (MethodCall subCall : getCalledOperations()) {
-				if (subCall.getThreadId() == call.getThreadId() && subCall.getEnterTime() <= call.getEnterTime()
-						&& subCall.getExitTime() >= call.getExitTime()) {
+				if (subCall.isParentOf(call)) {
 					return subCall.removeCall(call);
 				}
 			}
@@ -256,6 +257,34 @@ public class MethodCall {
 		hashCode = hashCode * multi + (int) (getThreadId() & 0xFFFFFFFF);
 
 		return hashCode;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(operation);
+		builder.append("[tid ");
+		builder.append(threadId);
+		builder.append("]: ");
+		builder.append(enterTime);
+		builder.append("-");
+		builder.append(exitTime);
+		builder.append(" => {");
+
+		boolean first = true;
+		for (MethodCall call : getCalledOperations()) {
+			if (first) {
+				first = false;
+			} else {
+				builder.append(", ");
+			}
+
+			builder.append(call);
+		}
+
+		builder.append("}");
+
+		return builder.toString();
 	}
 
 }

@@ -60,30 +60,30 @@ public class MethodCallSet {
 
 		callsForThidId.add(call);
 	}
-	
+
 	public boolean addCallIfNested(MethodCall call) {
 		boolean added = false;
-		
+
 		for (MethodCall existingCall : getMethodCalls()) {
 			if (existingCall.addCall(call)) {
 				added = true;
 				break;
 			}
 		}
-		
+
 		return added;
 	}
-	
+
 	public boolean addCallIfNotNested(MethodCall call) {
 		boolean nestedCall = false;
-		
+
 		for (MethodCall existingCall : getMethodCalls()) {
 			if (existingCall.isParentOf(call)) {
 				nestedCall = true;
 				break;
 			}
 		}
-		
+
 		if (!nestedCall) {
 			Set<MethodCall> callsPerId = methodCallsPerThreadId.get(call.getThreadId());
 			if (callsPerId == null) {
@@ -92,7 +92,7 @@ public class MethodCallSet {
 			}
 			callsPerId.add(call);
 		}
-		
+
 		return nestedCall;
 	}
 
@@ -198,14 +198,14 @@ public class MethodCallSet {
 		subset.addAllCalls(callsOfLayer);
 		return subset;
 	}
-	
+
 	public MethodCallSet getSubsetOfLowestLayer() {
 		MethodCallSet finalSet = new MethodCallSet();
-		
+
 		for (MethodCall call : getMethodCalls()) {
 			finalSet.addAllCalls(call.getFinalCalls());
 		}
-		
+
 		return finalSet;
 	}
 
@@ -275,7 +275,7 @@ public class MethodCallSet {
 	 */
 	public void removeCall(MethodCall call) {
 		Set<MethodCall> calls = methodCallsPerThreadId.get(call.getThreadId());
-		
+
 		if (calls.contains(call)) {
 			methodCallsPerThreadId.remove(call);
 		} else {
@@ -295,6 +295,41 @@ public class MethodCallSet {
 		for (MethodCall call : calls) {
 			removeCall(call);
 		}
+	}
+
+	public void removeAllCallsWithName(String name) {
+		for (long tid : methodCallsPerThreadId.keySet()) {
+			Set<MethodCall> toRemove = new HashSet<>();
+
+			for (MethodCall call : methodCallsPerThreadId.get(tid)) {
+				if (call.getOperation().equals(name)) {
+					toRemove.add(call);
+				}
+			}
+
+			methodCallsPerThreadId.get(tid).removeAll(toRemove);
+		}
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("[");
+		boolean first = true;
+
+		for (MethodCall call : getMethodCalls()) {
+			if (first) {
+				first = false;
+			} else {
+				builder.append(", ");
+			}
+			builder.append(call);
+		}
+
+		builder.append("]");
+
+		return builder.toString();
 	}
 
 }
