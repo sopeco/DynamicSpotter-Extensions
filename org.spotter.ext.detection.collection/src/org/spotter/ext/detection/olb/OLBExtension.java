@@ -58,6 +58,7 @@ public class OLBExtension extends AbstractDetectionExtension {
 
 		Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(QUEUEING_THEORY_STRATEGY);
+		scopeOptions.add(T_TEST_CPU_THRESHOLD_STRATEGY);
 		scopeParameter.setOptions(scopeOptions);
 		scopeParameter.setDefaultValue(QUEUEING_THEORY_STRATEGY);
 		scopeParameter.setDescription("This parameter determines the strategy, "

@@ -12,6 +12,7 @@ import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPair;
 import org.lpe.common.util.NumericPairList;
 import org.spotter.core.chartbuilder.AnalysisChartBuilder;
+import org.spotter.ext.detection.ramp.RampExtension;
 import org.spotter.ext.detection.trafficJam.ITrafficJamStrategy;
 import org.spotter.ext.detection.trafficJam.TrafficJamDetectionController;
 import org.spotter.ext.detection.trafficJam.TrafficJamExtension;
@@ -26,9 +27,8 @@ public class LinearRegression implements ITrafficJamStrategy {
 	@Override
 	public void setProblemDetectionConfiguration(Properties problemDetectionConfiguration) {
 		String slopeThresholdStr = problemDetectionConfiguration.getProperty(TrafficJamExtension.REGRESSION_SLOPE_KEY);
-		slopeThreshold = 1.0 - (slopeThresholdStr != null ? Double.parseDouble(slopeThresholdStr)
-				: TrafficJamExtension.REGRESSION_SLOPE_DEFAULT);
-
+		slopeThreshold = slopeThresholdStr != null ? Double.parseDouble(slopeThresholdStr)
+				: TrafficJamExtension.REGRESSION_SLOPE_DEFAULT;
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public class LinearRegression implements ITrafficJamStrategy {
 		}
 
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(operation, "Experiment Time [ms]", "Response Time [ms]");
+		chartBuilder.startChart(operation, "Number of Users", "Response Time [ms]");
 
 		chartBuilder.addTimeSeriesWithErrorBars(means, standDeviations, "Response Times");
 		chartBuilder.addTimeSeriesWithLine(thresholdPoints, "Threshold Slope");

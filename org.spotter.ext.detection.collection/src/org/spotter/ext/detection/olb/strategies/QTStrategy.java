@@ -36,6 +36,7 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 	private static final double ONE_PLUS_EPSILON = 1.1;
 	private static final long MS_IN_SECOND = 1000L;
 	private OLBDetectionController mainDetectionController;
+	private static final long SPEED_100MBIT = 100000000;
 
 	@Override
 	public SpotterResult analyze(DatasetCollection data) {
@@ -105,14 +106,14 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 				for (int numUsers : numUsersList) {
 					double responseTime = getValueForNumUsers(responseTimes, numUsers);
 					double utilization = getValueForNumUsers(utils, numUsers);
+					double saveUtil = Math.min(0.999, utilization * 1.05);
 
 					// response time threshold derived from queueing theory for
 					// multi-server queues
-					double rtThreshold = singleUserResponseTime / (1 - utilization)
-							* LpeNumericUtils.calculateErlangsCFormula(numServers, utilization) + numServers
-							* singleUserResponseTime;
+					double rtThreshold = singleUserResponseTime / (numServers * (1 - saveUtil))
+							* LpeNumericUtils.calculateErlangsCFormula(numServers, saveUtil) + singleUserResponseTime;
 
-					if (responseTime > rtThreshold * ONE_PLUS_EPSILON) {
+					if (responseTime > rtThreshold) {
 						responseTimesUnderThresholdCurve = false;
 
 					}
@@ -144,8 +145,7 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 		chartBuilder.startChart(operation + " - " + resourceId, "number of users", "Response Time [ms]");
 		chartBuilder.addScatterSeries(responseTimes, "Avg. Response Times");
 		chartBuilder.addLineSeries(rtThresholdsForChart, "Threshold for Response Times");
-		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Response Times",
-				result);
+		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
 		if (!utilsChartsCreatedFor.contains(resourceId)) {
 			chartBuilder = AnalysisChartBuilder.getChartBuilder();
 			chartBuilder.startChart("CPU on " + resourceId, "number of users", "Utilization [%]");
@@ -215,12 +215,14 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 						.select(AbstractDetectionController.NUMBER_OF_USERS_KEY, numUsers)
 						.select(CPUUtilizationRecord.PAR_PROCESS_ID, processID)
 						.select(CPUUtilizationRecord.PAR_CPU_ID, CPUUtilizationRecord.RES_CPU_AGGREGATED);
+
 				Dataset tmpCPUUtilDataset = selection.applyTo(cpuUtilDataset);
 				List<Double> cpuUtils = tmpCPUUtilDataset.getValues(CPUUtilizationRecord.PAR_UTILIZATION, Double.class);
 				double meanCPUUtil = LpeNumericUtils.average(cpuUtils);
 				cpuUtilPairList.add(numUsers, meanCPUUtil);
 			}
 			resultMap.put(processID + " - " + CPUUtilizationRecord.RES_CPU_AGGREGATED, cpuUtilPairList);
+			
 		}
 		return resultMap;
 	}
@@ -238,13 +240,16 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 				ParameterSelection nwInterfaceSelection = ParameterSelection.newSelection().select(
 						NetworkInterfaceInfoRecord.PAR_NETWORK_INTERFACE, nwInterfaceName);
 				Dataset nwInterfaceSpecificDataset = nwInterfaceSelection.applyTo(processSpecificDataset);
-				long speed = nwInterfaceSpecificDataset.getValues(NetworkInterfaceInfoRecord.PAR_INTERFACE_SPEED,
+				long tmpSpeed = nwInterfaceSpecificDataset.getValues(NetworkInterfaceInfoRecord.PAR_INTERFACE_SPEED,
 						Long.class).get(0);
-				
+				if (tmpSpeed < 0L) {
+					tmpSpeed = SPEED_100MBIT;
+				}
+				double speed = ((double) tmpSpeed) / 8.0;
 				NumericPairList<Integer, Double> networkUtilPairList = new NumericPairList<>();
 
 				for (Integer numUsers : numUsersList) {
-					if (speed <= 0L) {
+					if (tmpSpeed == 0L) {
 						networkUtilPairList.add(numUsers, 0.0);
 						continue;
 					}
@@ -266,9 +271,9 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 					long maxTransferredBytes = LpeNumericUtils.max(transferredBytes);
 
 					double utilReceived = (((double) (MS_IN_SECOND * (maxReceivedBytes - minReceivedBytes))) / ((double) (maxTimestamp - minTimestamp)))
-							/ (double) speed;
+							/ speed;
 					double utilTransferred = (((double) (MS_IN_SECOND * (maxTransferredBytes - minTransferredBytes))) / ((double) (maxTimestamp - minTimestamp)))
-							/ (double) speed;
+							/ speed;
 					networkUtilPairList.add(numUsers, Math.max(utilReceived, utilTransferred));
 				}
 
@@ -300,6 +305,7 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 			ParameterSelection selection = new ParameterSelection().select(CPUUtilizationRecord.PAR_PROCESS_ID,
 					processID);
 			int numCores = selection.applyTo(cpuUtilDataset).getValueSet(CPUUtilizationRecord.PAR_CPU_ID).size() - 1;
+
 			cpuNumCores.put(processID + " - " + CPUUtilizationRecord.RES_CPU_AGGREGATED, numCores);
 		}
 		return cpuNumCores;

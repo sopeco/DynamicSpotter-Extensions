@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.spotter.ext.detection.collection.est;
+package org.spotter.ext.detection.est;
 
 import java.util.ArrayList;
 import java.util.List;

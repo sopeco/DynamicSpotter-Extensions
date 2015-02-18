@@ -114,6 +114,18 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 			dbHosts.add(host);
 		}
 		for (String processID : dbUtilDataset.getValueSet(CPUUtilizationRecord.PAR_PROCESS_ID, String.class)) {
+			boolean isDBNode = false;
+			for (String dbHost : dbHosts) {
+				if (processID.contains(dbHost)) {
+					isDBNode = true;
+					break;
+				}
+			}
+
+			if (!isDBNode) {
+				continue;
+			}
+
 			boolean detected = analyzeCPUUtilization(dbUtilDataset, dbHosts, processID, result);
 			if (detected) {
 				result.setDetected(true);
@@ -140,28 +152,14 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 					.select(AbstractDetectionController.NUMBER_OF_USERS_KEY, numUsers)
 					.select(CPUUtilizationRecord.PAR_PROCESS_ID, processID)
 					.select(CPUUtilizationRecord.PAR_CPU_ID, CPUUtilizationRecord.RES_CPU_AGGREGATED);
-			Dataset tmpDataset = usersSelection.applyTo(dbUtilDataset);
-
-			List<Double> cpuUtils = new ArrayList<>();
-			for (CPUUtilizationRecord rec : tmpDataset.getRecords(CPUUtilizationRecord.class)) {
-				boolean isDBRecord = false;
-				for (String dbHost : dbHosts) {
-					if (rec.getProcessId().contains(dbHost)) {
-						isDBRecord = true;
-						break;
-					}
-				}
-
-				if (isDBRecord) {
-					cpuUtils.add(rec.getUtilization());
-				}
-			}
+			List<Double> cpuUtils = usersSelection.applyTo(dbUtilDataset).getValues(
+					CPUUtilizationRecord.PAR_UTILIZATION, Double.class);
 
 			double meanCPUUtil = LpeNumericUtils.average(cpuUtils);
 
 			double actualThreshold = cpuThreshold;
 			if (qtStrategy) {
-				actualThreshold = LpeNumericUtils.getUtilizationForResponseTimeFactorQT(5, mapNumCores.get(processID));
+				actualThreshold = LpeNumericUtils.getUtilizationForResponseTimeFactorQT(3, mapNumCores.get(processID))*0.9;
 			} else {
 				actualThreshold = cpuThreshold;
 			}
@@ -172,7 +170,7 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 		}
 
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(processID, "Num Users", "CPU Utilization [%]");
+		chartBuilder.startChart(processID, "Number of Users", "CPU Utilization [%]");
 		chartBuilder.addScatterSeries(chartDataUtils, "Utilization");
 		chartBuilder.addHorizontalLine(cpuThreshold, "Threshold");
 		getResultManager().storeImageChartResource(chartBuilder, "DB-CPU Utilization", result);
@@ -207,8 +205,11 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 				long waitTime_prev = waitTimeSeries.get(i - 1).getValue();
 				long numWait = numWaitsSeries.get(i).getValue();
 				long waitTime = waitTimeSeries.get(i).getValue();
-
-				waitTimesPerLock.add(((double) (waitTime - waitTime_prev) / ((double) (numWait - numWait_prev))));
+				if (numWait - numWait_prev == 0L) {
+					waitTimesPerLock.add(0.0);
+				} else {
+					waitTimesPerLock.add(((double) (waitTime - waitTime_prev) / ((double) (numWait - numWait_prev))));
+				}
 
 			}
 
@@ -265,7 +266,7 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 		chartBuilder.addScatterSeries(rawData, "Lock Times");
 		getResultManager().storeImageChartResource(chartBuilder, "Lock Times", result);
 
-		chartBuilder =AnalysisChartBuilder.getChartBuilder();
+		chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(dbId, "Num Users", "CI: Lock Times [ms]");
 		chartBuilder.addScatterSeriesWithErrorBars(means, ci, "Lock Times");
 		getResultManager().storeImageChartResource(chartBuilder, "Confidence Intervals", result);

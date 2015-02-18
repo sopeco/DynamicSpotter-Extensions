@@ -106,7 +106,7 @@ public class MethodCall {
 		if (calledOperations == null) {
 			calledOperations = new HashSet<>();
 		}
-		
+
 		return calledOperations;
 	}
 
@@ -174,7 +174,7 @@ public class MethodCall {
 		if (this.equals(newCall)) {
 			return true;
 		}
-		
+
 		if (this.getThreadId() == newCall.getThreadId() && this.getEnterTime() <= newCall.getEnterTime()
 				&& this.getExitTime() >= newCall.getExitTime()) {
 			if (this.calledOperations == null) {
@@ -190,11 +190,14 @@ public class MethodCall {
 			}
 
 			if (!addedInChild) {
+				Set<MethodCall> toRemove = new HashSet<>();
 				for (MethodCall childCall : getCalledOperations()) {
 					if (newCall.addCall(childCall)) {
-						getCalledOperations().remove(childCall);
+						toRemove.add(childCall);
+
 					}
 				}
+				getCalledOperations().removeAll(toRemove);
 
 				this.calledOperations.add(newCall);
 			}
@@ -204,12 +207,12 @@ public class MethodCall {
 			return false;
 		}
 	}
-	
+
 	public boolean removeCall(MethodCall call) {
 		if (this.equals(call)) {
 			return false;
 		}
-		
+
 		if (this.getThreadId() == call.getThreadId() && this.getEnterTime() <= call.getEnterTime()
 				&& this.getExitTime() >= call.getExitTime()) {
 			for (MethodCall subCall : getCalledOperations()) {
@@ -218,7 +221,7 @@ public class MethodCall {
 					return true;
 				}
 			}
-			
+
 			for (MethodCall subCall : getCalledOperations()) {
 				if (subCall.getThreadId() == call.getThreadId() && subCall.getEnterTime() <= call.getEnterTime()
 						&& subCall.getExitTime() >= call.getExitTime()) {
@@ -226,7 +229,7 @@ public class MethodCall {
 				}
 			}
 		}
-		
+
 		return false;
 	}
 

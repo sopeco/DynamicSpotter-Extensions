@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.spotter.ext.detection.collection.est;
+package org.spotter.ext.detection.est;
 
 /**
  * Candidate for an Empty Semi Trucks problem.

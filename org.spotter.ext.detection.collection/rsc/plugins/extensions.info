@@ -9,4 +9,4 @@ org.spotter.ext.detection.stifle.StifleExtension
 org.spotter.ext.detection.olb.OLBExtension
 org.spotter.ext.detection.excessiveMessaging.ExcessiveMessagingExtension
 org.spotter.ext.detection.blob.BlobExtension
-org.spotter.ext.detection.collection.est.EmptySemiTrucksExtension;
+org.spotter.ext.detection.est.EmptySemiTrucksExtension

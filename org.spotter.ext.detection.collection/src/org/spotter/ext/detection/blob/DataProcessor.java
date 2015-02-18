@@ -117,10 +117,10 @@ public final class DataProcessor {
 
 				MessageCorrelation correlation = getMessageCorrelation(record.getMessageCorrelationHash());
 
-				if (record.wasSent() == 0) {
+				if (!record.wasSent()) {
 					correlation.setReceiverId(record.getClientId());
 					correlation.setTimeReceived(record.getTimeStamp());
-				} else if (record.wasSent() == 1) {
+				} else if (record.wasSent()) {
 					correlation.setSenderId(record.getClientId());
 					correlation.setTimeSend(record.getTimeStamp());
 				} else {
@@ -142,7 +142,9 @@ public final class DataProcessor {
 	private void callcualteMessageDurations() {
 		for (Component component : processedData.getComponents()) {
 			List<Double> list = messageDurations.get(component.getId());
-
+			if (list == null) {
+				continue;
+			}
 			double shortest = Double.MAX_VALUE;
 			double longest = 0;
 			double average = 0;
