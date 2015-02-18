@@ -222,7 +222,7 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 				cpuUtilPairList.add(numUsers, meanCPUUtil);
 			}
 			resultMap.put(processID + " - " + CPUUtilizationRecord.RES_CPU_AGGREGATED, cpuUtilPairList);
-			
+
 		}
 		return resultMap;
 	}
@@ -253,8 +253,10 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 						networkUtilPairList.add(numUsers, 0.0);
 						continue;
 					}
-					Dataset tmpNetowrkIODataset = processSelection.applyTo(networkIODataset);
-					tmpNetowrkIODataset = nwInterfaceSelection.applyTo(tmpNetowrkIODataset);
+					Dataset tmpNetowrkIODataset = ParameterSelection.newSelection()
+							.select(AbstractDetectionController.NUMBER_OF_USERS_KEY, numUsers)
+							.select(NetworkRecord.PAR_PROCESS_ID, processID)
+							.select(NetworkRecord.PAR_NETWORK_INTERFACE, nwInterfaceName).applyTo(networkIODataset);
 
 					List<Long> timestamps = tmpNetowrkIODataset.getValues(NetworkRecord.PAR_TIMESTAMP, Long.class);
 					long minTimestamp = LpeNumericUtils.min(timestamps);

@@ -280,6 +280,7 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 
 				String interfaceName = getInterfaceName(node, nwInterface);
 				double networkSpeed = speedThresholdPair.get(interfaceName).getKey();
+				double threshold = speedThresholdPair.get(interfaceName).getValue();
 				NumericPairList<Integer, Double> utils = new NumericPairList<>();
 
 				int numSignificantSteps = 0;
@@ -328,7 +329,7 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 					}
 
 				}
-				if (numSignificantSteps >= requiredSignificantSteps && maxUtil > 0.5) {
+				if (numSignificantSteps >= requiredSignificantSteps && maxUtil > Math.min(0.5, threshold)) {
 					stagnationDetected = true;
 					result.addMessage("Network interface " + interfaceName + " has a stagnating growth");
 				}
