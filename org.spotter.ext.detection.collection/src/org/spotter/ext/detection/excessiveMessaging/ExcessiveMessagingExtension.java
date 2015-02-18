@@ -12,6 +12,10 @@ public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
 	public static final String REQUIRED_CONFIDENCE_LEVEL_KEY = "confidenceLevel";
 	public static final String REQUIRED_SIGNIFICANT_STEPS_KEY = "numSignificantSteps";
 	
+	protected static final String DETECTION_STRATEGY_KEY = "strategy";
+	protected static final String THRESHOLD_STRATEGY = "fix threshold strategy";
+	protected static final String STAGNATION_STRATEGY = "stagnation strategy";
+	
 	public static final double REQUIRED_CONFIDENCE_LEVEL_DEFAULT = 0.95;
 	public static final int REQUIRED_SIGNIFICANT_STEPS_DEFAULT = 2;
 	
@@ -45,6 +49,20 @@ public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
 				+ "two response time samples with the t-test.");
 		return requiredConfidenceLevel;
 	}
+	
+	private ConfigParameterDescription createStrategyParameter() {
+		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
+				LpeSupportedTypes.String);
+
+		Set<String> scopeOptions = new HashSet<>();
+		scopeOptions.add(STAGNATION_STRATEGY);
+		scopeOptions.add(THRESHOLD_STRATEGY);
+		scopeParameter.setOptions(scopeOptions);
+		scopeParameter.setDefaultValue(STAGNATION_STRATEGY);
+		scopeParameter.setDescription("This parameter determines the strategy, "
+				+ "used to analyse the Database congestion anti-pattern.");
+		return scopeParameter;
+	}
 
 
 
@@ -52,7 +70,7 @@ public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createConfidenceLevelParameter());
 		addConfigParameter(createNumSignificantStepsParameter());
-		
+		addConfigParameter(createStrategyParameter());
 
 	}
 

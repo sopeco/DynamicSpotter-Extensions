@@ -1,7 +1,5 @@
 package org.spotter.ext.detection.olb.strategies;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import org.aim.api.measurement.dataset.Dataset;
@@ -55,6 +53,7 @@ public class TTestCpuThresholdStrategy implements IOLBAnalysisStrategy {
 		boolean cpuUtilized = false;
 
 		ParameterSelection parSelection = new ParameterSelection();
+
 		parSelection.select(CPUUtilizationRecord.PAR_CPU_ID, CPUUtilizationRecord.RES_CPU_AGGREGATED).select(
 				CPUUtilizationRecord.PAR_PROCESS_ID, processId);
 
@@ -74,14 +73,16 @@ public class TTestCpuThresholdStrategy implements IOLBAnalysisStrategy {
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart("CPU Utilization - " + processId, "number of users", "Mean Utilization [%]");
 		chartBuilder.addUtilizationLineSeries(cpuMeans, "CPU Utilization", true);
-		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "CPU Utilization",
-				result);
+		chartBuilder.addHorizontalLine(cpuThreshold * 100.0, "Utilization Threshold");
+		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "CPU Utilization", result);
 		return cpuUtilized;
 	}
 
 	@Override
 	public void setProblemDetectionConfiguration(Properties problemDetectionConfiguration) {
-
+		String cpuThresholdStr = problemDetectionConfiguration.getProperty(OLBExtension.CPU_UTILIZATION_THRESHOLD_KEY,
+				String.valueOf(OLBExtension.CPU_UTILIZATION_THRESHOLD_DEFAULT));
+		cpuThreshold = Double.parseDouble(cpuThresholdStr);
 	}
 
 	@Override

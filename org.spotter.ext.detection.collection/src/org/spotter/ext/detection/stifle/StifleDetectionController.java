@@ -91,8 +91,7 @@ public class StifleDetectionController extends AbstractDetectionController {
 
 		SpotterResult result = new SpotterResult();
 		result.setDetected(false);
-		
-		
+
 		if (!stifleQueries.isEmpty()) {
 			result.setDetected(true);
 			StringBuilder strBuilder = new StringBuilder();
@@ -120,21 +119,51 @@ public class StifleDetectionController extends AbstractDetectionController {
 	private List<SQLQueryRecord> filterQueryRecords(List<SQLQueryRecord> sqlRecords, List<ThreadTracingRecord> ttRecords) {
 		MeasurementDataUtils.sortRecordsAscending(sqlRecords, SQLQueryRecord.PAR_CALL_ID);
 		MeasurementDataUtils.sortRecordsAscending(ttRecords, ThreadTracingRecord.PAR_CALL_ID);
-		if (sqlRecords.size() != ttRecords.size()) {
+		List<SQLQueryRecord> sqlRecordsTmp = new ArrayList<>();
+		List<ThreadTracingRecord> ttRecordsTmp = new ArrayList<>();
+		int firstSQLIndex = 0;
+		int firstTTIndex = 0;
+		int lastSQLIndex = sqlRecords.size() - 1;
+		int lastTTIndex = ttRecords.size() - 1;
+		while (sqlRecords.get(firstSQLIndex).getCallId() < ttRecords.get(firstTTIndex).getCallId()) {
+			firstSQLIndex++;
+		}
+
+		while (sqlRecords.get(firstSQLIndex).getCallId() > ttRecords.get(firstTTIndex).getCallId()) {
+			firstTTIndex++;
+		}
+
+		while (sqlRecords.get(lastSQLIndex).getCallId() < ttRecords.get(lastTTIndex).getCallId()) {
+			lastTTIndex--;
+		}
+
+		while (sqlRecords.get(lastSQLIndex).getCallId() > ttRecords.get(lastTTIndex).getCallId()) {
+			lastSQLIndex--;
+		}
+
+		for (int i = firstSQLIndex; i <= lastSQLIndex; i++) {
+			sqlRecordsTmp.add(sqlRecords.get(i));
+		}
+
+		for (int i = firstTTIndex; i <= lastTTIndex; i++) {
+			ttRecordsTmp.add(ttRecords.get(i));
+		}
+
+		if (sqlRecordsTmp.size() != ttRecordsTmp.size()) {
 			throw new RuntimeException("Unequal amount of records!");
 		}
 		List<SQLQueryRecord> uniqueSQLRecords = new ArrayList<>();
 		int index = 0;
 		long currentStart = -1;
 		long refEnd = -1;
-		while (index < sqlRecords.size()) {
-			if (sqlRecords.get(index).getCallId() != ttRecords.get(index).getCallId()) {
+		while (index < sqlRecordsTmp.size()) {
+			if (sqlRecordsTmp.get(index).getCallId() != ttRecordsTmp.get(index).getCallId()) {
 				throw new RuntimeException("CallIDs do not match!");
 			}
-			currentStart = ttRecords.get(index).getEnterNanoTime();
+			currentStart = ttRecordsTmp.get(index).getEnterNanoTime();
 			if (refEnd < 0 || currentStart > refEnd) {
-				refEnd = ttRecords.get(index).getExitNanoTime();
-				uniqueSQLRecords.add(sqlRecords.get(index));
+				refEnd = ttRecordsTmp.get(index).getExitNanoTime();
+				uniqueSQLRecords.add(sqlRecordsTmp.get(index));
 			}
 
 			index++;
@@ -194,12 +223,12 @@ public class StifleDetectionController extends AbstractDetectionController {
 		// in this loop we will always be one index ahead of the element we
 		// currently analyze
 		ResponseTimeRecord currentRtRecord = null;
-		int SQLIndex = 0;
+		int sqlIndex = 0;
 		for (ResponseTimeRecord nextRtRecord : rtRecords) {
-			if (currentRtRecord != null) {
-
+			if (currentRtRecord == null) {
+				currentRtRecord = nextRtRecord;
+				continue;
 			}
-			currentRtRecord = nextRtRecord;
 
 			// the timespace is too inaccurate, hence we use the callId
 			long currentRTCallId = currentRtRecord.getCallId();
@@ -207,35 +236,34 @@ public class StifleDetectionController extends AbstractDetectionController {
 
 			// we skip the first SQL queries, which are not related to the first
 			// RT record
-			while (SQLIndex < sqlRecords.size() && sqlRecords.get(SQLIndex).getCallId() < currentRTCallId) {
-				SQLIndex++;
+			while (sqlIndex < sqlRecords.size() && sqlRecords.get(sqlIndex).getCallId() < currentRTCallId) {
+				sqlIndex++;
 			}
 
-			if (SQLIndex >= sqlRecords.size()) {
+			if (sqlIndex >= sqlRecords.size()) {
 				return stifleQueries;
 			}
 
 			Map<String, Integer> potentialStifles = new HashMap<>();
+			while (sqlIndex < sqlRecords.size() && sqlRecords.get(sqlIndex).getCallId() <= nextRTCallId) {
 
-			while (SQLIndex < sqlRecords.size() && sqlRecords.get(SQLIndex).getCallId() <= nextRTCallId) {
-
-				String query = sqlRecords.get(SQLIndex).getQueryString();
-
+				String query = sqlRecords.get(sqlIndex).getQueryString();
+				sqlIndex++;
 				boolean found = false;
 				for (String alreadyObservedQuery : potentialStifles.keySet()) {
-					if (LpeStringUtils.areEqualSql(alreadyObservedQuery, query)) {
+					if (LpeStringUtils.getGeneralizedQuery(alreadyObservedQuery).equals(LpeStringUtils.getGeneralizedQuery(query))) {
 						int newCount = potentialStifles.get(alreadyObservedQuery) + 1;
-						potentialStifles.put(alreadyObservedQuery, newCount);
+						potentialStifles.put(LpeStringUtils.getGeneralizedQuery(alreadyObservedQuery), newCount);
 						found = true;
 						break;
 					}
 				}
 
 				if (!found) {
-					potentialStifles.put(query, 1);
+					potentialStifles.put(LpeStringUtils.getGeneralizedQuery(query), 1);
 				}
 
-				SQLIndex++;
+				
 
 			}
 			String operation = currentRtRecord.getOperation();
@@ -250,6 +278,7 @@ public class StifleDetectionController extends AbstractDetectionController {
 					for (StifleQuery tmpQuery : tmpStifleQueries) {
 						if (potStifle.getKey().equals(tmpQuery.getQuery())) {
 							sQuery = tmpQuery;
+							break;
 						}
 					}
 					if (sQuery == null) {
@@ -259,7 +288,7 @@ public class StifleDetectionController extends AbstractDetectionController {
 					sQuery.addOccurrence(potStifle.getValue());
 				}
 			}
-
+			currentRtRecord = nextRtRecord;
 		}
 
 		return stifleQueries;

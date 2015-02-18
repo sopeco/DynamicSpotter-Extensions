@@ -15,6 +15,7 @@
  */
 package org.spotter.ext.measurement.database;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -115,15 +116,22 @@ public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runna
 
 	@Override
 	public MeasurementData getMeasurementData() throws MeasurementException {
-		return dataSource.read();
+		if (samplerActivated) {
+			return dataSource.read();
+		}
+		return new MeasurementData();
 	}
 
 	@Override
 	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
-		try {
+		if (samplerActivated) {
 			dataSource.pipeToOutputStream(oStream);
-		} catch (MeasurementException e) {
-			throw new RuntimeException(e);
+		} else {
+			try {
+				oStream.close();
+			} catch (IOException e) {
+				throw new MeasurementException(e);
+			}
 		}
 	}
 

@@ -13,14 +13,17 @@ public class TrafficJamExtension extends AbstractDetectionExtension {
 			+ "either due to software bottlenecks or hardware limitations. ";
 	public static final String REQUIRED_CONFIDENCE_LEVEL_KEY = "confidenceLevel";
 	public static final String REQUIRED_SIGNIFICANT_STEPS_KEY = "numSignificantSteps";
+	public static final String REGRESSION_SLOPE_KEY = "regression slope threshold"; 
 	public static final String EXPERIMENT_STEPS_KEY = "numExperiments";
 
 	public static final double REQUIRED_CONFIDENCE_LEVEL_DEFAULT = 0.95;
+	public static final double REGRESSION_SLOPE_DEFAULT = 10.0;
 	public static final int REQUIRED_SIGNIFICANT_STEPS_DEFAULT = 2;
 	public static final int EXPERIMENT_STEPS_DEFAULT = 4;
 
 	protected static final String DETECTION_STRATEGY_KEY = "strategy";
 	protected static final String T_TEST_STRATEGY = "t-Test strategy";
+	protected static final String LIN_REGRESSION_STRATEGY = "linear regression strategy";
 
 	@Override
 	public IDetectionController createExtensionArtifact() {
@@ -62,6 +65,14 @@ public class TrafficJamExtension extends AbstractDetectionExtension {
 				+ "two response time samples with the t-test.");
 		return requiredConfidenceLevel;
 	}
+	
+	private ConfigParameterDescription createRegressionSlopeParameter() {
+		ConfigParameterDescription requiredConfidenceLevel = new ConfigParameterDescription(
+				REGRESSION_SLOPE_KEY, LpeSupportedTypes.Double);
+		requiredConfidenceLevel.setDefaultValue(String.valueOf(REGRESSION_SLOPE_DEFAULT));
+		requiredConfidenceLevel.setDescription("ONLY for lilnear regression strategy! Threshold for regression slope.");
+		return requiredConfidenceLevel;
+	}
 
 	private ConfigParameterDescription createStrategyParameter() {
 		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
@@ -69,6 +80,7 @@ public class TrafficJamExtension extends AbstractDetectionExtension {
 
 		Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(T_TEST_STRATEGY);
+		scopeOptions.add(LIN_REGRESSION_STRATEGY);
 		scopeParameter.setOptions(scopeOptions);
 		scopeParameter.setDefaultValue(T_TEST_STRATEGY);
 		scopeParameter.setDescription("This parameter determines the strategy, "
@@ -83,6 +95,7 @@ public class TrafficJamExtension extends AbstractDetectionExtension {
 		addConfigParameter(createNumSignificantStepsParameter());
 		addConfigParameter(createNumExperimentsParameter());
 		addConfigParameter(createStrategyParameter());
+		addConfigParameter(createRegressionSlopeParameter());
 
 	}
 

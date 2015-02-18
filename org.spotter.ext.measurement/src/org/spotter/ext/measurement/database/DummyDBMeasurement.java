@@ -1,5 +1,6 @@
 package org.spotter.ext.measurement.database;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 import java.util.concurrent.Future;
@@ -82,28 +83,20 @@ public class DummyDBMeasurement extends AbstractMeasurementAdapter implements Ru
 	@Override
 	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
 		if (samplerActivated) {
-			try {
 				dataSource.pipeToOutputStream(oStream);
-			} catch (MeasurementException e) {
-				throw new RuntimeException(e);
+		}else{
+			try {
+				oStream.close();
+			} catch (IOException e) {
+				throw new MeasurementException(e);
 			}
 		}
 	}
 
 	@Override
 	public void initialize() throws MeasurementException {
-
-		if (getProperties().containsKey(DummyDBMeasurementExtension.HOST)) {
-			host = getProperties().getProperty(DummyDBMeasurementExtension.HOST);
-		} else {
-			throw new RuntimeException("Host has not been specified!");
-		}
-
-		if (getProperties().containsKey(DummyDBMeasurementExtension.PORT)) {
-			port = getProperties().getProperty(DummyDBMeasurementExtension.PORT);
-		} else {
-			throw new RuntimeException("Port has not been specified!");
-		}
+		host = getHost();
+		port = getPort();
 
 		webResource = client.resource("http://" + host + ":" + port + "/").path("dummyDB").path("getStatistics");
 		Properties collectorProperties = GlobalConfiguration.getInstance().getProperties();
