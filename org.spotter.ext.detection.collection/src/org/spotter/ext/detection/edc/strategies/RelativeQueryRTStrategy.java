@@ -116,7 +116,7 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 
 		Dataset sqlDataset = data.getDataSet(SQLQueryRecord.class);
 		for (SQLQueryRecord record : sqlDataset.getRecords(SQLQueryRecord.class)) {
-			record.setQueryString(LpeStringUtils.getGeneralizedQuery(record.getQueryString()));
+			record.setQueryString(LpeStringUtils.getGeneralizedQuery(record.getQueryString().replace("#sc#", ";")));
 		}
 
 		if (sqlDataset == null || sqlDataset.size() == 0) {
