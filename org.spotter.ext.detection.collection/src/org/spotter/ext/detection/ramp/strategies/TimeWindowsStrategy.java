@@ -219,88 +219,94 @@ public class TimeWindowsStrategy implements IRampDetectionStrategy {
 	}
 
 	private boolean analyseOperationResponseTimes(Dataset rtDataset, String operation, SpotterResult result) {
-		int prevStep = -1;
-		int firstSignificantStep = -1;
-		int significantSteps = 0;
-		NumericPairList<Integer, Double> chartData = new NumericPairList<>();
-		NumericPairList<Integer, Double> chartDataMeans = new NumericPairList<>();
-		List<Number> confidenceIntervals = new ArrayList<>();
-		for (Integer step : rtDataset.getValueSet(STEP, Integer.class)) {
-			if (prevStep > 0) {
-				ParameterSelection selectionCurrent = new ParameterSelection().select(STEP, step).select(
-						ResponseTimeRecord.PAR_OPERATION, operation);
-				ParameterSelection selectionPrev = new ParameterSelection().select(STEP, prevStep).select(
-						ResponseTimeRecord.PAR_OPERATION, operation);
+		try {
+			int prevStep = -1;
+			int firstSignificantStep = -1;
+			int significantSteps = 0;
+			NumericPairList<Integer, Double> chartData = new NumericPairList<>();
+			NumericPairList<Integer, Double> chartDataMeans = new NumericPairList<>();
+			List<Number> confidenceIntervals = new ArrayList<>();
+			for (Integer step : rtDataset.getValueSet(STEP, Integer.class)) {
+				if (prevStep > 0) {
+					ParameterSelection selectionCurrent = new ParameterSelection().select(STEP, step).select(
+							ResponseTimeRecord.PAR_OPERATION, operation);
+					ParameterSelection selectionPrev = new ParameterSelection().select(STEP, prevStep).select(
+							ResponseTimeRecord.PAR_OPERATION, operation);
 
-				Dataset datasetCurrent = selectionCurrent.applyTo(rtDataset);
-				Dataset datasetPrev = selectionPrev.applyTo(rtDataset);
+					Dataset datasetCurrent = selectionCurrent.applyTo(rtDataset);
+					Dataset datasetPrev = selectionPrev.applyTo(rtDataset);
 
-				double prevMean = LpeNumericUtils.average(datasetPrev.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME,
-						Long.class));
-				double currentMean = LpeNumericUtils.average(datasetCurrent.getValues(
-						ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class));
-				// maybe the operation could not be found in one of the current
-				// selections
-				if (datasetCurrent == null || datasetPrev == null) {
-					prevStep = step;
-					continue;
-				}
-				List<Double> sums1 = new ArrayList<>();
-				List<Double> sums2 = new ArrayList<>();
-				LpeNumericUtils.createNormalDistributionByBootstrapping(
-						datasetPrev.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class),
-						datasetCurrent.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class), sums1, sums2);
-				double pValue = LpeNumericUtils.tTest(sums2, sums1);
-
-				if (pValue <= requiredSignificanceLevel && currentMean > prevMean) {
-					if (firstSignificantStep < 0) {
-						firstSignificantStep = prevStep;
+					double prevMean = LpeNumericUtils.average(datasetPrev.getValues(
+							ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class));
+					double currentMean = LpeNumericUtils.average(datasetCurrent.getValues(
+							ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class));
+					// maybe the operation could not be found in one of the
+					// current
+					// selections
+					if (datasetCurrent == null || datasetPrev == null) {
+						prevStep = step;
+						continue;
 					}
-					significantSteps++;
-				} else {
-					firstSignificantStep = -1;
-					significantSteps = 0;
-				}
+					List<Double> sums1 = new ArrayList<>();
+					List<Double> sums2 = new ArrayList<>();
+					double pValue = 0.0;
 
-				// create data for chart
-				if (prevStep == 1) {
-					for (Double value : sums1) {
-						chartData.add(prevStep, value);
+					LpeNumericUtils.createNormalDistributionByBootstrapping(
+							datasetPrev.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class),
+							datasetCurrent.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class), sums1, sums2);
+					pValue = LpeNumericUtils.tTest(sums2, sums1);
 
+					if (pValue <= requiredSignificanceLevel && currentMean > prevMean) {
+						if (firstSignificantStep < 0) {
+							firstSignificantStep = prevStep;
+						}
+						significantSteps++;
+					} else {
+						firstSignificantStep = -1;
+						significantSteps = 0;
 					}
-					chartDataMeans.add(prevStep, LpeNumericUtils.average(sums1));
-					double stdDev = LpeNumericUtils.stdDev(sums1);
-					double width = LpeNumericUtils.getConfidenceIntervalWidth(sums1.size(), stdDev,
+
+					// create data for chart
+					if (prevStep == 1) {
+						for (Double value : sums1) {
+							chartData.add(prevStep, value);
+
+						}
+						chartDataMeans.add(prevStep, LpeNumericUtils.average(sums1));
+						double stdDev = LpeNumericUtils.stdDev(sums1);
+						double width = LpeNumericUtils.getConfidenceIntervalWidth(sums1.size(), stdDev,
+								requiredSignificanceLevel);
+						confidenceIntervals.add(width / 2.0);
+					}
+					for (Double value : sums2) {
+						chartData.add(step, value);
+					}
+					chartDataMeans.add(step, LpeNumericUtils.average(sums2));
+					double stdDev = LpeNumericUtils.stdDev(sums2);
+					double width = LpeNumericUtils.getConfidenceIntervalWidth(sums2.size(), stdDev,
 							requiredSignificanceLevel);
 					confidenceIntervals.add(width / 2.0);
 				}
-				for (Double value : sums2) {
-					chartData.add(step, value);
-				}
-				chartDataMeans.add(step, LpeNumericUtils.average(sums2));
-				double stdDev = LpeNumericUtils.stdDev(sums2);
-				double width = LpeNumericUtils.getConfidenceIntervalWidth(sums2.size(), stdDev,
-						requiredSignificanceLevel);
-				confidenceIntervals.add(width / 2.0);
+				prevStep = step;
 			}
-			prevStep = step;
-		}
 
-		createChart(operation, result, chartData, chartDataMeans, confidenceIntervals);
-		if (firstSignificantStep > 0 && significantSteps >= reuiqredSignificanceSteps) {
-			return true;
+			createChart(operation, result, chartData, chartDataMeans, confidenceIntervals);
+			if (firstSignificantStep > 0 && significantSteps >= reuiqredSignificanceSteps) {
+				return true;
+			}
+			return false;
+		} catch (Exception e) {
+			return false;
 		}
-		return false;
 	}
 
 	private void createChart(String operation, SpotterResult result, NumericPairList<Integer, Double> chartData,
 			NumericPairList<Integer, Double> chartDataMeans, List<Number> confidenceIntervals) {
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(operation, "Experiment", "Response Time [ms]");
-//		chartBuilder.addTimeSeries(chartData, "Response Times");
+		chartBuilder.startChart(operation.substring(0, operation.indexOf("(")), "Experiment", "Response Time [ms]");
+		// chartBuilder.addTimeSeries(chartData, "Response Times");
 		chartBuilder.addScatterSeriesWithErrorBars(chartDataMeans, confidenceIntervals, "Confidence Intervals");
-		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Ramp Detection (TW)",
-				result);
+		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Ramp Detection (TW)", result);
 	}
 
 }

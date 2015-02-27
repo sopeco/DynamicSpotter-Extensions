@@ -4,6 +4,7 @@ import org.aim.api.exceptions.InstrumentationException;
 import org.aim.api.exceptions.MeasurementException;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.artifacts.probes.ResponsetimeProbe;
+import org.aim.artifacts.probes.SQLQueryProbe;
 import org.aim.artifacts.sampler.CPUSampler;
 import org.aim.artifacts.sampler.NetworkIOSampler;
 import org.aim.artifacts.scopes.EntryPointScope;
@@ -19,7 +20,6 @@ import org.spotter.core.detection.IExperimentReuser;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.detection.olb.strategies.QTStrategy;
 import org.spotter.ext.detection.olb.strategies.TTestCpuThresholdStrategy;
-import org.spotter.ext.detection.trafficJam.TrafficJamExtension;
 import org.spotter.shared.result.model.SpotterResult;
 
 /**
@@ -50,12 +50,10 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 
 	@Override
 	public void loadProperties() {
-		String experimentStepsStr = getProblemDetectionConfiguration().getProperty(
-				OLBExtension.EXPERIMENT_STEPS_KEY);
+		String experimentStepsStr = getProblemDetectionConfiguration().getProperty(OLBExtension.EXPERIMENT_STEPS_KEY);
 		experimentSteps = experimentStepsStr != null ? Integer.parseInt(experimentStepsStr)
 				: OLBExtension.EXPERIMENT_STEPS_DEFAULT;
 
-		
 		scope = getProblemDetectionConfiguration().getProperty(OLBExtension.SCOPE_KEY, OLBExtension.ENTRY_SCOPE);
 
 		analysisStrategy = getProblemDetectionConfiguration().getProperty(OLBExtension.DETECTION_STRATEGY_KEY,
@@ -106,10 +104,16 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 		if (!reuser) {
 			switch (scope) {
 			case OLBExtension.SYNC_SCOPE:
-				// TODO...
-				throw new UnsupportedOperationException("Sync scope is not supported yet!");
+				idBuilder
+						.newMethodScopeEntity("tpcw.TPCW_Database.cartUpdateSynchronized*",
+								"tpcw.TPCW_Database.getConnection()", "tpcw.TPCW_Database.returnConnection(*",
+								"tpcw.TPCW_Database.createEmptyCart(java.sql.Connection*",
+								"tpcw.TPCW_Database.createCustomer*", "tpcw.TPCW_Database.insertAddress*",
+								"tpcw.TPCW_Database.newOrder*")
+						.addProbe(ResponsetimeProbe.MODEL_PROBE).entityDone();
+				break;
 			case OLBExtension.DB_SCOPE:
-				idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
+				idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE).addProbe(SQLQueryProbe.MODEL_PROBE)
 						.entityDone();
 				break;
 			case OLBExtension.ENTRY_SCOPE:

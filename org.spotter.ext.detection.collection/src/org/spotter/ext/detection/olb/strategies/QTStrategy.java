@@ -1,11 +1,17 @@
 package org.spotter.ext.detection.olb.strategies;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -16,13 +22,17 @@ import org.aim.artifacts.records.CPUUtilizationRecord;
 import org.aim.artifacts.records.NetworkInterfaceInfoRecord;
 import org.aim.artifacts.records.NetworkRecord;
 import org.aim.artifacts.records.ResponseTimeRecord;
+import org.aim.artifacts.records.SQLQueryRecord;
 import org.lpe.common.util.LpeNumericUtils;
+import org.lpe.common.util.LpeStringUtils;
 import org.lpe.common.util.NumericPair;
 import org.lpe.common.util.NumericPairList;
+import org.lpe.common.util.system.LpeSystemUtils;
 import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.ext.detection.olb.IOLBAnalysisStrategy;
 import org.spotter.ext.detection.olb.OLBDetectionController;
+import org.spotter.ext.detection.olb.OLBExtension;
 import org.spotter.shared.result.model.SpotterResult;
 
 /**
@@ -37,6 +47,9 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 	private static final long MS_IN_SECOND = 1000L;
 	private OLBDetectionController mainDetectionController;
 	private static final long SPEED_100MBIT = 100000000;
+	private static final double SIG_LEVEL = 0.05;
+	private static final int NUM_REQ_SIG_STEPS = 2;
+	private String scope;
 
 	@Override
 	public SpotterResult analyze(DatasetCollection data) {
@@ -75,36 +88,121 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 		}
 
 		List<Integer> numUsersList = getNumUsersList(rtDataset);
-		Map<String, NumericPairList<Integer, Double>> responseTimesMap = analyseOperationResponseTimes(rtDataset,
-				result, numUsersList);
-		Map<String, NumericPairList<Integer, Double>> utilsMap = analyseCPUUtilizations(cpuUtilDataset, result,
+		Map<String, NumericPairList<Integer, Double>> responseTimesMap = null;
+		if (scope.equals(OLBExtension.DB_SCOPE)) {
+			Dataset sqlDataset = data.getDataSet(SQLQueryRecord.class);
+
+			if (sqlDataset == null || sqlDataset.size() == 0) {
+				result.setDetected(false);
+				result.addMessage("Instrumentation achieved no SQL results for the given scope!");
+				return result;
+			}
+
+			responseTimesMap = getOperationResponseTimesWithSQL(rtDataset, sqlDataset, result, numUsersList);
+		} else {
+			responseTimesMap = getOperationResponseTimes(rtDataset, result, numUsersList);
+
+		}
+		Map<String, NumericPairList<Integer, Double>> utilsMap = getCPUUtilizations(cpuUtilDataset, result,
 				numUsersList);
-		utilsMap.putAll(analyseNetworkUtilizations(networkIODataset, networkInfoDataset, result, numUsersList));
+
+		utilsMap.putAll(getNetworkUtilizations(networkIODataset, networkInfoDataset, result, numUsersList));
 		Map<String, Integer> numServersMap = getNumberOfCPUCores(cpuUtilDataset);
 		numServersMap.putAll(getNumberServers(networkInfoDataset));
 
-		analyzeThreshold(result, numUsersList, responseTimesMap, utilsMap, numServersMap);
+		List<String> candidateOperations = analyseResponseTimesIncrease(result, numUsersList, responseTimesMap);
+		Set<String> operations = new HashSet<>();
+		operations.addAll(responseTimesMap.keySet());
+		for (String operation : operations) {
+			if (!candidateOperations.contains(operation)) {
+				responseTimesMap.remove(operation);
+			}
+		}
+		analyzeOLB(result, numUsersList, responseTimesMap, utilsMap, numServersMap);
 
 		return result;
 	}
 
-	private void analyzeThreshold(SpotterResult result, List<Integer> numUsersList,
+	private List<String> analyseResponseTimesIncrease(SpotterResult result, List<Integer> numUsersList,
+			Map<String, NumericPairList<Integer, Double>> responseTimesMap) {
+		List<String> guiltyOperations = new ArrayList<>();
+
+		for (String operation : responseTimesMap.keySet()) {
+			try {
+
+				int prevNumUsers = -1;
+				int firstSignificantNumUsers = -1;
+				int significantSteps = 0;
+				List<Double> prevValues = null;
+				for (Integer numUsers : numUsersList) {
+					if (prevNumUsers > 0) {
+						List<Double> currentValues = LpeNumericUtils.filterOutliersUsingIQR(getValuesForNumUsers(
+								responseTimesMap.get(operation), numUsers));
+						prevValues = LpeNumericUtils.filterOutliersUsingIQR(getValuesForNumUsers(
+								responseTimesMap.get(operation), prevNumUsers));
+
+						List<Double> sums1 = new ArrayList<>();
+						List<Double> sums2 = new ArrayList<>();
+						LpeNumericUtils
+								.createNormalDistributionByBootstrapping(prevValues, currentValues, sums1, sums2);
+
+						if (sums2.size() < 2 || sums1.size() < 2) {
+							throw new IllegalArgumentException("OLB detection failed for the operation '" + operation
+									+ "', because there are not enough measurement points for a t-test.");
+						}
+						double prevMean = LpeNumericUtils.average(sums1);
+						double currentMean = LpeNumericUtils.average(sums2);
+
+						double pValue = LpeNumericUtils.tTest(sums2, sums1);
+						if (pValue >= 0 && pValue <= SIG_LEVEL && prevMean < currentMean) {
+							if (firstSignificantNumUsers < 0) {
+								firstSignificantNumUsers = prevNumUsers;
+							}
+							significantSteps++;
+						} else {
+							firstSignificantNumUsers = -1;
+							significantSteps = 0;
+						}
+					}
+					prevNumUsers = numUsers;
+
+				}
+
+				if (firstSignificantNumUsers > 0 && significantSteps >= NUM_REQ_SIG_STEPS) {
+					guiltyOperations.add(operation);
+				}
+			} catch (Exception e) {
+			}
+		}
+
+		return guiltyOperations;
+	}
+
+	private void analyzeOLB(SpotterResult result, List<Integer> numUsersList,
 			Map<String, NumericPairList<Integer, Double>> responseTimesMap,
 			Map<String, NumericPairList<Integer, Double>> utilsMap, Map<String, Integer> numServersMap) {
 		Set<String> utilsChartsCreatedFor = new HashSet<>();
 		for (String operation : responseTimesMap.keySet()) {
 			NumericPairList<Integer, Double> responseTimes = responseTimesMap.get(operation);
+			NumericPairList<Integer, Double> chartResponseTimes = new NumericPairList<>();
 			double singleUserResponseTime = getValueForNumUsers(responseTimes, responseTimes.getKeyMin());
-			boolean detected = true;
+			singleUserResponseTime = Math.max(singleUserResponseTime, 15.0);
+			boolean qtDetected = true;
+			int i = 0;
 			for (String rersourceID : utilsMap.keySet()) {
 				// prepare chart data container
 				NumericPairList<Integer, Double> rtThresholdsForChart = new NumericPairList<>();
 				NumericPairList<Integer, Double> utils = utilsMap.get(rersourceID);
 				int numServers = numServersMap.get(rersourceID);
-
+				createUtilChart(result, utilsChartsCreatedFor, rersourceID, utils);
 				boolean responseTimesUnderThresholdCurve = true;
+
 				for (int numUsers : numUsersList) {
 					double responseTime = getValueForNumUsers(responseTimes, numUsers);
+					if (i < numUsersList.size()) {
+						chartResponseTimes.add(numUsers, responseTime);
+					}
+
 					double utilization = getValueForNumUsers(utils, numUsers);
 					double saveUtil = Math.min(0.999, utilization * 1.05);
 
@@ -119,33 +217,55 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 					}
 
 					rtThresholdsForChart.add(numUsers, rtThreshold);
-
+					i++;
 				}
 
-				createChart(result, utilsChartsCreatedFor, operation, responseTimes, rersourceID, rtThresholdsForChart,
-						utils);
-
 				if (responseTimesUnderThresholdCurve) {
-					detected = false;
+					qtDetected = false;
+				} else {
+					createDetectedChart(result, utilsChartsCreatedFor, operation, chartResponseTimes, rersourceID,
+							rtThresholdsForChart, utils);
 				}
 
 			}
 
-			if (detected) {
+			if (qtDetected) {
 				result.setDetected(true);
 				result.addMessage("OLB detected in service: " + operation);
 			}
 		}
 	}
 
-	private void createChart(SpotterResult result, Set<String> utilsChartsCreatedFor, String operation,
+	private void createRTChart(SpotterResult result, String operation, NumericPairList<Integer, Double> responseTimes) {
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
+		chartBuilder
+				.startChart(operation.substring(0, operation.indexOf("(")), "number of users", "Response Time [ms]");
+		chartBuilder.addScatterSeries(responseTimes, "Avg. Response Times");
+		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
+	}
+
+	private void createDetectedChart(SpotterResult result, Set<String> utilsChartsCreatedFor, String operation,
 			NumericPairList<Integer, Double> responseTimes, String resourceId,
 			NumericPairList<Integer, Double> rtThresholdsForChart, NumericPairList<Integer, Double> cpuUtils) {
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(operation + " - " + resourceId, "number of users", "Response Time [ms]");
+		chartBuilder.startChart(operation.substring(0, operation.indexOf("(")) + " - " + resourceId, "number of users",
+				"Response Time [ms]");
 		chartBuilder.addScatterSeries(responseTimes, "Avg. Response Times");
 		chartBuilder.addLineSeries(rtThresholdsForChart, "Threshold for Response Times");
-		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
+		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Detected", result);
+		if (!utilsChartsCreatedFor.contains(resourceId)) {
+			chartBuilder = AnalysisChartBuilder.getChartBuilder();
+			chartBuilder.startChart("CPU on " + resourceId, "number of users", "Utilization [%]");
+			chartBuilder.addUtilizationLineSeries(cpuUtils, "Utilization", true);
+			mainDetectionController.getResultManager().storeImageChartResource(chartBuilder,
+					"Utilization-" + resourceId, result);
+			utilsChartsCreatedFor.add(resourceId);
+		}
+	}
+
+	private void createUtilChart(SpotterResult result, Set<String> utilsChartsCreatedFor, String resourceId,
+			NumericPairList<Integer, Double> cpuUtils) {
+		AnalysisChartBuilder chartBuilder = null;
 		if (!utilsChartsCreatedFor.contains(resourceId)) {
 			chartBuilder = AnalysisChartBuilder.getChartBuilder();
 			chartBuilder.startChart("CPU on " + resourceId, "number of users", "Utilization [%]");
@@ -157,12 +277,24 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 	}
 
 	private double getValueForNumUsers(NumericPairList<Integer, Double> pairList, int numUsers) {
-		for (NumericPair<Integer, Double> pair : pairList) {
-			if (pair.getKey().equals(numUsers)) {
-				return pair.getValue();
-			}
+		List<Double> values = getValuesForNumUsers(pairList, numUsers);
+
+		if (!values.isEmpty()) {
+			return LpeNumericUtils.average(values);
 		}
 		throw new IllegalArgumentException("Data not found!");
+	}
+
+	private List<Double> getValuesForNumUsers(NumericPairList<Integer, Double> pairList, int numUsers) {
+		List<Double> values = new ArrayList<>();
+		for (NumericPair<Integer, Double> pair : pairList) {
+			if (pair.getKey().equals(numUsers)) {
+				values.add(pair.getValue());
+
+			}
+		}
+		return values;
+
 	}
 
 	private List<Integer> getNumUsersList(Dataset rtDataset) {
@@ -172,7 +304,7 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 		return numUsersList;
 	}
 
-	private Map<String, NumericPairList<Integer, Double>> analyseOperationResponseTimes(Dataset rtDataset,
+	private Map<String, NumericPairList<Integer, Double>> getOperationResponseTimes(Dataset rtDataset,
 			SpotterResult result, final List<Integer> numUsersList) {
 
 		Map<String, NumericPairList<Integer, Double>> resultMap = new HashMap<>();
@@ -195,15 +327,169 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 				}
 
 				List<Long> responseTimes = tmpRTDataset.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class);
-				double meanResponseTime = LpeNumericUtils.average(responseTimes);
-				responseTimePairList.add(numUsers, meanResponseTime);
+
+				for (Long rt : responseTimes) {
+					responseTimePairList.add(numUsers, rt.doubleValue());
+				}
 			}
 			resultMap.put(operation, responseTimePairList);
+			createRTChart(result, operation, responseTimePairList);
 		}
 		return resultMap;
 	}
 
-	private Map<String, NumericPairList<Integer, Double>> analyseCPUUtilizations(Dataset cpuUtilDataset,
+	private Map<String, NumericPairList<Integer, Double>> getOperationResponseTimesWithSQL(Dataset rtDataset,
+			Dataset sqlDataset, SpotterResult result, final List<Integer> numUsersList) {
+
+		Map<String, NumericPairList<Integer, Double>> resultMap = new HashMap<>();
+		List<SQLQueryRecord> sqlRecords = sqlDataset.getRecords(SQLQueryRecord.class);
+		operationLoop: for (String operation : rtDataset.getValueSet(ResponseTimeRecord.PAR_OPERATION, String.class)) {
+
+			if (operation.contains("execute") || operation.contains("update")) {
+				Map<String, String> queryMap = new HashMap<>();
+				Map<String, NumericPairList<Integer, Double>> rtMap = new HashMap<>();
+				for (Integer numUsers : numUsersList) {
+					ParameterSelection selection = new ParameterSelection().select(
+							AbstractDetectionController.NUMBER_OF_USERS_KEY, numUsers).select(
+							ResponseTimeRecord.PAR_OPERATION, operation);
+
+					Dataset tmpRTDataset = selection.applyTo(rtDataset);
+
+					if (tmpRTDataset == null || tmpRTDataset.size() == 0) {
+						result.addMessage("One Lane Bridge detection failed for the operation '" + operation
+								+ "', because the operation was not executed in each analysis cycle. "
+								+ "Hence, the operation cannot be analyzed for an OLB.");
+						continue operationLoop;
+					}
+					Map<String, List<Long>> responsetimesMap = new HashMap<>();
+					for (ResponseTimeRecord rtRecord : tmpRTDataset.getRecords(ResponseTimeRecord.class)) {
+						SQLQueryRecord sqlRecord = findRecordForCallID(sqlRecords, rtRecord.getCallId());
+						if (sqlRecord == null) {
+							continue;
+						}
+						String sql = null;
+						try {
+							sql = LpeStringUtils.getGeneralizedQuery(sqlRecord.getQueryString());
+							if (sql == null) {
+								sql = sqlRecord.getQueryString();
+								if(sql.contains("$")){
+									int endIndex = Math.min(sql.indexOf(",", sql.indexOf("$")), sql.indexOf(" ", sql.indexOf("$")));
+									String name = sql.substring(sql.indexOf("$"),endIndex); 
+									sql = sql.replace(name, "tmp");
+								}
+							}
+						} catch (Exception e) {
+							continue;
+						}
+						int hash = sql.hashCode();
+						String opName = hash + " - " + operation;
+						if (!responsetimesMap.containsKey(opName)) {
+							responsetimesMap.put(opName, new ArrayList<Long>());
+						}
+						if (!queryMap.containsKey(opName)) {
+							queryMap.put(opName, sql);
+						}
+						if (!rtMap.containsKey(opName)) {
+							rtMap.put(opName, new NumericPairList<Integer, Double>());
+						}
+						List<Long> rtList = responsetimesMap.get(opName);
+						rtList.add(rtRecord.getResponseTime());
+					}
+
+					for (String opName : responsetimesMap.keySet()) {
+
+						List<Long> responseTimes = responsetimesMap.get(opName);
+						NumericPairList<Integer, Double> responseTimePairList = rtMap.get(opName);
+						for (Long rt : responseTimes) {
+							responseTimePairList.add(numUsers, rt.doubleValue());
+						}
+
+					}
+
+					
+				}
+				storeQueryMap(queryMap, result);
+				for (String opName : rtMap.keySet()) {
+					resultMap.put(opName, rtMap.get(opName));
+					createRTChart(result, opName, resultMap.get(opName));
+				}
+				
+
+			} else {
+				NumericPairList<Integer, Double> responseTimePairList = new NumericPairList<>();
+				for (Integer numUsers : numUsersList) {
+
+					ParameterSelection selection = new ParameterSelection().select(
+							AbstractDetectionController.NUMBER_OF_USERS_KEY, numUsers).select(
+							ResponseTimeRecord.PAR_OPERATION, operation);
+
+					Dataset tmpRTDataset = selection.applyTo(rtDataset);
+
+					if (tmpRTDataset == null || tmpRTDataset.size() == 0) {
+						result.addMessage("One Lane Bridge detection failed for the operation '" + operation
+								+ "', because the operation was not executed in each analysis cycle. "
+								+ "Hence, the operation cannot be analyzed for an OLB.");
+						continue operationLoop;
+					}
+
+					List<Long> responseTimes = tmpRTDataset.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class);
+					double meanResponseTime = LpeNumericUtils.average(responseTimes);
+					responseTimePairList.add(numUsers, meanResponseTime);
+				}
+				resultMap.put(operation, responseTimePairList);
+			}
+
+		}
+		return resultMap;
+	}
+
+	private void storeQueryMap(final Map<String, String> queryMap, SpotterResult result) {
+		try {
+			final PipedOutputStream outStream = new PipedOutputStream();
+			PipedInputStream inStream = new PipedInputStream(outStream);
+
+			LpeSystemUtils.submitTask(new Runnable() {
+
+				@Override
+				public void run() {
+					BufferedWriter bWriter = new BufferedWriter(new OutputStreamWriter(outStream));
+					try {
+						for (Entry<String, String> entry : queryMap.entrySet()) {
+							bWriter.write(entry.getKey() + " : " + entry.getValue());
+							bWriter.newLine();
+						}
+					} catch (IOException e) {
+
+					} finally {
+						if (bWriter != null) {
+							try {
+								bWriter.close();
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						}
+
+					}
+				}
+
+			});
+			mainDetectionController.getResultManager().storeTextResource("QueryMap", result, inStream);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private SQLQueryRecord findRecordForCallID(List<SQLQueryRecord> sqlRecords, long callID) {
+		for (SQLQueryRecord rec : sqlRecords) {
+			if (rec.getCallId() == callID) {
+				return rec;
+			}
+		}
+		return null;
+
+	}
+
+	private Map<String, NumericPairList<Integer, Double>> getCPUUtilizations(Dataset cpuUtilDataset,
 			SpotterResult result, final List<Integer> numUsersList) {
 		Map<String, NumericPairList<Integer, Double>> resultMap = new HashMap<>();
 
@@ -227,7 +513,7 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 		return resultMap;
 	}
 
-	private Map<String, NumericPairList<Integer, Double>> analyseNetworkUtilizations(Dataset networkIODataset,
+	private Map<String, NumericPairList<Integer, Double>> getNetworkUtilizations(Dataset networkIODataset,
 			Dataset networkInfoDataset, SpotterResult result, final List<Integer> numUsersList) {
 		Map<String, NumericPairList<Integer, Double>> resultMap = new HashMap<>();
 
@@ -315,7 +601,7 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 
 	@Override
 	public void setProblemDetectionConfiguration(Properties problemDetectionConfiguration) {
-		// TODO Auto-generated method stub
+		scope = problemDetectionConfiguration.getProperty(OLBExtension.SCOPE_KEY, OLBExtension.ENTRY_SCOPE);
 
 	}
 

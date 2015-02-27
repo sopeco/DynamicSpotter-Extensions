@@ -121,7 +121,7 @@ public class PerfProblemController extends AbstractDetectionController {
 	private void createChart(double perfReqThreshold, double perfReqConfidence, SpotterResult result, String operation,
 			List<Double> responseTimes, NumericPairList<Long, Double> responseTimeSeries) {
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart("CDF - " + operation, "Response Time [ms]", "Cummulative Probability [%]");
+		chartBuilder.startChart("CDF - " + operation.substring(0, operation.indexOf("(")), "Response Time [ms]", "Cummulative Probability [%]");
 		chartBuilder.addCDFSeries(responseTimes, "CDF");
 		chartBuilder.addHorizontalLine(perfReqConfidence * _100_PERCENT, "Requirements Confidence");
 		chartBuilder.addVerticalLine(perfReqThreshold, "Performance Requirement");
@@ -129,7 +129,7 @@ public class PerfProblemController extends AbstractDetectionController {
 		getResultManager().storeImageChartResource(chartBuilder, "cummulativeDistribution", result);
 
 		chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(operation, "Experiment Time [ms]", "Response Time [ms]");
+		chartBuilder.startChart(operation.substring(0, operation.indexOf("(")), "Experiment Time [ms]", "Response Time [ms]");
 		chartBuilder.addTimeSeries(responseTimeSeries, "Response Times");
 		chartBuilder.addHorizontalLine(perfReqThreshold, "Performance Requirement");
 

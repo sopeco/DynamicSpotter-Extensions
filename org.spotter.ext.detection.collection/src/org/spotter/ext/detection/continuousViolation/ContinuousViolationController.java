@@ -104,6 +104,9 @@ public class ContinuousViolationController extends AbstractDetectionController i
 			Dataset operationSpecificDataset = selectOperation.applyTo(rtDataset);
 
 			NumericPairList<Long, Double> responseTimeSeries = Utils.toTimestampRTPairs(operationSpecificDataset);
+			if (responseTimeSeries.size() <= 5) {
+				continue;
+			}
 			// sort chronologically
 			responseTimeSeries.sort();
 			boolean detected = analysisStrategyImpl.analyze(responseTimeSeries, analysisConfig, perfReqThreshold,
@@ -124,7 +127,7 @@ public class ContinuousViolationController extends AbstractDetectionController i
 	private void createChart(double perfReqThreshold, SpotterResult result, String operation,
 			NumericPairList<Long, Double> responseTimeSeries) {
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(operation, "Experiment Time [ms]", "Response Time [ms]");
+		chartBuilder.startChart(operation.substring(0, operation.indexOf("(")), "Experiment Time [ms]", "Response Time [ms]");
 		chartBuilder.addTimeSeries(responseTimeSeries, "Response Times");
 		chartBuilder.addHorizontalLine(perfReqThreshold, "Perf. Requirement");
 		getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
