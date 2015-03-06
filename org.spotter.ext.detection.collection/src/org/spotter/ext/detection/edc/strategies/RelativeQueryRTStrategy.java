@@ -117,7 +117,26 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 
 		Dataset sqlDataset = data.getDataSet(SQLQueryRecord.class);
 		for (SQLQueryRecord record : sqlDataset.getRecords(SQLQueryRecord.class)) {
-			record.setQueryString(LpeStringUtils.getGeneralizedQuery(record.getQueryString().replace("#sc#", ";")));
+			String sql = record.getQueryString().replace("#sc#", ";");
+			String generalizedSql = LpeStringUtils.getGeneralizedQuery(sql);
+			if (generalizedSql == null) {
+				if (sql.contains("$")) {
+					int idx_1 = sql.indexOf(",", sql.indexOf("$"));
+					int idx_2 = sql.indexOf(" ", sql.indexOf("$"));
+					if(idx_1 < 0 && idx_2 < 0){
+						idx_1 = sql.length();
+					}
+					idx_1 = idx_1 < 0 ? Integer.MAX_VALUE : idx_1;
+					idx_2 = idx_2 < 0 ? Integer.MAX_VALUE : idx_2;
+					int endIndex = Math.min(idx_1, idx_2);
+					String name = sql.substring(sql.indexOf("$"), endIndex);
+					generalizedSql = sql.replace(name, "tmp");
+				} else {
+					generalizedSql = sql;
+				}
+			}
+
+			record.setQueryString(generalizedSql);
 		}
 
 		if (sqlDataset == null || sqlDataset.size() == 0) {

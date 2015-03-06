@@ -32,6 +32,14 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 	private static final String EXTENSION_DESCRIPTION = "The DBMS sampling measurement satellite adapter is used to connect "
 			+ "to a MySQL DBMS and to query the database status.";
 
+	public static final String HOST = "host";
+	public static final String PORT = "port";
+	public static final String USER = "user";
+	public static final String PASSWORD = "password";
+	public static final String DATABASE = "database";
+
+	public static final String CONNECTION_STRING = "org.spotter.sampling.mysql.connectionString";
+
 	@Override
 	public String getName() {
 		return "measurement.satellite.adapter.sampling.dbms";
@@ -47,18 +55,59 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 		return new DBMSMeasurement(this);
 	}
 
-	private ConfigParameterDescription createConnectionStringParameter() {
-		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(
-				DBMSMeasurement.CONNECTION_STRING, LpeSupportedTypes.String);
+	private ConfigParameterDescription createHostParameter() {
+		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(HOST,
+				LpeSupportedTypes.String);
 		samplingDelayParameter.setMandatory(true);
-		samplingDelayParameter.setDescription("The connection string to the database");
+		samplingDelayParameter.setDescription("Host");
+
+		return samplingDelayParameter;
+	}
+
+	private ConfigParameterDescription createPortParameter() {
+		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(PORT,
+				LpeSupportedTypes.String);
+		samplingDelayParameter.setDefaultValue("3306");
+		samplingDelayParameter.setMandatory(true);
+		samplingDelayParameter.setDescription("Port");
+
+		return samplingDelayParameter;
+	}
+
+	private ConfigParameterDescription createUserParameter() {
+		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(USER,
+				LpeSupportedTypes.String);
+		samplingDelayParameter.setMandatory(true);
+		samplingDelayParameter.setDescription("User");
+
+		return samplingDelayParameter;
+	}
+
+	private ConfigParameterDescription createPasswordParameter() {
+		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(PASSWORD,
+				LpeSupportedTypes.String);
+		samplingDelayParameter.setMandatory(true);
+		samplingDelayParameter.setDescription("Password");
+
+		return samplingDelayParameter;
+	}
+
+	private ConfigParameterDescription createDatabaseParameter() {
+		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(DATABASE,
+				LpeSupportedTypes.String);
+		samplingDelayParameter.setMandatory(true);
+		samplingDelayParameter.setDescription("Database Name");
 
 		return samplingDelayParameter;
 	}
 
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(createConnectionStringParameter());
+		addConfigParameter(createHostParameter());
+		addConfigParameter(createPortParameter());
+		addConfigParameter(createUserParameter());
+		addConfigParameter(createPasswordParameter());
+		addConfigParameter(createDatabaseParameter());
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 

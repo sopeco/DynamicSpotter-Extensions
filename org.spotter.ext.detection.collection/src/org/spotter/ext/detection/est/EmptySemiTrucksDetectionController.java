@@ -44,6 +44,7 @@ import org.aim.artifacts.scopes.JmsScope;
 import org.aim.description.InstrumentationDescription;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
+import org.lpe.common.util.system.LpeSystemUtils;
 import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.IDetectionController;
@@ -141,7 +142,7 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 			List<Trace> traces = extractTraces(processRelatedTraceDataset, processRelatedMessagingDataset,
 					messageSizesDataset);
 
-			writeTracesToFile(result, traces, "traces");
+			// writeTracesToFile(result, traces, "traces");
 
 			List<AggTrace> aggregatedTraces = aggregateTraces(traces);
 
@@ -248,20 +249,39 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 		}
 	}
 
-	private void writeTracesToFile(SpotterResult result, List<?> traces, String fileName) {
-		PipedOutputStream outStream = null;
-		PipedInputStream inStream = null;
+	private void writeTracesToFile(final SpotterResult result, final List<?> traces, String fileName) {
+
 		try {
-			outStream = new PipedOutputStream();
-			inStream = new PipedInputStream(outStream);
+			final PipedOutputStream outStream = new PipedOutputStream();
+			PipedInputStream inStream = new PipedInputStream(outStream);
+
+			LpeSystemUtils.submitTask(new Runnable() {
+
+				@Override
+				public void run() {
+					BufferedWriter bWriter = new BufferedWriter(new OutputStreamWriter(outStream));
+					try {
+						for (Object trace : traces) {
+							bWriter.write(trace.toString());
+							bWriter.newLine();
+							bWriter.newLine();
+						}
+					} catch (IOException e) {
+
+					} finally {
+						if (bWriter != null) {
+							try {
+								bWriter.close();
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						}
+
+					}
+				}
+
+			});
 			getResultManager().storeTextResource(fileName, result, inStream);
-			BufferedWriter bWriter = new BufferedWriter(new OutputStreamWriter(outStream));
-			for (Object trace : traces) {
-				bWriter.write(trace.toString());
-				bWriter.newLine();
-				bWriter.newLine();
-			}
-			bWriter.close();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -336,7 +356,7 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 			Dataset messagingDataset, Dataset messageSizesDataset) {
 
 		if (operation.endsWith("send(javax.jms.Message)")) {
-			JmsMessageSizeRecord mSizeRecord = getMessageSizeRecord(processId, callId, messagingDataset,
+			JmsMessageSizeRecord mSizeRecord = getMessageSizeRecord(processId, callId +1 , messagingDataset,
 					messageSizesDataset);
 			if (mSizeRecord != null) {
 				trace.setSendMethod(true);

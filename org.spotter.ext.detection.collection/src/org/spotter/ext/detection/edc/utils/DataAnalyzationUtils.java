@@ -144,6 +144,9 @@ public class DataAnalyzationUtils {
 	public static void addQueriesToMethodCallSet(MethodCallSet set, Dataset responseTimes, Dataset queries,
 			Dataset threadTracing) {
 		for (SQLQueryRecord sqlRecord : queries.getRecords(SQLQueryRecord.class)) {
+			if(sqlRecord.getQueryString() == null){
+				continue;
+			}
 			Dataset querySet = selectCallID(sqlRecord.getCallId()).applyTo(responseTimes);
 			if (querySet == null) {
 				continue;

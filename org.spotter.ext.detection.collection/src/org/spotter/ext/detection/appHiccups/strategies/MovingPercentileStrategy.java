@@ -35,7 +35,8 @@ import org.spotter.shared.result.model.SpotterResult;
 public class MovingPercentileStrategy implements IHiccupAnalysisStrategy {
 	@Override
 	public List<Hiccup> findHiccups(final NumericPairList<Long, Double> responsetimeSeries,
-			final HiccupDetectionConfig hiccupConfig, double perfReqThreshold, double perfReqConfidence, DetectionResultManager resultManager, SpotterResult result) {
+			final HiccupDetectionConfig hiccupConfig, double perfReqThreshold, double perfReqConfidence,
+			DetectionResultManager resultManager, SpotterResult result) {
 		List<Hiccup> hiccups = new ArrayList<Hiccup>();
 		Hiccup currentHiccup = null;
 		double maxRT = Double.MIN_VALUE;
@@ -43,7 +44,6 @@ public class MovingPercentileStrategy implements IHiccupAnalysisStrategy {
 		double responseTime = 0.0;
 		long timestamp = 0L;
 		for (int i = 0; i < responsetimeSeries.size(); i++) {
-
 			timestamp = responsetimeSeries.get(i).getKey();
 			responseTime = responsetimeSeries.get(i).getValue();
 			mvaResponseTime = Utils.calculateWindowPercentile(responsetimeSeries, perfReqConfidence, i,

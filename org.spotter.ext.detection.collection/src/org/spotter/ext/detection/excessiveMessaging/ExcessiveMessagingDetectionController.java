@@ -89,25 +89,103 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 			return result;
 		}
 
-		Map<String, NumericPair<Double, Double>> networkSpeedsAndThresholds = calculateNetworkUtilizationThreshold(data);
-		boolean highUtilization = false;
+		boolean highMessagingOverhead = false;
 		if (analysisStrategy.equals(ExcessiveMessagingExtension.THRESHOLD_STRATEGY)) {
-			highUtilization = analyzeNetworkUtilization(data, result, networkSpeedsAndThresholds);
-		} else {
-			highUtilization = analyzeNetworkUtilizationGrowth(data, result, networkSpeedsAndThresholds);
+			Map<String, NumericPair<Double, Double>> networkSpeedsAndThresholds = calculateNetworkUtilizationThreshold(data);
+			if (networkSpeedsAndThresholds != null) {
+				highMessagingOverhead = analyzeNetworkUtilization(data, result, networkSpeedsAndThresholds);
+			}
+		} else if (analysisStrategy.equals(ExcessiveMessagingExtension.STAGNATION_STRATEGY)) {
+			Map<String, NumericPair<Double, Double>> networkSpeedsAndThresholds = calculateNetworkUtilizationThreshold(data);
+			if (networkSpeedsAndThresholds != null) {
+				highMessagingOverhead = analyzeNetworkUtilizationGrowth(data, result, networkSpeedsAndThresholds);
+			}
+		} else if (analysisStrategy.equals(ExcessiveMessagingExtension.MSG_THORUGHPUT_STAGNATION_STRATEGY)) {
+			highMessagingOverhead = analyzeMessageThroughput(data, result);
 		}
 
 		boolean queueSizesGrow = analyzeQueueSizes(data, result);
 
-		if (highUtilization || queueSizesGrow) {
+		if (highMessagingOverhead || queueSizesGrow) {
 			result.setDetected(true);
 		}
 		return result;
 	}
 
+	private boolean analyzeMessageThroughput(DatasetCollection data, SpotterResult result) {
+		Dataset msgStatisticsDataset = data.getDataSet(JmsServerRecord.class);
+		if (msgStatisticsDataset == null) {
+			return false;
+		}
+		List<Integer> users = new ArrayList<>(msgStatisticsDataset.getValueSet(
+				AbstractDetectionController.NUMBER_OF_USERS_KEY, Integer.class));
+		Collections.sort(users);
+		Set<String> queueNames = msgStatisticsDataset.getValueSet(JmsServerRecord.PAR_QUEUE_NAME, String.class);
+		for (String queueName : queueNames) {
+			int significantSteps = 0;
+			int firstSignificantNumUsers = -1;
+			int prevNumUsers = 0;
+			double prevThroughput = -1;
+			NumericPairList<Integer, Double> messageThroughputs = new NumericPairList<>();
+			boolean notZero = false;
+			for (Integer numUsers : users) {
+				Dataset tmpDataset = ParameterSelection.newSelection()
+						.select(AbstractDetectionController.NUMBER_OF_USERS_KEY, numUsers)
+						.select(JmsServerRecord.PAR_QUEUE_NAME, queueName).applyTo(msgStatisticsDataset);
+
+				List<Long> enqueueCounts = tmpDataset.getValues(JmsServerRecord.PAR_ENQUEUE_COUNT, Long.class);
+				List<Long> timeStamps = tmpDataset.getValues(JmsServerRecord.PAR_TIMESTAMP, Long.class);
+				long minTimestamp = LpeNumericUtils.min(timeStamps);
+				long maxTimestamp = LpeNumericUtils.max(timeStamps);
+				long minCount = LpeNumericUtils.min(enqueueCounts);
+				long maxCount = LpeNumericUtils.max(enqueueCounts);
+				if (maxCount - minCount > 0L) {
+					notZero = true;
+				}
+				double msgThroughput = ((double) (maxCount - minCount))
+						/ ((double) (maxTimestamp - minTimestamp) * 0.001);
+
+				messageThroughputs.add(numUsers, msgThroughput);
+
+				if (prevThroughput < 0) {
+					prevThroughput = msgThroughput;
+					continue;
+				}
+
+				if (msgThroughput <= prevThroughput * 1.05) {
+					significantSteps++;
+					if (firstSignificantNumUsers < 0) {
+						firstSignificantNumUsers = prevNumUsers;
+					}
+				} else {
+					significantSteps = 0;
+					firstSignificantNumUsers = -1;
+				}
+
+				prevNumUsers = numUsers;
+				prevThroughput = msgThroughput;
+			}
+			if (notZero) {
+				AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
+				chartBuilder.startChart(queueName, "number of users", "throughput");
+				chartBuilder.addScatterSeriesWithLine(messageThroughputs, "message throughput");
+				getResultManager().storeImageChartResource(chartBuilder, "Msg. Throughput-" + queueName, result);
+
+				if (firstSignificantNumUsers > 1 && significantSteps >= requiredSignificantSteps) {
+					result.addMessage("Message throughput stagnates at queue " + queueName + "!");
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private boolean analyzeQueueSizes(DatasetCollection data, SpotterResult result) {
 
 		Dataset msgStatisticsDataset = data.getDataSet(JmsServerRecord.class);
+		if (msgStatisticsDataset == null) {
+			return false;
+		}
 		List<Integer> users = new ArrayList<>(msgStatisticsDataset.getValueSet(
 				AbstractDetectionController.NUMBER_OF_USERS_KEY, Integer.class));
 		Collections.sort(users);
@@ -115,15 +193,19 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 		for (String queueName : queueNames) {
 			List<Long> prevSizes = null;
 			int significantSteps = 0;
-			int firstSignificantNumUsers = 0;
+			int firstSignificantNumUsers = -1;
 			int prevNumUsers = 0;
 			NumericPairList<Integer, Long> qSizesForChart = new NumericPairList<>();
+			boolean allZero = true;
 			for (Integer numUsers : users) {
 				List<Long> qSizes = LpeNumericUtils.filterOutliersUsingIQR(ParameterSelection.newSelection()
 						.select(AbstractDetectionController.NUMBER_OF_USERS_KEY, numUsers)
 						.select(JmsServerRecord.PAR_QUEUE_NAME, queueName).applyTo(msgStatisticsDataset)
 						.getValues(JmsServerRecord.PAR_QUEUE_SIZE, Long.class));
 				for (Long s : qSizes) {
+					if (s > 0L) {
+						allZero = false;
+					}
 					qSizesForChart.add(numUsers, s);
 				}
 				if (prevSizes != null) {
@@ -152,12 +234,15 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 				prevNumUsers = numUsers;
 				prevSizes = qSizes;
 			}
+			if (allZero) {
+				continue;
+			}
 			AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-			chartBuilder.startChartWithoutLegend(queueName, "Number of Users", "Queue Size");
-			chartBuilder.addScatterSeries(qSizesForChart, "Queue Size");
+			chartBuilder.startChartWithoutLegend(queueName, "number of users", "queue size");
+			chartBuilder.addScatterSeries(qSizesForChart, "queue size");
 			getResultManager().storeImageChartResource(chartBuilder, "QueueSize-" + queueName, result);
 
-			if (firstSignificantNumUsers > 0 && significantSteps >= requiredSignificantSteps) {
+			if (firstSignificantNumUsers > 1 && significantSteps >= requiredSignificantSteps) {
 				result.addMessage("Message queue " + queueName + " grows significantly with the load!");
 				return true;
 			}
@@ -169,6 +254,9 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 		Map<String, NumericPair<Double, Double>> result = new HashMap<>();
 
 		Dataset msgStatisticsDataset = data.getDataSet(JmsServerRecord.class);
+		if (msgStatisticsDataset == null) {
+			return null;
+		}
 		double avgMessageSize = 8.0 * LpeNumericUtils.average(msgStatisticsDataset.getValueSet(
 				JmsServerRecord.PAR_AVG_MESSAGE_SIZE, Double.class));
 
@@ -257,9 +345,9 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 				}
 
 				AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-				chartBuilder.startChart(interfaceName, "#Users", "Utilization [%]");
-				chartBuilder.addUtilizationLineSeries(utils, "Network Utilization", true);
-				chartBuilder.addHorizontalLine((utilizationThreshold / networkSpeed) * 100.0, "Threshold");
+				chartBuilder.startChart(interfaceName, "number of users", "utilization [%]");
+				chartBuilder.addUtilizationLineSeries(utils, "network utilization", true);
+				chartBuilder.addHorizontalLine((utilizationThreshold / networkSpeed) * 100.0, "threshold");
 				getResultManager().storeImageChartResource(chartBuilder, "Network" + interfaceName, result);
 			}
 
@@ -280,6 +368,7 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 
 				String interfaceName = getInterfaceName(node, nwInterface);
 				double networkSpeed = speedThresholdPair.get(interfaceName).getKey();
+				double threshold = speedThresholdPair.get(interfaceName).getValue();
 				NumericPairList<Integer, Double> utils = new NumericPairList<>();
 
 				int numSignificantSteps = 0;
@@ -328,7 +417,7 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 					}
 
 				}
-				if (numSignificantSteps >= requiredSignificantSteps && maxUtil > 0.5) {
+				if (numSignificantSteps >= requiredSignificantSteps && maxUtil > Math.min(0.5, threshold)) {
 					stagnationDetected = true;
 					result.addMessage("Network interface " + interfaceName + " has a stagnating growth");
 				}

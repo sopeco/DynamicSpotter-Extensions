@@ -21,10 +21,10 @@ public class OLBExtension extends AbstractDetectionExtension {
 	public static final String CPU_UTILIZATION_THRESHOLD_KEY = "cpuThreshold";
 	public static final String EXPERIMENT_STEPS_KEY = "numExperiments";
 	public static final double CPU_UTILIZATION_THRESHOLD_DEFAULT = 90.0;
-	protected static final String SCOPE_KEY = "scope";
-	protected static final String ENTRY_SCOPE = "entry point scope";
-	protected static final String SYNC_SCOPE = "synchronization scope";
-	protected static final String DB_SCOPE = "database scope";
+	public static final String SCOPE_KEY = "scope";
+	public static final String ENTRY_SCOPE = "entry point scope";
+	public static final String SYNC_SCOPE = "synchronization scope";
+	public static final String DB_SCOPE = "database scope";
 	public static final int EXPERIMENT_STEPS_DEFAULT = 4;
 	
 	protected static final String DETECTION_STRATEGY_KEY = "strategy";

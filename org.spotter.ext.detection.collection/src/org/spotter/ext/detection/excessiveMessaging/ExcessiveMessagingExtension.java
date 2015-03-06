@@ -14,7 +14,8 @@ public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
 	
 	protected static final String DETECTION_STRATEGY_KEY = "strategy";
 	protected static final String THRESHOLD_STRATEGY = "fix threshold strategy";
-	protected static final String STAGNATION_STRATEGY = "stagnation strategy";
+	protected static final String STAGNATION_STRATEGY = "network stagnation strategy";
+	protected static final String MSG_THORUGHPUT_STAGNATION_STRATEGY = "message throughput stagnation strategy";
 	
 	public static final double REQUIRED_CONFIDENCE_LEVEL_DEFAULT = 0.95;
 	public static final int REQUIRED_SIGNIFICANT_STEPS_DEFAULT = 2;
@@ -57,6 +58,7 @@ public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
 		Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(STAGNATION_STRATEGY);
 		scopeOptions.add(THRESHOLD_STRATEGY);
+		scopeOptions.add(MSG_THORUGHPUT_STAGNATION_STRATEGY);
 		scopeParameter.setOptions(scopeOptions);
 		scopeParameter.setDefaultValue(STAGNATION_STRATEGY);
 		scopeParameter.setDescription("This parameter determines the strategy, "

@@ -106,6 +106,9 @@ public class AppHiccupsController extends AbstractDetectionController implements
 			Dataset operationSpecificDataset = selectOperation.applyTo(rtDataset);
 
 			NumericPairList<Long, Double> responseTimeSeries = Utils.toTimestampRTPairs(operationSpecificDataset);
+			if (responseTimeSeries.size() <= 5) {
+				continue;
+			}
 			// sort chronologically
 			responseTimeSeries.sort();
 			List<Hiccup> hiccups = analysisStrategyImpl.findHiccups(responseTimeSeries, hiccupDetectionConfig,
@@ -132,7 +135,9 @@ public class AppHiccupsController extends AbstractDetectionController implements
 	private void createChart(SpotterResult result, String operation, NumericPairList<Long, Double> responseTimeSeries,
 			List<Hiccup> hiccups, long perfReqThreshold) {
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(operation, "Experiment Time [ms]", "Response Time [ms]");
+		String operationName = operation.contains("(")?operation.substring(0, operation.indexOf("(")):operation;
+		
+		chartBuilder.startChart(operationName, "Experiment Time [ms]", "Response Time [ms]");
 		chartBuilder.addTimeSeries(responseTimeSeries, "Response Times");
 		chartBuilder.addHorizontalLine(perfReqThreshold, "Perf. Requirement");
 		long minTimestamp = responseTimeSeries.getKeyMin();

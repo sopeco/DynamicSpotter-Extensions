@@ -1,1 +1,2 @@
 org.spotter.ext.workload.simple.SimpleWorkloadExtension
+org.spotter.ext.workload.tpcw.TpcwRbeExtension

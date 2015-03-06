@@ -25,6 +25,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.Future;
 
+import javax.net.ssl.HostnameVerifier;
+
 import org.aim.api.exceptions.MeasurementException;
 import org.aim.api.measurement.MeasurementData;
 import org.aim.api.measurement.collector.AbstractDataSource;
@@ -50,7 +52,7 @@ import org.spotter.core.measurement.AbstractMeasurementAdapter;
 public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runnable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DBMSMeasurement.class);
-	public static final String CONNECTION_STRING = "org.spotter.sampling.mysql.connectionString";
+	
 	public static Integer instanceId = 1;
 	private AbstractDataSource dataSource;
 	private Future<?> measurementTask;
@@ -60,7 +62,11 @@ public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runna
 	private boolean running;
 	private boolean samplerActivated = false;
 	private long delay;
-	private String dbConnectionString;
+	private String mySQLHost;
+	private String mySQLPort;
+	private String mySQLUser;
+	private String mySQLPW;
+	private String mySQLdatabase;
 	protected static final long DEFAULT_DELAY = 500;
 
 	/**
@@ -85,7 +91,8 @@ public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runna
 	public void enableMonitoring() throws MeasurementException {
 		if (samplerActivated) {
 			try {
-				jdbcConnection = DriverManager.getConnection(dbConnectionString);
+				String dbConnectionString = "jdbc:mysql://" + mySQLHost + ":"+ mySQLPort + "/" + mySQLdatabase;
+				jdbcConnection = DriverManager.getConnection(dbConnectionString,mySQLUser,mySQLPW);
 				sqlStatement = jdbcConnection.prepareStatement(SQL_QUERY);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
@@ -138,11 +145,11 @@ public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runna
 	@Override
 	public void initialize() throws MeasurementException {
 
-		if (getProperties().containsKey(CONNECTION_STRING)) {
-			dbConnectionString = getProperties().getProperty(CONNECTION_STRING);
-		} else {
-			throw new RuntimeException("Connection String to database has not been specified!");
-		}
+		mySQLHost = getProperties().getProperty(DBMSMeasurementExtension.HOST);
+		mySQLPort = getProperties().getProperty(DBMSMeasurementExtension.PORT);
+		mySQLUser = getProperties().getProperty(DBMSMeasurementExtension.USER);
+		mySQLPW= getProperties().getProperty(DBMSMeasurementExtension.PASSWORD);
+		mySQLdatabase = getProperties().getProperty(DBMSMeasurementExtension.DATABASE);
 
 		Properties collectorProperties = GlobalConfiguration.getInstance().getProperties();
 		synchronized (instanceId) {
@@ -216,7 +223,7 @@ public class DBMSMeasurement extends AbstractMeasurementAdapter implements Runna
 			DBStatisticsRecrod record = new DBStatisticsRecrod();
 			record.setTimeStamp(System.currentTimeMillis());
 			record.setNumQueueries(numQueueries);
-			record.setProcessId(dbConnectionString);
+			record.setProcessId(mySQLHost);
 			record.setNumLockWaits(numLockWaits);
 			record.setLockTime(lockTime);
 			dataSource.newRecord(record);
