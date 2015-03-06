@@ -35,6 +35,7 @@ import org.aim.artifacts.records.ThreadTracingRecord;
 import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.LpeStringUtils;
+import org.lpe.common.util.NumericPair;
 import org.lpe.common.util.NumericPairList;
 import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.ext.detection.edc.EDCDetectionController;
@@ -315,6 +316,9 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 				List<Double> singleUserRRTs = DataAnalyzationUtils.getRelativeQueryResponseTimes(query,
 						singleUserServletQueryHierarchy);
 				double singleUserART = LpeNumericUtils.average(singleUserRRTs);
+
+				createRelativeChart(servletMethod, query, numUsers, relativeRT, 1.0, singleUserART, result);
+
 				DecimalFormat df = new DecimalFormat("#.##");
 
 				messageBuilder.append("\n");
@@ -341,6 +345,39 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		}
 
 		return result;
+	}
+
+	private void createRelativeChart(String servlet, String query, long numMaxUsers, double multiUserQueryRRT,
+			double singleUserRRT, double singleUserQueryRRT, SpotterResult result) {
+		NumericPairList<Integer, Double> muRRTSeries = new NumericPairList<>();
+		for (int i = 0; i <= 100; i += 4) {
+			muRRTSeries.add(new NumericPair<Integer, Double>(i, 100.0));
+		}
+
+		NumericPairList<Integer, Double> muQRRTSeries = new NumericPairList<>();
+		for (int i = 1; i <= 100; i += 4) {
+			muQRRTSeries.add(new NumericPair<Integer, Double>(i, multiUserQueryRRT * 100.0));
+		}
+
+		NumericPairList<Integer, Double> suRRTSeries = new NumericPairList<>();
+		for (int i = 2; i <= 100; i += 4) {
+			suRRTSeries.add(new NumericPair<Integer, Double>(i, singleUserRRT * 100.0));
+		}
+
+		NumericPairList<Integer, Double> suQRRTSeries = new NumericPairList<>();
+		for (int i = 3; i <= 100; i += 4) {
+			suQRRTSeries.add(new NumericPair<Integer, Double>(i, singleUserQueryRRT * singleUserRRT * 100.0));
+		}
+
+		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
+
+		chartBuilder.startChart("Relation between " + servlet + " and " + query, "", "Relative Response Time [%]");
+		chartBuilder.addScatterSeries(muRRTSeries, "AVG servlet Response Time with " + numMaxUsers + " users");
+		chartBuilder.addScatterSeries(muQRRTSeries, "AVG query Response Time with " + numMaxUsers + " users");
+		chartBuilder.addScatterSeries(suRRTSeries, "AVG servlet Response Time with 1 user");
+		chartBuilder.addScatterSeries(suQRRTSeries, "AVG query Response Time with 1 user");
+
+		controller.getResultManager().storeImageChartResource(chartBuilder, "Relative Response Times", result);
 	}
 
 	private void createCharts(String servlet, String query, long numMaxUsers,
