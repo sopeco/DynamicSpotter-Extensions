@@ -7,6 +7,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -110,14 +111,15 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 		Map<String, Integer> numServersMap = getNumberOfCPUCores(cpuUtilDataset);
 		numServersMap.putAll(getNumberServers(networkInfoDataset));
 
-		List<String> candidateOperations = analyseResponseTimesIncrease(result, numUsersList, responseTimesMap);
-		Set<String> operations = new HashSet<>();
-		operations.addAll(responseTimesMap.keySet());
-		for (String operation : operations) {
-			if (!candidateOperations.contains(operation)) {
-				responseTimesMap.remove(operation);
-			}
-		}
+		// List<String> candidateOperations =
+		// analyseResponseTimesIncrease(result, numUsersList, responseTimesMap);
+		// Set<String> operations = new HashSet<>();
+		// operations.addAll(responseTimesMap.keySet());
+		// for (String operation : operations) {
+		// if (!candidateOperations.contains(operation)) {
+		// responseTimesMap.remove(operation);
+		// }
+		// }
 		analyzeOLB(result, numUsersList, responseTimesMap, utilsMap, numServersMap);
 
 		return result;
@@ -182,56 +184,108 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 			Map<String, NumericPairList<Integer, Double>> responseTimesMap,
 			Map<String, NumericPairList<Integer, Double>> utilsMap, Map<String, Integer> numServersMap) {
 		Set<String> utilsChartsCreatedFor = new HashSet<>();
-		for (String operation : responseTimesMap.keySet()) {
+		Map<String, Double> operationScales = new HashMap<>();
+		Map<String, NumericPairList<Integer, Double>> rtThresholdsForChart = new HashMap<String, NumericPairList<Integer, Double>>();
+		Map<String, NumericPairList<Integer, Double>> chartResponseTimes = new HashMap<String, NumericPairList<Integer, Double>>();
+
+		operationLoop: for (String operation : responseTimesMap.keySet()) {
 			NumericPairList<Integer, Double> responseTimes = responseTimesMap.get(operation);
-			NumericPairList<Integer, Double> chartResponseTimes = new NumericPairList<>();
-			double singleUserResponseTime = getValueForNumUsers(responseTimes, responseTimes.getKeyMin());
+			double singleUserResponseTime = 0;
+			try {
+				singleUserResponseTime = getValueForNumUsers(responseTimes, responseTimes.getKeyMin());
+			} catch (Exception e) {
+				continue operationLoop;
+			}
 			singleUserResponseTime = Math.max(singleUserResponseTime, 15.0);
 			boolean qtDetected = true;
 			int i = 0;
+
+			Map<Integer, Double> thresholds = new HashMap<>();
+
+			boolean fixThresholdExceeded = false;
 			for (String rersourceID : utilsMap.keySet()) {
-				// prepare chart data container
-				NumericPairList<Integer, Double> rtThresholdsForChart = new NumericPairList<>();
 				NumericPairList<Integer, Double> utils = utilsMap.get(rersourceID);
 				int numServers = numServersMap.get(rersourceID);
 				createUtilChart(result, utilsChartsCreatedFor, rersourceID, utils);
-				boolean responseTimesUnderThresholdCurve = true;
-
 				for (int numUsers : numUsersList) {
-					double responseTime = getValueForNumUsers(responseTimes, numUsers);
-					if (i < numUsersList.size()) {
-						chartResponseTimes.add(numUsers, responseTime);
-					}
-
 					double utilization = getValueForNumUsers(utils, numUsers);
-					double saveUtil = Math.min(0.999, utilization * 1.05);
-
+					if(utilization>0.9){
+						fixThresholdExceeded=true;
+					}
+					double saveUtil = Math.min(0.999, utilization + 0.1);
+					if (!thresholds.containsKey(numUsers)) {
+						thresholds.put(numUsers, 0.0);
+					}
 					// response time threshold derived from queueing theory for
 					// multi-server queues
-					double rtThreshold = singleUserResponseTime / (numServers * (1 - saveUtil))
+					double t = singleUserResponseTime / (numServers * (1 - saveUtil))
 							* LpeNumericUtils.calculateErlangsCFormula(numServers, saveUtil) + singleUserResponseTime;
-
-					if (responseTime > rtThreshold) {
-						responseTimesUnderThresholdCurve = false;
-
-					}
-
-					rtThresholdsForChart.add(numUsers, rtThreshold);
-					i++;
-				}
-
-				if (responseTimesUnderThresholdCurve) {
-					qtDetected = false;
-				} else {
-					createDetectedChart(result, utilsChartsCreatedFor, operation, chartResponseTimes, rersourceID,
-							rtThresholdsForChart, utils);
+					thresholds.put(numUsers, Math.max(t, thresholds.get(numUsers)));
 				}
 
 			}
+			if(fixThresholdExceeded){
+				continue operationLoop;
+			}
+			rtThresholdsForChart.put(operation, new NumericPairList<Integer, Double>());
+			chartResponseTimes.put(operation, new NumericPairList<Integer, Double>());
+			boolean responseTimesUnderThresholdCurve = true;
+			double maxResponseTime = Double.MIN_VALUE;
+			for (int numUsers : numUsersList) {
+				double responseTime = 0.0;
+				try {
+					responseTime = getValueForNumUsers(responseTimes, numUsers);
+					maxResponseTime = Math.max(maxResponseTime, responseTime);
+				} catch (Exception e) {
+					continue operationLoop;
+				}
+				if (i < numUsersList.size()) {
+					chartResponseTimes.get(operation).add(numUsers, responseTime);
+				}
 
-			if (qtDetected) {
-				result.setDetected(true);
-				result.addMessage("OLB detected in service: " + operation);
+				if (responseTime > thresholds.get(numUsers)) {
+					responseTimesUnderThresholdCurve = false;
+
+				}
+
+				rtThresholdsForChart.get(operation).add(numUsers, thresholds.get(numUsers));
+				i++;
+			}
+
+			if (!responseTimesUnderThresholdCurve) {
+				operationScales.put(operation, maxResponseTime);
+
+			}
+
+		}
+		double sum = 0.0;
+		for (Double d : operationScales.values()) {
+			sum += d;
+		}
+		for (String op : operationScales.keySet()) {
+			double scale = operationScales.get(op);
+			operationScales.put(op, scale / sum);
+		}
+		List<Entry<String, Double>> sortedEntryList = new ArrayList<>();
+
+		sortedEntryList.addAll(operationScales.entrySet());
+		Collections.sort(sortedEntryList, new Comparator<Entry<String, Double>>() {
+
+			@Override
+			public int compare(Entry<String, Double> o1, Entry<String, Double> o2) {
+				return o2.getValue().compareTo(o1.getValue());
+			}
+		});
+
+		double sumPercent = 0.0;
+		for (Entry<String, Double> entry : sortedEntryList) {
+			result.setDetected(true);
+			result.addMessage("OLB detected in service: " + entry.getKey());
+			createDetectedChart(result, entry.getKey(), chartResponseTimes.get(entry.getKey()),
+					rtThresholdsForChart.get(entry.getKey()));
+			sumPercent += entry.getValue();
+			if (sumPercent >= 0.8) {
+				break;
 			}
 		}
 	}
@@ -239,28 +293,21 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 	private void createRTChart(SpotterResult result, String operation, NumericPairList<Integer, Double> responseTimes) {
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder
-				.startChart(operation.substring(0, operation.indexOf("(")), "number of users", "Response Time [ms]");
-		chartBuilder.addScatterSeries(responseTimes, "Avg. Response Times");
+				.startChart(operation.substring(0, operation.indexOf("(")), "number of users", "response time [ms]");
+		chartBuilder.addScatterSeries(responseTimes, "avg. response times");
 		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
 	}
 
-	private void createDetectedChart(SpotterResult result, Set<String> utilsChartsCreatedFor, String operation,
-			NumericPairList<Integer, Double> responseTimes, String resourceId,
-			NumericPairList<Integer, Double> rtThresholdsForChart, NumericPairList<Integer, Double> cpuUtils) {
+	private void createDetectedChart(SpotterResult result, String operation,
+			NumericPairList<Integer, Double> responseTimes, NumericPairList<Integer, Double> rtThresholdsForChart) {
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(operation.substring(0, operation.indexOf("(")) + " - " + resourceId, "number of users",
-				"Response Time [ms]");
-		chartBuilder.addScatterSeries(responseTimes, "Avg. Response Times");
-		chartBuilder.addLineSeries(rtThresholdsForChart, "Threshold for Response Times");
+		String operationName = operation.contains("(") ? operation.substring(0, operation.indexOf("(")) : operation;
+
+		chartBuilder.startChart(operationName, "number of users", "response time [ms]");
+		chartBuilder.addScatterSeriesWithLine(responseTimes, "avg. response times");
+		chartBuilder.addLineSeries(rtThresholdsForChart, "response times threshold");
 		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Detected", result);
-		if (!utilsChartsCreatedFor.contains(resourceId)) {
-			chartBuilder = AnalysisChartBuilder.getChartBuilder();
-			chartBuilder.startChart("CPU on " + resourceId, "number of users", "Utilization [%]");
-			chartBuilder.addUtilizationLineSeries(cpuUtils, "Utilization", true);
-			mainDetectionController.getResultManager().storeImageChartResource(chartBuilder,
-					"Utilization-" + resourceId, result);
-			utilsChartsCreatedFor.add(resourceId);
-		}
+
 	}
 
 	private void createUtilChart(SpotterResult result, Set<String> utilsChartsCreatedFor, String resourceId,
@@ -268,8 +315,8 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 		AnalysisChartBuilder chartBuilder = null;
 		if (!utilsChartsCreatedFor.contains(resourceId)) {
 			chartBuilder = AnalysisChartBuilder.getChartBuilder();
-			chartBuilder.startChart("CPU on " + resourceId, "number of users", "Utilization [%]");
-			chartBuilder.addUtilizationLineSeries(cpuUtils, "Utilization", true);
+			chartBuilder.startChart("CPU on " + resourceId, "number of users", "utilization [%]");
+			chartBuilder.addUtilizationLineSeries(cpuUtils, "utilization", true);
 			mainDetectionController.getResultManager().storeImageChartResource(chartBuilder,
 					"Utilization-" + resourceId, result);
 			utilsChartsCreatedFor.add(resourceId);
@@ -345,7 +392,7 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 		List<SQLQueryRecord> sqlRecords = sqlDataset.getRecords(SQLQueryRecord.class);
 		operationLoop: for (String operation : rtDataset.getValueSet(ResponseTimeRecord.PAR_OPERATION, String.class)) {
 
-			if (operation.contains("execute") || operation.contains("update")) {
+			if (operation.contains("execute")) {
 				Map<String, String> queryMap = new HashMap<>();
 				Map<String, NumericPairList<Integer, Double>> rtMap = new HashMap<>();
 				for (Integer numUsers : numUsersList) {
@@ -372,13 +419,18 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 							sql = LpeStringUtils.getGeneralizedQuery(sqlRecord.getQueryString());
 							if (sql == null) {
 								sql = sqlRecord.getQueryString();
-								if(sql.contains("$")){
-									int endIndex = Math.min(sql.indexOf(",", sql.indexOf("$")), sql.indexOf(" ", sql.indexOf("$")));
-									String name = sql.substring(sql.indexOf("$"),endIndex); 
+								if (sql.contains("$")) {
+									int idx_1 = sql.indexOf(",", sql.indexOf("$"));
+									int idx_2 = sql.indexOf(" ", sql.indexOf("$"));
+									idx_1 = idx_1 < 0 ? Integer.MAX_VALUE : idx_1;
+									idx_2 = idx_2 < 0 ? Integer.MAX_VALUE : idx_2;
+									int endIndex = Math.min(idx_1, idx_2);
+									String name = sql.substring(sql.indexOf("$"), endIndex);
 									sql = sql.replace(name, "tmp");
 								}
 							}
 						} catch (Exception e) {
+
 							continue;
 						}
 						int hash = sql.hashCode();
@@ -406,14 +458,12 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 
 					}
 
-					
 				}
 				storeQueryMap(queryMap, result);
 				for (String opName : rtMap.keySet()) {
 					resultMap.put(opName, rtMap.get(opName));
 					createRTChart(result, opName, resultMap.get(opName));
 				}
-				
 
 			} else {
 				NumericPairList<Integer, Double> responseTimePairList = new NumericPairList<>();

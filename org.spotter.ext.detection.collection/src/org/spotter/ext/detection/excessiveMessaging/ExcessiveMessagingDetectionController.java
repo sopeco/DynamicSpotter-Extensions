@@ -167,8 +167,8 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 			}
 			if (notZero) {
 				AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-				chartBuilder.startChart(queueName, "Number of Users", "Throughput");
-				chartBuilder.addScatterSeries(messageThroughputs, "Msg. Throughput");
+				chartBuilder.startChart(queueName, "number of users", "throughput");
+				chartBuilder.addScatterSeriesWithLine(messageThroughputs, "message throughput");
 				getResultManager().storeImageChartResource(chartBuilder, "Msg. Throughput-" + queueName, result);
 
 				if (firstSignificantNumUsers > 1 && significantSteps >= requiredSignificantSteps) {
@@ -238,8 +238,8 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 				continue;
 			}
 			AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-			chartBuilder.startChartWithoutLegend(queueName, "Number of Users", "Queue Size");
-			chartBuilder.addScatterSeries(qSizesForChart, "Queue Size");
+			chartBuilder.startChartWithoutLegend(queueName, "number of users", "queue size");
+			chartBuilder.addScatterSeries(qSizesForChart, "queue size");
 			getResultManager().storeImageChartResource(chartBuilder, "QueueSize-" + queueName, result);
 
 			if (firstSignificantNumUsers > 1 && significantSteps >= requiredSignificantSteps) {
@@ -345,9 +345,9 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 				}
 
 				AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-				chartBuilder.startChart(interfaceName, "#Users", "Utilization [%]");
-				chartBuilder.addUtilizationLineSeries(utils, "Network Utilization", true);
-				chartBuilder.addHorizontalLine((utilizationThreshold / networkSpeed) * 100.0, "Threshold");
+				chartBuilder.startChart(interfaceName, "number of users", "utilization [%]");
+				chartBuilder.addUtilizationLineSeries(utils, "network utilization", true);
+				chartBuilder.addHorizontalLine((utilizationThreshold / networkSpeed) * 100.0, "threshold");
 				getResultManager().storeImageChartResource(chartBuilder, "Network" + interfaceName, result);
 			}
 

@@ -98,13 +98,14 @@ public class TTestStrategy implements ITrafficJamStrategy {
 			}
 
 			AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-			chartBuilder.startChart(operation.substring(0, operation.indexOf("(")), "Number of Users", "Response Time [ms]");
-			chartBuilder.addScatterSeries(rawData, "Response Times");
+			String operationName = operation.contains("(")?operation.substring(0, operation.indexOf("(")):operation;
+			chartBuilder.startChart(operationName, "number of users", "response time [ms]");
+			chartBuilder.addScatterSeries(rawData, "response times");
 			mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
 
 			chartBuilder = AnalysisChartBuilder.getChartBuilder();
-			chartBuilder.startChart(operation.substring(0, operation.indexOf("(")), "Number of Users", "CI: Response Times [ms]");
-			chartBuilder.addScatterSeriesWithErrorBars(means, ci, "Response Times");
+			chartBuilder.startChart(operationName, "number of users", "response time [ms]");
+			chartBuilder.addScatterSeriesWithErrorBars(means, ci, "avg. response times");
 			mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Confidence Intervals",
 					result);
 

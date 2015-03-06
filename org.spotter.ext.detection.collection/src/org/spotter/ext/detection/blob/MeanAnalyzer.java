@@ -78,9 +78,9 @@ public class MeanAnalyzer implements IBlobAnalyzer {
 		}
 
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart("Components' Messaging Times", "Component", "Messaging Time [ms]");
-		chartBuilder.addScatterSeries(ownValues, "Messaging Time");
-		chartBuilder.addHorizontalLine(threshold, "3-Sigma Threshold");
+		chartBuilder.startChart("Components' Messaging Times", "component", "messaging time [ms]");
+		chartBuilder.addScatterSeries(ownValues, "messaging time");
+		chartBuilder.addHorizontalLine(threshold, "3-Sigma threshold");
 		resultManager.storeImageChartResource(chartBuilder, "Messaging Times", result);
 		return blobs;
 

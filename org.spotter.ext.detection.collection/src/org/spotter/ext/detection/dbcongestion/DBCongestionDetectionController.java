@@ -159,7 +159,7 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 
 			double actualThreshold = cpuThreshold;
 			if (qtStrategy) {
-				actualThreshold = LpeNumericUtils.getUtilizationForResponseTimeFactorQT(3, mapNumCores.get(processID))*0.9;
+				actualThreshold = LpeNumericUtils.getUtilizationForResponseTimeFactorQT(3, mapNumCores.get(processID)) * 0.9;
 			} else {
 				actualThreshold = cpuThreshold;
 			}
@@ -170,9 +170,9 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 		}
 
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(processID, "Number of Users", "CPU Utilization [%]");
-		chartBuilder.addScatterSeries(chartDataUtils, "Utilization");
-		chartBuilder.addHorizontalLine(cpuThreshold, "Threshold");
+		chartBuilder.startChart(processID, "number of users", "utilization [%]");
+		chartBuilder.addUtilizationLineSeries(chartDataUtils, "CPU utilization", true);
+		chartBuilder.addHorizontalLine(cpuThreshold * 100.0, "Threshold");
 		getResultManager().storeImageChartResource(chartBuilder, "DB-CPU Utilization", result);
 
 		return detected;
@@ -262,13 +262,13 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 		}
 
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(dbId, "Num Users", "Avg. LockTime [ms]");
-		chartBuilder.addScatterSeries(rawData, "Lock Times");
+		chartBuilder.startChart(dbId, "number of users", "avg. locking time [ms]");
+		chartBuilder.addScatterSeries(rawData, "locking times");
 		getResultManager().storeImageChartResource(chartBuilder, "Lock Times", result);
 
 		chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(dbId, "Num Users", "CI: Lock Times [ms]");
-		chartBuilder.addScatterSeriesWithErrorBars(means, ci, "Lock Times");
+		chartBuilder.startChart(dbId, "number of users", "locking time [ms]");
+		chartBuilder.addScatterSeriesWithErrorBars(means, ci, "locking times");
 		getResultManager().storeImageChartResource(chartBuilder, "Confidence Intervals", result);
 
 		if (firstSignificantNumUsers > 0 && significantSteps >= requiredSignificantSteps) {

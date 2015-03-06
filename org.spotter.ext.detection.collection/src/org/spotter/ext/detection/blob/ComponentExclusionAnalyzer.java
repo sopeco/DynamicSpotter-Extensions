@@ -82,9 +82,9 @@ public class ComponentExclusionAnalyzer implements IBlobAnalyzer {
 		}
 
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart("Components' Messaging Contributions", "Component", "Messaging Time [ms]");
-		chartBuilder.addScatterSeries(ownValues, "Messaging Contribution");
-		chartBuilder.addScatterSeriesWithErrorBars(excludedMeans, excludedThresholds, "Individual Thresholds");
+		chartBuilder.startChart("Components' Messaging Contributions", "component", "messaging time [ms]");
+		chartBuilder.addScatterSeries(ownValues, "messaging contribution");
+		chartBuilder.addScatterSeriesWithErrorBars(excludedMeans, excludedThresholds, "individual thresholds");
 		resultManager.storeImageChartResource(chartBuilder, "Messaging Contributions", result);
 		return blobs;
 	}

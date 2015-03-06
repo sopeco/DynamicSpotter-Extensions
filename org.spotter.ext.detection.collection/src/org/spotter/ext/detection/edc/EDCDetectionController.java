@@ -47,7 +47,7 @@ import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
 import org.spotter.shared.status.DiagnosisStatus;
 
-public class EDCDetectionController extends AbstractDetectionController implements IExperimentReuser {
+public class EDCDetectionController extends AbstractDetectionController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EDCDetectionController.class);
 
@@ -124,10 +124,6 @@ public class EDCDetectionController extends AbstractDetectionController implemen
 		return strategy.analyze();
 	}
 
-	@Override
-	public InstrumentationDescription getInstrumentationDescription() {
-		return getMainInstrumentationDescription(true);
-	}
 
 	private InstrumentationDescription getMainInstrumentationDescription(boolean useGranularity) {
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();

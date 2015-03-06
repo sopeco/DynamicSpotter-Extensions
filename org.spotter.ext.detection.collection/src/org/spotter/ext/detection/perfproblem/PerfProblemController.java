@@ -121,17 +121,18 @@ public class PerfProblemController extends AbstractDetectionController {
 	private void createChart(double perfReqThreshold, double perfReqConfidence, SpotterResult result, String operation,
 			List<Double> responseTimes, NumericPairList<Long, Double> responseTimeSeries) {
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart("CDF - " + operation.substring(0, operation.indexOf("(")), "Response Time [ms]", "Cummulative Probability [%]");
+		String operationName = operation.contains("(")?operation.substring(0, operation.indexOf("(")):operation;
+		chartBuilder.startChart("CDF - " + operationName, "response time [ms]", "cummulative probability [%]");
 		chartBuilder.addCDFSeries(responseTimes, "CDF");
-		chartBuilder.addHorizontalLine(perfReqConfidence * _100_PERCENT, "Requirements Confidence");
-		chartBuilder.addVerticalLine(perfReqThreshold, "Performance Requirement");
+		chartBuilder.addHorizontalLine(perfReqConfidence * _100_PERCENT, "requirements confidence");
+		chartBuilder.addVerticalLine(perfReqThreshold, "requirements threshold");
 
 		getResultManager().storeImageChartResource(chartBuilder, "cummulativeDistribution", result);
 
 		chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(operation.substring(0, operation.indexOf("(")), "Experiment Time [ms]", "Response Time [ms]");
-		chartBuilder.addTimeSeries(responseTimeSeries, "Response Times");
-		chartBuilder.addHorizontalLine(perfReqThreshold, "Performance Requirement");
+		chartBuilder.startChart(operationName, "experiment time [ms]", "response time [ms]");
+		chartBuilder.addTimeSeries(responseTimeSeries, "response times");
+		chartBuilder.addHorizontalLine(perfReqThreshold, "requirements threshold");
 
 		getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
 	}

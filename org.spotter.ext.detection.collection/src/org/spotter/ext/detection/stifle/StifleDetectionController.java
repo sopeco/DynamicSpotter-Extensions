@@ -141,13 +141,27 @@ public class StifleDetectionController extends AbstractDetectionController {
 			lastSQLIndex--;
 		}
 
-		for (int i = firstSQLIndex; i <= lastSQLIndex; i++) {
-			sqlRecordsTmp.add(sqlRecords.get(i));
+		int ttIndex = firstTTIndex;
+		int i = firstSQLIndex;
+		while (i <= lastSQLIndex && ttIndex <= lastTTIndex) {
+			try {
+				while (ttRecords.get(ttIndex).getCallId() < sqlRecords.get(i).getCallId()) {
+					ttIndex++;
+				}
+				while (ttRecords.get(ttIndex).getCallId() > sqlRecords.get(i).getCallId()) {
+					i++;
+				}
+
+				sqlRecordsTmp.add(sqlRecords.get(i));
+				ttRecordsTmp.add(ttRecords.get(ttIndex));
+			} catch (Exception e) {
+			}
+			i++;
 		}
 
-		for (int i = firstTTIndex; i <= lastTTIndex; i++) {
-			ttRecordsTmp.add(ttRecords.get(i));
-		}
+		// for (int i = firstTTIndex; i <= lastTTIndex; i++) {
+		// ttRecordsTmp.add(ttRecords.get(i));
+		// }
 
 		if (sqlRecordsTmp.size() != ttRecordsTmp.size()) {
 			throw new RuntimeException("Unequal amount of records!");
@@ -248,22 +262,41 @@ public class StifleDetectionController extends AbstractDetectionController {
 			while (sqlIndex < sqlRecords.size() && sqlRecords.get(sqlIndex).getCallId() <= nextRTCallId) {
 
 				String query = sqlRecords.get(sqlIndex).getQueryString();
+				String sql = query;
+				String generalizedSql = LpeStringUtils.getGeneralizedQuery(sql);
+				if (generalizedSql == null) {
+					if (sql.contains("$")) {
+						int idx_1 = sql.indexOf(",", sql.indexOf("$"));
+						int idx_2 = sql.indexOf(" ", sql.indexOf("$"));
+						if (idx_1 < 0 && idx_2 < 0) {
+							idx_1 = sql.length();
+						}
+						idx_1 = idx_1 < 0 ? Integer.MAX_VALUE : idx_1;
+						idx_2 = idx_2 < 0 ? Integer.MAX_VALUE : idx_2;
+						int endIndex = Math.min(idx_1, idx_2);
+						String name = sql.substring(sql.indexOf("$"), endIndex);
+						generalizedSql = sql.replace(name, "tmp");
+					} else {
+						generalizedSql = sql;
+					}
+				}
+				query = generalizedSql;
+
 				sqlIndex++;
 				boolean found = false;
 				for (String alreadyObservedQuery : potentialStifles.keySet()) {
-					if (LpeStringUtils.getGeneralizedQuery(alreadyObservedQuery).equals(LpeStringUtils.getGeneralizedQuery(query))) {
+
+					if (alreadyObservedQuery.equals(query)) {
 						int newCount = potentialStifles.get(alreadyObservedQuery) + 1;
-						potentialStifles.put(LpeStringUtils.getGeneralizedQuery(alreadyObservedQuery), newCount);
+						potentialStifles.put(alreadyObservedQuery, newCount);
 						found = true;
 						break;
 					}
 				}
 
 				if (!found) {
-					potentialStifles.put(LpeStringUtils.getGeneralizedQuery(query), 1);
+					potentialStifles.put(query, 1);
 				}
-
-				
 
 			}
 			String operation = currentRtRecord.getOperation();

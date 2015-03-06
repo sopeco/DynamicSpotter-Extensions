@@ -89,7 +89,31 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 	@Override
 	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		if (!reuser) {
-			executeDefaultExperimentSeries(this, experimentSteps, getInstrumentationDescription());
+			//TODO: fix that
+			if(scope.equals(OLBExtension.DB_SCOPE)){
+				instrumentApplication(getInstrumentationDescription(1.0));
+				runExperiment(this, 1);
+				uninstrumentApplication();
+				
+				instrumentApplication(getInstrumentationDescription(1.0));
+				runExperiment(this, 25);
+				uninstrumentApplication();
+				
+				instrumentApplication(getInstrumentationDescription(0.1));
+				runExperiment(this, 50);
+				uninstrumentApplication();
+				
+				instrumentApplication(getInstrumentationDescription(0.1));
+				runExperiment(this, 75);
+				uninstrumentApplication();
+				
+				instrumentApplication(getInstrumentationDescription(0.05));
+				runExperiment(this, 100);
+				uninstrumentApplication();
+			}else{
+				executeDefaultExperimentSeries(this, experimentSteps, getInstrumentationDescription());
+			}
+			
 		}
 	}
 
@@ -115,6 +139,7 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 			case OLBExtension.DB_SCOPE:
 				idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE).addProbe(SQLQueryProbe.MODEL_PROBE)
 						.entityDone();
+				idBuilder.newGlobalRestriction().setGranularity(0.01).restrictionDone();
 				break;
 			case OLBExtension.ENTRY_SCOPE:
 				idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
@@ -127,6 +152,19 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 			}
 
 		}
+		idBuilder.newSampling(CPUSampler.class.getName(), SAMPLING_DELAY);
+		idBuilder.newSampling(NetworkIOSampler.class.getName(), SAMPLING_DELAY);
+		return idBuilder.build();
+	}
+	
+	
+	public InstrumentationDescription getInstrumentationDescription(double granularity) {
+		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+
+				idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE).addProbe(SQLQueryProbe.MODEL_PROBE)
+						.entityDone();
+				idBuilder.newGlobalRestriction().setGranularity(granularity).restrictionDone();
+		
 		idBuilder.newSampling(CPUSampler.class.getName(), SAMPLING_DELAY);
 		idBuilder.newSampling(NetworkIOSampler.class.getName(), SAMPLING_DELAY);
 		return idBuilder.build();

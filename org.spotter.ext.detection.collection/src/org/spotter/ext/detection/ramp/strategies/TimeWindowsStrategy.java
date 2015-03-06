@@ -303,9 +303,11 @@ public class TimeWindowsStrategy implements IRampDetectionStrategy {
 	private void createChart(String operation, SpotterResult result, NumericPairList<Integer, Double> chartData,
 			NumericPairList<Integer, Double> chartDataMeans, List<Number> confidenceIntervals) {
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		chartBuilder.startChart(operation.substring(0, operation.indexOf("(")), "Experiment", "Response Time [ms]");
+		String operationName = operation.contains("(")?operation.substring(0, operation.indexOf("(")):operation;
+		
+		chartBuilder.startChart(operationName, "experiment", "response time [ms]");
 		// chartBuilder.addTimeSeries(chartData, "Response Times");
-		chartBuilder.addScatterSeriesWithErrorBars(chartDataMeans, confidenceIntervals, "Confidence Intervals");
+		chartBuilder.addScatterSeriesWithErrorBars(chartDataMeans, confidenceIntervals, "avg. response times");
 		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Ramp Detection (TW)", result);
 	}
 
