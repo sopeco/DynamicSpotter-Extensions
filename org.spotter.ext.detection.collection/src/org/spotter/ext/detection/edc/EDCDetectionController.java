@@ -100,18 +100,22 @@ public class EDCDetectionController extends AbstractDetectionController {
 			int maxUsers = Integer.parseInt(LpeStringUtils.getPropertyOrFail(GlobalConfiguration.getInstance()
 					.getProperties(), ConfigKeys.WORKLOAD_MAXUSERS, null));
 
+			LOGGER.debug("Hierarchy description:\n" + getServletHierarchyDescription());
 			instrumentApplication(getServletHierarchyDescription());
 			runExperiment(this, 1, NAME_HIERARCHY_EXP);
 			uninstrumentApplication();
 
+			LOGGER.debug("Single user description:\n" + getMainInstrumentationDescription(false));
 			instrumentApplication(getMainInstrumentationDescription(false));
 			runExperiment(this, 1, NAME_SINGLE_USER_EXP);
 			uninstrumentApplication();
 
+			LOGGER.debug("Mutli user description:\n" + getMainInstrumentationDescription(true));
 			instrumentApplication(getMainInstrumentationDescription(true));
 			runExperiment(this, maxUsers, NAME_MAIN_EXP);
 			uninstrumentApplication();
 
+			LOGGER.debug("Stack trace description:\n" + getStackTraceInstrDescription());
 			instrumentApplication(getStackTraceInstrDescription());
 			runExperiment(this, 1, NAME_STACK_TRACE_EXP);
 			uninstrumentApplication();
@@ -172,6 +176,11 @@ public class EDCDetectionController extends AbstractDetectionController {
 				ConfigKeys.EXPERIMENT_COOL_DOWN_NUM_USERS_PER_INTERVAL));
 		lConfig.setExperimentDuration(GlobalConfiguration.getInstance().getPropertyAsInteger(
 				ConfigKeys.EXPERIMENT_DURATION));
+		
+		if (NAME_STACK_TRACE_EXP.equals(experimentName)) {
+			lConfig.setExperimentDuration(300);
+		}
+		
 		getWorkloadAdapter().startLoad(lConfig);
 
 		getWorkloadAdapter().waitForWarmupPhaseTermination();

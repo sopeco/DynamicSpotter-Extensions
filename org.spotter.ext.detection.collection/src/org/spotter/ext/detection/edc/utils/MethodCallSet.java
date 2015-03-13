@@ -304,6 +304,8 @@ public class MethodCallSet {
 			for (MethodCall call : methodCallsPerThreadId.get(tid)) {
 				if (call.getOperation().equals(name)) {
 					toRemove.add(call);
+				} else {
+					call.removeNestedCallsWithName(name);
 				}
 			}
 

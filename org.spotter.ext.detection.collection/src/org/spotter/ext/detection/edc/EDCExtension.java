@@ -67,7 +67,7 @@ public class EDCExtension extends AbstractDetectionExtension {
 		ConfigParameterDescription perfReqRelativeQueryRTParameter = new ConfigParameterDescription(
 				PERF_REQ_RELATIVE_QUERY_RT_DIFF_KEY, LpeSupportedTypes.Double);
 		perfReqRelativeQueryRTParameter.setDefaultValue(String.valueOf(PERF_REQ_RELATIVE_QUERY_RT_DIFF_DEFAULT));
-		perfReqRelativeQueryRTParameter.setRange(String.valueOf(0), String.valueOf(1));
+		perfReqRelativeQueryRTParameter.setRange(String.valueOf(-1), String.valueOf(1));
 		perfReqRelativeQueryRTParameter
 				.setDescription("Performance requirement for difference of relative (to calling servlet response time) query response times when running one user and when running high load.");
 
