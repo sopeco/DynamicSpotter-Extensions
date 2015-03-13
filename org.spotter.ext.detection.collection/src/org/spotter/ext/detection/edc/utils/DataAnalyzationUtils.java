@@ -91,7 +91,9 @@ public class DataAnalyzationUtils {
 		Set<String> uniqueNames = new TreeSet<>();
 
 		for (ResponseTimeRecord rtRecord : responseTimes.getRecords(ResponseTimeRecord.class)) {
-			uniqueNames.add(rtRecord.getOperation());
+			if (!rtRecord.getOperation().startsWith("org.apache")) {
+				uniqueNames.add(rtRecord.getOperation());
+			}
 		}
 
 		return uniqueNames;

@@ -121,13 +121,21 @@ public class MethodCall {
 
 	public Set<MethodCall> getFinalCalls() {
 		Set<MethodCall> finalCalls = new HashSet<>();
+		Set<MethodCall> nonFinalCalls = new HashSet<>();
+		nonFinalCalls.add(this);
 
-		if (getCalledOperations() == null || getCalledOperations().isEmpty()) {
-			finalCalls.add(this);
-		} else {
-			for (MethodCall childCall : getCalledOperations()) {
-				finalCalls.addAll(childCall.getFinalCalls());
+		while (!nonFinalCalls.isEmpty()) {
+			Set<MethodCall> tmp = new HashSet<>();
+
+			for (MethodCall call : nonFinalCalls) {
+				if (call.getCalledOperations() == null || call.getCalledOperations().isEmpty()) {
+					finalCalls.add(call);
+				} else {
+					tmp.addAll(call.getCalledOperations());
+				}
 			}
+
+			nonFinalCalls = tmp;
 		}
 
 		return finalCalls;
@@ -232,6 +240,20 @@ public class MethodCall {
 		}
 
 		return false;
+	}
+
+	public void removeNestedCallsWithName(String name) {
+		Set<MethodCall> toRemove = new HashSet<>();
+
+		for (MethodCall nestedCall : getCalledOperations()) {
+			if (nestedCall.getOperation().equals(name)) {
+				toRemove.add(nestedCall);
+			} else {
+				nestedCall.removeNestedCallsWithName(name);
+			}
+		}
+
+		getCalledOperations().removeAll(toRemove);
 	}
 
 	@Override
