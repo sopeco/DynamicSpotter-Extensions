@@ -89,31 +89,31 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 	@Override
 	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		if (!reuser) {
-			//TODO: fix that
-			if(scope.equals(OLBExtension.DB_SCOPE)){
+			// TODO: fix that
+			if (scope.equals(OLBExtension.DB_SCOPE)) {
 				instrumentApplication(getInstrumentationDescription(1.0));
 				runExperiment(this, 1);
 				uninstrumentApplication();
-				
+
 				instrumentApplication(getInstrumentationDescription(1.0));
-				runExperiment(this, 25);
+				runExperiment(this, 125);
 				uninstrumentApplication();
-				
+
 				instrumentApplication(getInstrumentationDescription(0.1));
-				runExperiment(this, 50);
+				runExperiment(this, 250);
 				uninstrumentApplication();
-				
+
 				instrumentApplication(getInstrumentationDescription(0.1));
-				runExperiment(this, 75);
+				runExperiment(this, 375);
 				uninstrumentApplication();
-				
+
 				instrumentApplication(getInstrumentationDescription(0.05));
-				runExperiment(this, 100);
+				runExperiment(this, 500);
 				uninstrumentApplication();
-			}else{
+			} else {
 				executeDefaultExperimentSeries(this, experimentSteps, getInstrumentationDescription());
 			}
-			
+
 		}
 	}
 
@@ -128,17 +128,24 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 		if (!reuser) {
 			switch (scope) {
 			case OLBExtension.SYNC_SCOPE:
-				idBuilder
-						.newMethodScopeEntity("tpcw.TPCW_Database.cartUpdateSynchronized*",
-								"tpcw.TPCW_Database.getConnection()", "tpcw.TPCW_Database.returnConnection(*",
-								"tpcw.TPCW_Database.createEmptyCart(java.sql.Connection*",
-								"tpcw.TPCW_Database.createCustomer*", "tpcw.TPCW_Database.insertAddress*",
-								"tpcw.TPCW_Database.newOrder*")
+				// idBuilder
+				// .newMethodScopeEntity("tpcw.TPCW_Database.cartUpdateSynchronized*",
+				// "tpcw.TPCW_Database.getConnection()",
+				// "tpcw.TPCW_Database.returnConnection(*",
+				// "tpcw.TPCW_Database.createEmptyCart(java.sql.Connection*",
+				// "tpcw.TPCW_Database.createCustomer*",
+				// "tpcw.TPCW_Database.insertAddress*",
+				// "tpcw.TPCW_Database.newOrder*")
+				// .addProbe(ResponsetimeProbe.MODEL_PROBE).entityDone();
+				
+				// idBuilder.newSynchronizedScopeEntity().addProbe(MonitorWaitingTimeProbe.MODEL_PROBE).entityDone();
+				
+				idBuilder.newMethodScopeEntity("Nop.Web.Controllers.ShoppingCartController:ProblemMethod")
 						.addProbe(ResponsetimeProbe.MODEL_PROBE).entityDone();
 				break;
 			case OLBExtension.DB_SCOPE:
-				idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE).addProbe(SQLQueryProbe.MODEL_PROBE)
-						.entityDone();
+				idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
+						.addProbe(SQLQueryProbe.MODEL_PROBE).entityDone();
 				idBuilder.newGlobalRestriction().setGranularity(0.01).restrictionDone();
 				break;
 			case OLBExtension.ENTRY_SCOPE:
@@ -156,15 +163,14 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 		idBuilder.newSampling(NetworkIOSampler.class.getName(), SAMPLING_DELAY);
 		return idBuilder.build();
 	}
-	
-	
+
 	public InstrumentationDescription getInstrumentationDescription(double granularity) {
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 
-				idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE).addProbe(SQLQueryProbe.MODEL_PROBE)
-						.entityDone();
-				idBuilder.newGlobalRestriction().setGranularity(granularity).restrictionDone();
-		
+		idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
+				.addProbe(SQLQueryProbe.MODEL_PROBE).entityDone();
+		idBuilder.newGlobalRestriction().setGranularity(granularity).restrictionDone();
+
 		idBuilder.newSampling(CPUSampler.class.getName(), SAMPLING_DELAY);
 		idBuilder.newSampling(NetworkIOSampler.class.getName(), SAMPLING_DELAY);
 		return idBuilder.build();

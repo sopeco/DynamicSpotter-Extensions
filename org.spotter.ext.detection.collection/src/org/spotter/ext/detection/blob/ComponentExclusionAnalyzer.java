@@ -39,10 +39,12 @@ public class ComponentExclusionAnalyzer implements IBlobAnalyzer {
 	public List<Component> analyze(ProcessedData processData, DetectionResultManager resultManager, SpotterResult result) {
 		List<Component> blobs = new ArrayList<>();
 		double totalMessagingTime = processData.getTotalMessagingTime();
-
+double totalNumMessages = Math.max(processData.getTotalMessagesReceived(),processData.getTotalMessagesSent());
 		Map<Component, Double> msgContributions = new HashMap<Component, Double>();
+		Map<Component, Double> msgNumContributions = new HashMap<Component, Double>();
 		for (Component comp : processData.getComponents()) {
 			double messagingTimeWithoutComp = totalMessagingTime - comp.getTotalMessageSentDuration();
+			double messagesNumWithoutComp = totalNumMessages - comp.getMessagesSent()-comp.getMessagesReceived();
 			for (Component sender : processData.getComponents()) {
 				if (!sender.getId().equals(comp.getId())) {
 					Double receivingDuration = sender.getSendToDurationMap().get(comp.getId());
@@ -54,7 +56,8 @@ public class ComponentExclusionAnalyzer implements IBlobAnalyzer {
 			}
 
 			double msgTimeContribution = 1.0 - messagingTimeWithoutComp / totalMessagingTime;
-
+			double msgNumContribution = 1.0 - messagesNumWithoutComp / totalNumMessages;
+			msgNumContributions.put(comp, msgNumContribution);
 			msgContributions.put(comp, msgTimeContribution);
 		}
 		NumericPairList<Integer, Double> ownValues = new NumericPairList<>();
@@ -63,20 +66,28 @@ public class ComponentExclusionAnalyzer implements IBlobAnalyzer {
 		int i = 0;
 		for (Component comp : processData.getComponents()) {
 			List<Double> conts = new ArrayList<>();
+			List<Double> contsNum = new ArrayList<>();
 			for (Component otherComp : processData.getComponents()) {
 				if (!otherComp.equals(comp)) {
 					conts.add(msgContributions.get(otherComp));
+					contsNum.add(msgNumContributions.get(otherComp));
 				}
 			}
 
 			double mean = LpeNumericUtils.average(conts);
 			double sd = LpeNumericUtils.stdDev(conts);
-			double threshold = mean + 3 * sd;
+			double threshold = mean + 3.0 * sd;
 			double ownControbution = msgContributions.get(comp);
+			
+			double meanNum = LpeNumericUtils.average(contsNum);
+			double sdNum = LpeNumericUtils.stdDev(contsNum);
+			double thresholdNum = meanNum + 3.0 * sdNum;
+			double ownControbutionNum = msgNumContributions.get(comp);
+			
 			ownValues.add(i, ownControbution);
 			excludedMeans.add(i, mean);
 			excludedThresholds.add(3 * sd);
-			if (ownControbution > threshold) {
+			if (ownControbution > threshold || ownControbutionNum >thresholdNum ) {
 				blobs.add(comp);
 			}
 		}

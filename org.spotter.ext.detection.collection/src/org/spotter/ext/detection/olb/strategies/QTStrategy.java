@@ -292,8 +292,9 @@ public class QTStrategy implements IOLBAnalysisStrategy {
 
 	private void createRTChart(SpotterResult result, String operation, NumericPairList<Integer, Double> responseTimes) {
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
+		String operationName = operation.contains("(") ? operation.substring(0, operation.indexOf("(")) : operation;
 		chartBuilder
-				.startChart(operation.substring(0, operation.indexOf("(")), "number of users", "response time [ms]");
+				.startChart(operationName, "number of users", "response time [ms]");
 		chartBuilder.addScatterSeries(responseTimes, "avg. response times");
 		mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
 	}
