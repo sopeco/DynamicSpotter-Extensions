@@ -310,15 +310,7 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		for (String query : possiblyCriticalQueries) {
 			List<Double> relativeRTs = DataAnalyzationUtils.getRelativeQueryResponseTimes(query, servletQueryHierarchy);
 
-			int numberOfReqViolatingCalls = 0;
-
-			for (double responseTime : relativeRTs) {
-				if (responseTime > perfReqRelativeQueryRT) {
-					numberOfReqViolatingCalls++;
-				}
-			}
-
-			if (numberOfReqViolatingCalls / relativeRTs.size() > 1.0 - perfReqConfidence) {
+			if (LpeNumericUtils.average(relativeRTs) > perfReqRelativeQueryRT) {
 				violatingReqQueriesART.put(query, LpeNumericUtils.average(relativeRTs));
 			} else {
 				for (MethodCall queryCall : servletQueryHierarchy.getCallsOfMethodAtLayer(query, 1)) {
