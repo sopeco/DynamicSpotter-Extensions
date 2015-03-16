@@ -106,12 +106,15 @@ public class PerfProblemController extends AbstractDetectionController {
 			int reqViolationsCount = countRequirementViolations(perfReqThreshold, responseTimes);
 
 			double percentageViolations = ((double) reqViolationsCount) / ((double) responseTimes.size());
+			boolean detected = false;
 			if (percentageViolations > 1.0 - perfReqConfidence) {
 				result.addMessage("Performance Problem detected in operation: " + operation);
 				result.setDetected(true);
+				detected = true;
 			}
 
-			createChart(perfReqThreshold, perfReqConfidence, result, operation, responseTimes, responseTimeSeries);
+			createChart(perfReqThreshold, perfReqConfidence, result, operation, responseTimes, responseTimeSeries,
+					detected);
 		}
 
 		return result;
@@ -119,22 +122,27 @@ public class PerfProblemController extends AbstractDetectionController {
 	}
 
 	private void createChart(double perfReqThreshold, double perfReqConfidence, SpotterResult result, String operation,
-			List<Double> responseTimes, NumericPairList<Long, Double> responseTimeSeries) {
+			List<Double> responseTimes, NumericPairList<Long, Double> responseTimeSeries, boolean detected) {
+		String prefix = "";
+		if (detected) {
+			prefix = "DETECTED-";
+		}
+
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		String operationName = operation.contains("(")?operation.substring(0, operation.indexOf("(")):operation;
+		String operationName = operation.contains("(") ? operation.substring(0, operation.indexOf("(")) : operation;
 		chartBuilder.startChart("CDF - " + operationName, "response time [ms]", "cummulative probability [%]");
 		chartBuilder.addCDFSeries(responseTimes, "CDF");
 		chartBuilder.addHorizontalLine(perfReqConfidence * _100_PERCENT, "requirements confidence");
 		chartBuilder.addVerticalLine(perfReqThreshold, "requirements threshold");
 
-		getResultManager().storeImageChartResource(chartBuilder, "cummulativeDistribution", result);
+		getResultManager().storeImageChartResource(chartBuilder, prefix + "cummulativeDistribution", result);
 
 		chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(operationName, "experiment time [ms]", "response time [ms]");
 		chartBuilder.addTimeSeries(responseTimeSeries, "response times");
 		chartBuilder.addHorizontalLine(perfReqThreshold, "requirements threshold");
 
-		getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
+		getResultManager().storeImageChartResource(chartBuilder, prefix + "Response Times", result);
 	}
 
 	private int countRequirementViolations(double perfReqThreshold, List<Double> responseTimes) {

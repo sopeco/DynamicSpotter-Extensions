@@ -95,45 +95,51 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 		SpotterResult result = new SpotterResult();
 
 		Dataset dbDataset = data.getDataSet(DBStatisticsRecrod.class);
+		if (dbDataset != null) {
 
-		for (String dbId : dbDataset.getValueSet(DBStatisticsRecrod.PAR_PROCESS_ID, String.class)) {
-			List<Integer> sortedNumUsersList = new ArrayList<Integer>(dbDataset.getValueSet(
-					AbstractDetectionController.NUMBER_OF_USERS_KEY, Integer.class));
-			boolean detected = analyzeDBStatistics(dbDataset, dbId, sortedNumUsersList, result);
-			if (detected) {
-				result.setDetected(true);
-				result.addMessage("Database overhead detected on database " + dbId
-						+ " due to increasing locking times!");
+			for (String dbId : dbDataset.getValueSet(DBStatisticsRecrod.PAR_PROCESS_ID, String.class)) {
+				List<Integer> sortedNumUsersList = new ArrayList<Integer>(dbDataset.getValueSet(
+						AbstractDetectionController.NUMBER_OF_USERS_KEY, Integer.class));
+				boolean detected = analyzeDBStatistics(dbDataset, dbId, sortedNumUsersList, result);
+				if (detected) {
+					result.setDetected(true);
+					result.addMessage("Database overhead detected on database " + dbId
+							+ " due to increasing locking times!");
+				}
 			}
 		}
 
 		Dataset dbUtilDataset = data.getDataSet(CPUUtilizationRecord.class);
-		String dbHostStr = GlobalConfiguration.getInstance().getProperty(ConfigKeys.SYSTEM_NODE_ROLE_DB);
-		List<String> dbHosts = new ArrayList<>();
-		for (String host : dbHostStr.split(ConfigParameterDescription.LIST_VALUE_SEPARATOR)) {
-			dbHosts.add(host);
-		}
-		for (String processID : dbUtilDataset.getValueSet(CPUUtilizationRecord.PAR_PROCESS_ID, String.class)) {
-			boolean isDBNode = false;
-			for (String dbHost : dbHosts) {
-				if (processID.contains(dbHost)) {
-					isDBNode = true;
-					break;
+
+		if (dbUtilDataset != null) {
+
+			String dbHostStr = GlobalConfiguration.getInstance().getProperty(ConfigKeys.SYSTEM_NODE_ROLE_DB);
+			List<String> dbHosts = new ArrayList<>();
+			for (String host : dbHostStr.split(ConfigParameterDescription.LIST_VALUE_SEPARATOR)) {
+				dbHosts.add(host);
+			}
+			for (String processID : dbUtilDataset.getValueSet(CPUUtilizationRecord.PAR_PROCESS_ID, String.class)) {
+				boolean isDBNode = false;
+				for (String dbHost : dbHosts) {
+					if (processID.contains(dbHost)) {
+						isDBNode = true;
+						break;
+					}
+				}
+
+				if (!isDBNode) {
+					continue;
+				}
+
+				boolean detected = analyzeCPUUtilization(dbUtilDataset, dbHosts, processID, result);
+				if (detected) {
+					result.setDetected(true);
+					result.addMessage("Database overhead detected on database " + processID
+							+ " due to high CPU utilization on database!");
 				}
 			}
 
-			if (!isDBNode) {
-				continue;
-			}
-
-			boolean detected = analyzeCPUUtilization(dbUtilDataset, dbHosts, processID, result);
-			if (detected) {
-				result.setDetected(true);
-				result.addMessage("Database overhead detected on database " + processID
-						+ " due to high CPU utilization on database!");
-			}
 		}
-
 		return result;
 	}
 

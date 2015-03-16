@@ -23,13 +23,14 @@ public class BucketStrategy implements IHiccupAnalysisStrategy {
 
 	@Override
 	public List<Hiccup> findHiccups(NumericPairList<Long, Double> responsetimeSeries,
-			HiccupDetectionConfig hiccupConfig, double perfReqThreshold, double perfReqConfidence, DetectionResultManager resultManager, SpotterResult result) {
+			HiccupDetectionConfig hiccupConfig, double perfReqThreshold, double perfReqConfidence,
+			DetectionResultManager resultManager, SpotterResult result) {
 		List<Hiccup> hiccups = new ArrayList<Hiccup>();
 		Hiccup currentHiccup = null;
 		double maxRT = Double.MIN_VALUE;
 		long bucketStart = Long.MIN_VALUE;
 		long timestamp;
-		long bucketStep = Utils.meanInterRequestTime(responsetimeSeries)* 50;
+		long bucketStep = Math.max(5000, Utils.meanInterRequestTime(responsetimeSeries) * 50);
 		NumericPairList<Long, Double> bucketSeries = null;
 		for (int i = 0; i < responsetimeSeries.size(); i++) {
 			timestamp = responsetimeSeries.get(i).getKey();
@@ -41,7 +42,7 @@ public class BucketStrategy implements IHiccupAnalysisStrategy {
 					int reqViolationsCount = countRequirementViolations(perfReqThreshold, responseTimes);
 
 					double percentageViolations = ((double) reqViolationsCount) / ((double) responseTimes.size());
-					if (percentageViolations > 1.0 - perfReqConfidence) {
+					if (percentageViolations > perfReqConfidence) {
 						// new hiccup started
 						maxRT = Math.max(maxRT, bucketSeries.getValueMax());
 						if (currentHiccup == null) {
@@ -71,7 +72,7 @@ public class BucketStrategy implements IHiccupAnalysisStrategy {
 			int reqViolationsCount = countRequirementViolations(perfReqThreshold, responseTimes);
 
 			double percentageViolations = ((double) reqViolationsCount) / ((double) responseTimes.size());
-			if (percentageViolations > 1.0 - perfReqConfidence) {
+			if (percentageViolations > perfReqConfidence) {
 				// new hiccup started
 				maxRT = Math.max(maxRT, bucketSeries.getValueMax());
 				if (currentHiccup == null) {
@@ -90,8 +91,6 @@ public class BucketStrategy implements IHiccupAnalysisStrategy {
 
 		return hiccups;
 	}
-
-
 
 	private int countRequirementViolations(double perfReqThreshold, List<Double> responseTimes) {
 		int count = 0;
