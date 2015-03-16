@@ -89,30 +89,30 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 	@Override
 	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		if (!reuser) {
-//			// TODO: fix that
-//			if (scope.equals(OLBExtension.DB_SCOPE)) {
-//				instrumentApplication(getInstrumentationDescription(1.0));
-//				runExperiment(this, 1);
-//				uninstrumentApplication();
-//
-//				instrumentApplication(getInstrumentationDescription(1.0));
-//				runExperiment(this, 25);
-//				uninstrumentApplication();
-//
-//				instrumentApplication(getInstrumentationDescription(0.1));
-//				runExperiment(this, 50);
-//				uninstrumentApplication();
-//
-//				instrumentApplication(getInstrumentationDescription(0.1));
-//				runExperiment(this, 75);
-//				uninstrumentApplication();
-//
-//				instrumentApplication(getInstrumentationDescription(0.05));
-//				runExperiment(this, 100);
-//				uninstrumentApplication();
-//			} else {
+			// TODO: fix that
+			if (scope.equals(OLBExtension.DB_SCOPE)) {
+				instrumentApplication(getInstrumentationDescription(1.0));
+				runExperiment(this, 1);
+				uninstrumentApplication();
+
+				instrumentApplication(getInstrumentationDescription(1.0));
+				runExperiment(this, 125);
+				uninstrumentApplication();
+
+				instrumentApplication(getInstrumentationDescription(0.1));
+				runExperiment(this, 250);
+				uninstrumentApplication();
+
+				instrumentApplication(getInstrumentationDescription(0.1));
+				runExperiment(this, 375);
+				uninstrumentApplication();
+
+				instrumentApplication(getInstrumentationDescription(0.05));
+				runExperiment(this, 500);
+				uninstrumentApplication();
+			} else {
 				executeDefaultExperimentSeries(this, experimentSteps, getInstrumentationDescription());
-//			}
+			}
 
 		}
 	}
