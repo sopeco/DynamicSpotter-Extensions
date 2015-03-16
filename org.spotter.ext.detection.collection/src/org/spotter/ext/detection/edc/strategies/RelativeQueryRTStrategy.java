@@ -135,7 +135,7 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 				if (sql.contains("$")) {
 					int idx_1 = sql.indexOf(",", sql.indexOf("$"));
 					int idx_2 = sql.indexOf(" ", sql.indexOf("$"));
-					if(idx_1 < 0 && idx_2 < 0){
+					if (idx_1 < 0 && idx_2 < 0) {
 						idx_1 = sql.length();
 					}
 					idx_1 = idx_1 < 0 ? Integer.MAX_VALUE : idx_1;
@@ -310,15 +310,7 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		for (String query : possiblyCriticalQueries) {
 			List<Double> relativeRTs = DataAnalyzationUtils.getRelativeQueryResponseTimes(query, servletQueryHierarchy);
 
-			int numberOfReqViolatingCalls = 0;
-
-			for (double responseTime : relativeRTs) {
-				if (responseTime > perfReqRelativeQueryRT) {
-					numberOfReqViolatingCalls++;
-				}
-			}
-
-			if (numberOfReqViolatingCalls / relativeRTs.size() > 1.0 - perfReqConfidence) {
+			if (LpeNumericUtils.average(relativeRTs) > perfReqRelativeQueryRT) {
 				violatingReqQueriesART.put(query, LpeNumericUtils.average(relativeRTs));
 			} else {
 				for (MethodCall queryCall : servletQueryHierarchy.getCallsOfMethodAtLayer(query, 1)) {
@@ -342,8 +334,8 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 			if (avgRRTDiff < perfReqRelativeQueryRTDiff) {
 				queriesToRemove.add(query);
 				servletQueryHierarchy.removeAllCallsWithName(query);
-				}
 			}
+		}
 
 		for (String query : queriesToRemove) {
 			violatingReqQueriesART.remove(query);
@@ -387,8 +379,6 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 						servletMethod, multiUserResponseTimes);
 				NumericPairList<Long, Long> singleUserServletRts = DataAnalyzationUtils
 						.getServletResponseTimesOverTime(servletMethod, singleUserResponseTimes);
-				double singleUserServletARRT = LpeNumericUtils.average(singleUserServletRts.getValueList())
-						/ LpeNumericUtils.average(multiUserServletRts.getValueList());
 
 				double relativeRT = violatingReqQueriesART.get(query);
 				List<Double> singleUserRRTs = DataAnalyzationUtils.getRelativeQueryResponseTimes(query,
@@ -400,8 +390,7 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 								multiUserQueries), singleUserServletRts,
 						DataAnalyzationUtils.getQueryResponseTimesOverTime(query, singleUserResponseTimes,
 								singleUserQueries), result);
-				createRelativeChart(servletMethod, query, numUsers, relativeRT, singleUserServletARRT, singleUserART,
-						result);
+				createRelativeChart(servletMethod, query, numUsers, relativeRT, singleUserART, result);
 
 				DecimalFormat df = new DecimalFormat("#.##");
 
@@ -432,25 +421,25 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 	}
 
 	private void createRelativeChart(String servlet, String query, long numMaxUsers, double multiUserQueryRRT,
-			double singleUserRRT, double singleUserQueryRRT, SpotterResult result) {
+			double singleUserQueryRRT, SpotterResult result) {
 		NumericPairList<Integer, Double> muRRTSeries = new NumericPairList<>();
-		for (int i = 0; i <= 100; i += 4) {
+		for (int i = 0; i < 50; i += 2) {
 			muRRTSeries.add(new NumericPair<Integer, Double>(i, 100.0));
 		}
 
 		NumericPairList<Integer, Double> muQRRTSeries = new NumericPairList<>();
-		for (int i = 1; i <= 100; i += 4) {
+		for (int i = 1; i < 50; i += 2) {
 			muQRRTSeries.add(new NumericPair<Integer, Double>(i, multiUserQueryRRT * 100.0));
 		}
 
 		NumericPairList<Integer, Double> suRRTSeries = new NumericPairList<>();
-		for (int i = 2; i <= 100; i += 4) {
-			suRRTSeries.add(new NumericPair<Integer, Double>(i, singleUserRRT * 100.0));
+		for (int i = 50; i <= 100; i += 2) {
+			suRRTSeries.add(new NumericPair<Integer, Double>(i, 100.0));
 		}
 
 		NumericPairList<Integer, Double> suQRRTSeries = new NumericPairList<>();
-		for (int i = 3; i <= 100; i += 4) {
-			suQRRTSeries.add(new NumericPair<Integer, Double>(i, singleUserQueryRRT * singleUserRRT * 100.0));
+		for (int i = 51; i <= 100; i += 2) {
+			suQRRTSeries.add(new NumericPair<Integer, Double>(i, singleUserQueryRRT * 100.0));
 		}
 
 		NumericPairList<Integer, Double> nullSeries = new NumericPairList<>();
