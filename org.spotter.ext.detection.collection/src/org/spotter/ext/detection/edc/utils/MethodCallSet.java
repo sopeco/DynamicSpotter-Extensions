@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -17,7 +18,28 @@ import java.util.TreeSet;
  */
 public class MethodCallSet {
 
-	private final Map<Long, Set<MethodCall>> methodCallsPerThreadId = new HashMap<>();
+	private final Map<Long, MethodCallSetPerTid> methodCallsPerThreadId = new HashMap<>();
+
+	private final long min;
+	private final long max;
+	private final long avgNumOfCallsPerThread;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param min
+	 *            Minimum of used timestamps
+	 * @param max
+	 *            Maximum of used timestamps
+	 * @param avgNumOfCallsPerThread
+	 *            Estimated number of calls per thread id
+	 */
+	public MethodCallSet(long min, long max, long avgNumOfCallsPerThread) {
+		super();
+		this.min = min;
+		this.max = max;
+		this.avgNumOfCallsPerThread = avgNumOfCallsPerThread;
+	}
 
 	/**
 	 * Adds a new method call recursively.
@@ -26,74 +48,24 @@ public class MethodCallSet {
 	 *            {@link MethodCall} to be added
 	 */
 	public void addCall(MethodCall call) {
-		Set<MethodCall> callsForThidId = methodCallsPerThreadId.get(call.getThreadId());
-		if (callsForThidId == null) {
-			callsForThidId = new HashSet<>();
-			methodCallsPerThreadId.put(call.getThreadId(), callsForThidId);
+		MethodCallSetPerTid callsForThisId = methodCallsPerThreadId.get(call.getThreadId());
+
+		if (callsForThisId == null) {
+			callsForThisId = new MethodCallSetPerTid(min, max, avgNumOfCallsPerThread, call.getThreadId());
+			methodCallsPerThreadId.put(call.getThreadId(), callsForThisId);
 		}
 
-		boolean newCallIsParentCall = false;
-		Set<MethodCall> callsToRemove = new HashSet<>();
-		for (MethodCall existingCall : callsForThidId) {
-			if (call.addCall(existingCall)) {
-				newCallIsParentCall = true;
-				callsToRemove.add(existingCall);
-			}
-		}
-		callsForThidId.removeAll(callsToRemove);
-
-		if (newCallIsParentCall) {
-			callsForThidId.add(call);
-		} else {
-			boolean newCallIsChildCall = false;
-			for (MethodCall existingCall : callsForThidId) {
-				newCallIsChildCall = existingCall.addCall(call);
-				if (newCallIsChildCall) {
-					break;
-				}
-			}
-
-			if (!newCallIsChildCall) {
-				callsForThidId.add(call);
-			}
-		}
-
-		callsForThidId.add(call);
+		callsForThisId.insert(call);
 	}
 
 	public boolean addCallIfNested(MethodCall call) {
-		boolean added = false;
+		MethodCallSetPerTid callsForThisId = methodCallsPerThreadId.get(call.getThreadId());
 
-		for (MethodCall existingCall : getMethodCalls()) {
-			if (existingCall.addCall(call)) {
-				added = true;
-				break;
-			}
+		if (callsForThisId == null) {
+			return false;
 		}
 
-		return added;
-	}
-
-	public boolean addCallIfNotNested(MethodCall call) {
-		boolean nestedCall = false;
-
-		for (MethodCall existingCall : getMethodCalls()) {
-			if (existingCall.isParentOf(call)) {
-				nestedCall = true;
-				break;
-			}
-		}
-
-		if (!nestedCall) {
-			Set<MethodCall> callsPerId = methodCallsPerThreadId.get(call.getThreadId());
-			if (callsPerId == null) {
-				callsPerId = new HashSet<>();
-				methodCallsPerThreadId.put(call.getThreadId(), callsPerId);
-			}
-			callsPerId.add(call);
-		}
-
-		return nestedCall;
+		return callsForThisId.insertIfNested(call);
 	}
 
 	/**
@@ -109,29 +81,6 @@ public class MethodCallSet {
 	}
 
 	/**
-	 * Returns all method calls in the given range.
-	 * 
-	 * @param enterTime
-	 *            Minimum enter time
-	 * @param exitTime
-	 *            Maximum exit time
-	 * @param threadId
-	 *            thread id
-	 * @return All method calls in the given range
-	 */
-	public Set<MethodCall> getCallsInRange(long enterTime, long exitTime, long threadId) {
-		Set<MethodCall> callsInRange = new HashSet<>();
-
-		for (MethodCall call : methodCallsPerThreadId.get(threadId)) {
-			if (call.getEnterTime() >= enterTime && call.getExitTime() <= exitTime) {
-				callsInRange.add(call);
-			}
-		}
-
-		return callsInRange;
-	}
-
-	/**
 	 * Returns all stored method calls.
 	 * 
 	 * @return All stored method calls
@@ -140,7 +89,7 @@ public class MethodCallSet {
 		Set<MethodCall> callSet = new HashSet<>();
 
 		for (long tid : methodCallsPerThreadId.keySet()) {
-			callSet.addAll(methodCallsPerThreadId.get(tid));
+			callSet.addAll(methodCallsPerThreadId.get(tid).getAllCalls());
 		}
 
 		return callSet;
@@ -194,13 +143,13 @@ public class MethodCallSet {
 			callsOfLayer = tmp;
 		}
 
-		MethodCallSet subset = new MethodCallSet();
+		MethodCallSet subset = new MethodCallSet(min, max, avgNumOfCallsPerThread);
 		subset.addAllCalls(callsOfLayer);
 		return subset;
 	}
 
 	public MethodCallSet getSubsetOfLowestLayer() {
-		MethodCallSet finalSet = new MethodCallSet();
+		MethodCallSet finalSet = new MethodCallSet(min, max, avgNumOfCallsPerThread);
 
 		for (MethodCall call : getMethodCalls()) {
 			finalSet.addAllCalls(call.getFinalCalls());
@@ -220,7 +169,7 @@ public class MethodCallSet {
 	 * @see MethodCallSet#getIsolatedCallsOfLayer(int)
 	 */
 	public MethodCallSet getFlatSubsetAtLayer(int layer) {
-		MethodCallSet setAtLayer = new MethodCallSet();
+		MethodCallSet setAtLayer = new MethodCallSet(min, max, avgNumOfCallsPerThread);
 		setAtLayer.addAllCalls(getIsolatedCallsOfLayer(layer));
 		return setAtLayer;
 	}
@@ -274,14 +223,12 @@ public class MethodCallSet {
 	 *            Call to be removed
 	 */
 	public void removeCall(MethodCall call) {
-		Set<MethodCall> calls = methodCallsPerThreadId.get(call.getThreadId());
+		MethodCallSetPerTid callsPerTid = methodCallsPerThreadId.get(call.getThreadId());
 
-		if (calls.contains(call)) {
-			methodCallsPerThreadId.remove(call);
+		if (callsPerTid == null) {
+			return;
 		} else {
-			for (MethodCall parentCall : calls) {
-				parentCall.removeCall(call);
-			}
+			callsPerTid.remove(call);
 		}
 	}
 
@@ -298,18 +245,8 @@ public class MethodCallSet {
 	}
 
 	public void removeAllCallsWithName(String name) {
-		for (long tid : methodCallsPerThreadId.keySet()) {
-			Set<MethodCall> toRemove = new HashSet<>();
-
-			for (MethodCall call : methodCallsPerThreadId.get(tid)) {
-				if (call.getOperation().equals(name)) {
-					toRemove.add(call);
-				} else {
-					call.removeNestedCallsWithName(name);
-				}
-			}
-
-			methodCallsPerThreadId.get(tid).removeAll(toRemove);
+		for (Entry<Long, MethodCallSetPerTid> callsPerTidEntry : methodCallsPerThreadId.entrySet()) {
+			callsPerTidEntry.getValue().removeAllCallsWithName(name);
 		}
 	}
 
