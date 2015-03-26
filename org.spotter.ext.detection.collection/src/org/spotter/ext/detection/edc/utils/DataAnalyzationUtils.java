@@ -1,6 +1,7 @@
 package org.spotter.ext.detection.edc.utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -113,7 +114,28 @@ public class DataAnalyzationUtils {
 	 */
 	public static MethodCallSet getMethodCallSetOfMethods(Set<String> methodNames, Dataset responseTimes,
 			Dataset threadTracing) {
-		MethodCallSet servletCallSet = new MethodCallSet();
+		long min = Long.MAX_VALUE;
+		long max = Long.MIN_VALUE;
+		long numRecords = 0;
+		for (ResponseTimeRecord rtRec : responseTimes.getRecords(ResponseTimeRecord.class)) {
+			if (rtRec.getTimeStamp() < min) {
+				min = rtRec.getTimeStamp();
+			}
+
+			if (rtRec.getTimeStamp() + rtRec.getResponseTime() > max) {
+				max = rtRec.getTimeStamp() + rtRec.getResponseTime();
+			}
+
+			numRecords++;
+		}
+
+		Set<Long> tids = new HashSet<>();
+
+		for (ThreadTracingRecord ttRec : threadTracing.getRecords(ThreadTracingRecord.class)) {
+			tids.add(ttRec.getThreadId());
+		}
+
+		MethodCallSet servletCallSet = new MethodCallSet(min, max, numRecords / tids.size());
 
 		for (ResponseTimeRecord rtRec : responseTimes.getRecords(ResponseTimeRecord.class)) {
 			if (methodNames.contains(rtRec.getOperation())) {
@@ -146,7 +168,7 @@ public class DataAnalyzationUtils {
 	public static void addQueriesToMethodCallSet(MethodCallSet set, Dataset responseTimes, Dataset queries,
 			Dataset threadTracing) {
 		for (SQLQueryRecord sqlRecord : queries.getRecords(SQLQueryRecord.class)) {
-			if(sqlRecord.getQueryString() == null){
+			if (sqlRecord.getQueryString() == null) {
 				continue;
 			}
 			Dataset querySet = selectCallID(sqlRecord.getCallId()).applyTo(responseTimes);

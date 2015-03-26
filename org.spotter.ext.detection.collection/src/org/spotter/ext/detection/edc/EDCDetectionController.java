@@ -39,7 +39,6 @@ import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.AbstractDetectionExtension;
 import org.spotter.core.detection.IDetectionController;
-import org.spotter.core.detection.IExperimentReuser;
 import org.spotter.core.workload.LoadConfig;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.detection.edc.strategies.RelativeQueryRTStrategy;
@@ -128,7 +127,6 @@ public class EDCDetectionController extends AbstractDetectionController {
 		return strategy.analyze();
 	}
 
-
 	private InstrumentationDescription getMainInstrumentationDescription(boolean useGranularity) {
 		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
@@ -176,11 +174,11 @@ public class EDCDetectionController extends AbstractDetectionController {
 				ConfigKeys.EXPERIMENT_COOL_DOWN_NUM_USERS_PER_INTERVAL));
 		lConfig.setExperimentDuration(GlobalConfiguration.getInstance().getPropertyAsInteger(
 				ConfigKeys.EXPERIMENT_DURATION));
-		
+
 		if (NAME_STACK_TRACE_EXP.equals(experimentName)) {
 			lConfig.setExperimentDuration(300);
 		}
-		
+
 		getWorkloadAdapter().startLoad(lConfig);
 
 		getWorkloadAdapter().waitForWarmupPhaseTermination();
