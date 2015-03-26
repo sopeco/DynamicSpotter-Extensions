@@ -128,6 +128,12 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		LOGGER.debug("Setting SQL query datasets...");
 
 		Dataset sqlDataset = data.getDataSet(SQLQueryRecord.class);
+
+		if (sqlDataset == null || sqlDataset.size() == 0) {
+			invalidDataMessage = "Instrumentation achieved no query results for the given scope!";
+			return;
+		}
+		
 		for (SQLQueryRecord record : sqlDataset.getRecords(SQLQueryRecord.class)) {
 			String sql = record.getQueryString().replace("#sc#", ";");
 			String generalizedSql = LpeStringUtils.getGeneralizedQuery(sql);
@@ -149,11 +155,6 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 			}
 
 			record.setQueryString(generalizedSql);
-		}
-
-		if (sqlDataset == null || sqlDataset.size() == 0) {
-			invalidDataMessage = "Instrumentation achieved no query results for the given scope!";
-			return;
 		}
 
 		singleUserQueries = selectSingleUserExp.applyTo(sqlDataset);
