@@ -7,7 +7,6 @@ import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
 import org.spotter.core.detection.IDetectionController;
-import org.spotter.ext.detection.ramp.RampDetectionController;
 
 public class BlobExtension extends AbstractDetectionExtension {
 	protected static final String DETECTION_STRATEGY_KEY = "strategy";

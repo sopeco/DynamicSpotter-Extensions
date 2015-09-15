@@ -12,7 +12,6 @@ import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPair;
 import org.lpe.common.util.NumericPairList;
 import org.spotter.core.chartbuilder.AnalysisChartBuilder;
-import org.spotter.ext.detection.ramp.RampExtension;
 import org.spotter.ext.detection.trafficJam.ITrafficJamStrategy;
 import org.spotter.ext.detection.trafficJam.TrafficJamDetectionController;
 import org.spotter.ext.detection.trafficJam.TrafficJamExtension;

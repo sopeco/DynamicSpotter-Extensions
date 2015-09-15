@@ -3,7 +3,6 @@ package org.spotter.ext.detection.stifle;
 import java.util.Random;
 import java.util.UUID;
 
-import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.LpeStringUtils;
 
 public class TestTmp {
