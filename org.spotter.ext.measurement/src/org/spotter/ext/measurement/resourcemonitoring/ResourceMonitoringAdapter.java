@@ -18,11 +18,11 @@ package org.spotter.ext.measurement.resourcemonitoring;
 import java.io.OutputStream;
 import java.util.Properties;
 
-import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.measurement.MeasurementData;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.entities.measurements.MeasurementData;
+import org.aim.aiminterface.exceptions.MeasurementException;
 import org.aim.artifacts.sampler.CPUSampler;
 import org.aim.artifacts.sampler.NetworkIOSampler;
-import org.aim.description.InstrumentationDescription;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.aim.resourcemonitoring.ResourceMonitoringClient;
 import org.lpe.common.extension.IExtension;

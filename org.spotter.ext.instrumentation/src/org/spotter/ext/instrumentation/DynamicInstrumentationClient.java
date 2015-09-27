@@ -15,9 +15,9 @@
  */
 package org.spotter.ext.instrumentation;
 
-import org.aim.api.exceptions.InstrumentationException;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.exceptions.InstrumentationException;
 import org.aim.artifacts.instrumentation.InstrumentationClient;
-import org.aim.description.InstrumentationDescription;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.instrumentation.AbstractInstrumentationAdapter;
 

@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.aim.api.exceptions.InstrumentationException;
-import org.aim.api.exceptions.MeasurementException;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.exceptions.InstrumentationException;
+import org.aim.aiminterface.exceptions.MeasurementException;
 import org.aim.api.measurement.dataset.Dataset;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.api.measurement.dataset.ParameterSelection;
 import org.aim.artifacts.probes.ResponsetimeProbe;
 import org.aim.artifacts.records.ResponseTimeRecord;
 import org.aim.artifacts.scopes.EntryPointScope;
-import org.aim.description.InstrumentationDescription;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPair;

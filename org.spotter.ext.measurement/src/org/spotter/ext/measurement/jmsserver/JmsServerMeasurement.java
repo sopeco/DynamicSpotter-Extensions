@@ -30,14 +30,14 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.measurement.MeasurementData;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.description.sampling.SamplingDescription;
+import org.aim.aiminterface.entities.measurements.MeasurementData;
+import org.aim.aiminterface.exceptions.MeasurementException;
 import org.aim.api.measurement.collector.AbstractDataSource;
 import org.aim.api.measurement.collector.CollectorFactory;
 import org.aim.artifacts.measurement.collector.FileDataSource;
 import org.aim.artifacts.records.JmsServerRecord;
-import org.aim.description.InstrumentationDescription;
-import org.aim.description.sampling.SamplingDescription;
 import org.apache.activemq.broker.jmx.BrokerViewMBean;
 import org.apache.activemq.broker.jmx.QueueViewMBean;
 import org.lpe.common.config.GlobalConfiguration;

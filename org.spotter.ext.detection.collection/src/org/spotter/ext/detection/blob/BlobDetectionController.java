@@ -2,12 +2,12 @@ package org.spotter.ext.detection.blob;
 
 import java.util.List;
 
-import org.aim.api.exceptions.InstrumentationException;
-import org.aim.api.exceptions.MeasurementException;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.exceptions.InstrumentationException;
+import org.aim.aiminterface.exceptions.MeasurementException;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.artifacts.probes.JmsCommunicationProbe;
 import org.aim.artifacts.scopes.JmsScope;
-import org.aim.description.InstrumentationDescription;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.slf4j.Logger;

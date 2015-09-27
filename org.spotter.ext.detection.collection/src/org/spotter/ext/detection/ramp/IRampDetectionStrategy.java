@@ -2,10 +2,10 @@ package org.spotter.ext.detection.ramp;
 
 import java.util.Properties;
 
-import org.aim.api.exceptions.InstrumentationException;
-import org.aim.api.exceptions.MeasurementException;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.exceptions.InstrumentationException;
+import org.aim.aiminterface.exceptions.MeasurementException;
 import org.aim.api.measurement.dataset.DatasetCollection;
-import org.aim.description.InstrumentationDescription;
 import org.spotter.shared.result.model.SpotterResult;
 
 /**

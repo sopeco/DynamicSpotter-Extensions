@@ -10,14 +10,14 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.Future;
 
-import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.measurement.MeasurementData;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.description.sampling.SamplingDescription;
+import org.aim.aiminterface.entities.measurements.MeasurementData;
+import org.aim.aiminterface.exceptions.MeasurementException;
 import org.aim.api.measurement.collector.AbstractDataSource;
 import org.aim.api.measurement.collector.CollectorFactory;
 import org.aim.artifacts.measurement.collector.FileDataSource;
 import org.aim.artifacts.records.DBStatisticsRecrod;
-import org.aim.description.InstrumentationDescription;
-import org.aim.description.sampling.SamplingDescription;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.system.LpeSystemUtils;
 import org.slf4j.Logger;
