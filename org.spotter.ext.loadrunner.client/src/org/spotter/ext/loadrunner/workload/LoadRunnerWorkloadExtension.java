@@ -45,7 +45,7 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 	}
 	
 	private ConfigParameterDescription createLoadRunnerPathParameter() {
-		ConfigParameterDescription loadRunnerPathParameter = new ConfigParameterDescription(LRConfigKeys.CONTROLLER_EXE,
+		final ConfigParameterDescription loadRunnerPathParameter = new ConfigParameterDescription(LRConfigKeys.CONTROLLER_EXE,
 				LpeSupportedTypes.String);
 		loadRunnerPathParameter.setADirectory(false);
 		loadRunnerPathParameter.setMandatory(true);
@@ -56,7 +56,7 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createResultDirParameter() {
-		ConfigParameterDescription resultDirParameter = new ConfigParameterDescription(LRConfigKeys.RESULT_DIR,
+		final ConfigParameterDescription resultDirParameter = new ConfigParameterDescription(LRConfigKeys.RESULT_DIR,
 				LpeSupportedTypes.String);
 		resultDirParameter.setADirectory(false);
 		resultDirParameter.setMandatory(true);
@@ -67,7 +67,7 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createScenarioPathParameter() {
-		ConfigParameterDescription scenarioPathParameter = new ConfigParameterDescription(LRConfigKeys.SCENARIO_FILE,
+		final ConfigParameterDescription scenarioPathParameter = new ConfigParameterDescription(LRConfigKeys.SCENARIO_FILE,
 				LpeSupportedTypes.String);
 		scenarioPathParameter.setADirectory(false);
 		scenarioPathParameter.setMandatory(true);
@@ -88,13 +88,14 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IWorkloadAdapter createExtensionArtifact() {
+	public IWorkloadAdapter createExtensionArtifact(final String ... args) {
 		return new LoadRunnerWorkloadClient(this);
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return LoadGeneratorClient.testConnection(host, port);
 	}
 

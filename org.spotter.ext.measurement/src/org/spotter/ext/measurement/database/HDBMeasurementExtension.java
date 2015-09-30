@@ -16,8 +16,9 @@ public class HDBMeasurementExtension extends AbstractMeasurmentExtension {
 		return "HDB Measurement";
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IMeasurementAdapter createExtensionArtifact() {
+	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
 		return new HDBMeasurement(this);
 	}
 
@@ -30,15 +31,15 @@ public class HDBMeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		try {
-			HDBMeasurement instance = (HDBMeasurement) createExtensionArtifact();
+			final HDBMeasurement instance = (HDBMeasurement) createExtensionArtifact();
 
 			instance.initialize();
-			boolean con = instance.testConnection();
+			final boolean con = instance.testConnection();
 			instance.disableMonitoring();
 			return con;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return false;
 		}
 
@@ -52,7 +53,7 @@ public class HDBMeasurementExtension extends AbstractMeasurmentExtension {
 	
 
 	private ConfigParameterDescription createHostParameter() {
-		ConfigParameterDescription parameter = new ConfigParameterDescription(HOST_KEY, LpeSupportedTypes.String);
+		final ConfigParameterDescription parameter = new ConfigParameterDescription(HOST_KEY, LpeSupportedTypes.String);
 		parameter.setMandatory(true);
 		parameter.setDescription("The database host");
 
@@ -60,7 +61,7 @@ public class HDBMeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	private ConfigParameterDescription createPortParameter() {
-		ConfigParameterDescription parameter = new ConfigParameterDescription(PORT_KEY, LpeSupportedTypes.Integer);
+		final ConfigParameterDescription parameter = new ConfigParameterDescription(PORT_KEY, LpeSupportedTypes.Integer);
 		parameter.setMandatory(true);
 		parameter.setDescription("The database port");
 
@@ -68,7 +69,7 @@ public class HDBMeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	private ConfigParameterDescription createUsernameParameter() {
-		ConfigParameterDescription parameter = new ConfigParameterDescription(USER_NAME_KEY, LpeSupportedTypes.String);
+		final ConfigParameterDescription parameter = new ConfigParameterDescription(USER_NAME_KEY, LpeSupportedTypes.String);
 		parameter.setMandatory(true);
 		parameter.setDescription("The user name");
 
@@ -76,7 +77,7 @@ public class HDBMeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	private ConfigParameterDescription createPasswordParameter() {
-		ConfigParameterDescription parameter = new ConfigParameterDescription(PASSWORD_KEY, LpeSupportedTypes.String);
+		final ConfigParameterDescription parameter = new ConfigParameterDescription(PASSWORD_KEY, LpeSupportedTypes.String);
 		parameter.setMandatory(true);
 		parameter.setDescription("The user's password");
 

@@ -25,8 +25,9 @@ public class TrafficJamExtension extends AbstractDetectionExtension {
 	protected static final String T_TEST_STRATEGY = "t-Test strategy";
 	protected static final String LIN_REGRESSION_STRATEGY = "linear regression strategy";
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IDetectionController createExtensionArtifact() {
+	public IDetectionController createExtensionArtifact(final String ... args) {
 		return new TrafficJamDetectionController(this);
 	}
 
@@ -36,7 +37,7 @@ public class TrafficJamExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createNumExperimentsParameter() {
-		ConfigParameterDescription numExperimentsParameter = new ConfigParameterDescription(EXPERIMENT_STEPS_KEY,
+		final ConfigParameterDescription numExperimentsParameter = new ConfigParameterDescription(EXPERIMENT_STEPS_KEY,
 				LpeSupportedTypes.Integer);
 		numExperimentsParameter.setDefaultValue(String.valueOf(EXPERIMENT_STEPS_DEFAULT));
 		numExperimentsParameter.setRange(String.valueOf(2), String.valueOf(Integer.MAX_VALUE));
@@ -46,7 +47,7 @@ public class TrafficJamExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createNumSignificantStepsParameter() {
-		ConfigParameterDescription numSignificantStepsParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription numSignificantStepsParameter = new ConfigParameterDescription(
 				REQUIRED_SIGNIFICANT_STEPS_KEY, LpeSupportedTypes.Integer);
 		numSignificantStepsParameter.setDefaultValue(String.valueOf(REQUIRED_SIGNIFICANT_STEPS_DEFAULT));
 		numSignificantStepsParameter.setRange(String.valueOf(1), String.valueOf(Integer.MAX_VALUE));
@@ -56,7 +57,7 @@ public class TrafficJamExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createConfidenceLevelParameter() {
-		ConfigParameterDescription requiredConfidenceLevel = new ConfigParameterDescription(
+		final ConfigParameterDescription requiredConfidenceLevel = new ConfigParameterDescription(
 				REQUIRED_CONFIDENCE_LEVEL_KEY, LpeSupportedTypes.Double);
 		requiredConfidenceLevel.setDefaultValue(String.valueOf(REQUIRED_CONFIDENCE_LEVEL_DEFAULT));
 		requiredConfidenceLevel.setRange("0.0", "1.0");
@@ -67,7 +68,7 @@ public class TrafficJamExtension extends AbstractDetectionExtension {
 	}
 	
 	private ConfigParameterDescription createRegressionSlopeParameter() {
-		ConfigParameterDescription requiredConfidenceLevel = new ConfigParameterDescription(
+		final ConfigParameterDescription requiredConfidenceLevel = new ConfigParameterDescription(
 				REGRESSION_SLOPE_KEY, LpeSupportedTypes.Double);
 		requiredConfidenceLevel.setDefaultValue(String.valueOf(REGRESSION_SLOPE_DEFAULT));
 		requiredConfidenceLevel.setDescription("ONLY for lilnear regression strategy! Threshold for regression slope.");
@@ -75,10 +76,10 @@ public class TrafficJamExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createStrategyParameter() {
-		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
+		final ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
 				LpeSupportedTypes.String);
 
-		Set<String> scopeOptions = new HashSet<>();
+		final Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(T_TEST_STRATEGY);
 		scopeOptions.add(LIN_REGRESSION_STRATEGY);
 		scopeParameter.setOptions(scopeOptions);

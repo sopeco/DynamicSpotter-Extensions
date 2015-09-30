@@ -10,4 +10,11 @@
 
 	<artifactId>org.spotter.ext.detection.collection</artifactId>
 	<name>Core Detection Strategies</name>
+	<dependencies>
+		<dependency>
+			<groupId>org.aim</groupId>
+			<artifactId>org.aim.description</artifactId>
+			<version>1.0.4-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
 </project>

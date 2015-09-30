@@ -57,7 +57,7 @@ public class LoadRunnerMeasurementClient extends AbstractMeasurementAdapter {
 	 * @param provider
 	 *            extension provider
 	 */
-	public LoadRunnerMeasurementClient(IExtension<?> provider) {
+	public LoadRunnerMeasurementClient(final IExtension provider) {
 		super(provider);
 
 	}
@@ -65,7 +65,7 @@ public class LoadRunnerMeasurementClient extends AbstractMeasurementAdapter {
 	@Override
 	public void initialize() throws MeasurementException {
 
-		for (LoadRunnerInstrumentationClient instrClient : InstrumentationBroker.getInstance()
+		for (final LoadRunnerInstrumentationClient instrClient : InstrumentationBroker.getInstance()
 				.getInstrumentationControllers(LoadRunnerInstrumentationClient.class)) {
 			if (instrClient.getHost().equals(getHost()) && instrClient.getPort().equals(getPort())) {
 				instrumentationClient = instrClient;
@@ -106,15 +106,15 @@ public class LoadRunnerMeasurementClient extends AbstractMeasurementAdapter {
 			throw new MeasurementException("LoadRunner Measurement Client has not been initialized yet!");
 		}
 		if (instrumentationClient != null && instrumentationClient.isInstrumented()) {
-			LGMeasurementData lgData = lrClient.getMeasurementData(lrmConfig);
-			List<AbstractRecord> records = new ArrayList<>();
-			for (String transactionName : lgData.getTransactionNames()) {
-				for (TimeSpan tSpan : lgData.getTimesForTransaction(transactionName)) {
+			final LGMeasurementData lgData = lrClient.getMeasurementData(lrmConfig);
+			final List<AbstractRecord> records = new ArrayList<>();
+			for (final String transactionName : lgData.getTransactionNames()) {
+				for (final TimeSpan tSpan : lgData.getTimesForTransaction(transactionName)) {
 					records.add(new ResponseTimeRecord(tSpan.getStart(), transactionName, tSpan.getStop()-tSpan.getStart()));
 				}
 			}
 
-			MeasurementData data = new MeasurementData();
+			final MeasurementData data = new MeasurementData();
 			data.setRecords(records);
 			return data;
 
@@ -131,32 +131,32 @@ public class LoadRunnerMeasurementClient extends AbstractMeasurementAdapter {
 	}
 
 	@Override
-	public void setControllerRelativeTime(long relativeTime) {
+	public void setControllerRelativeTime(final long relativeTime) {
 		// Loadrunner Timestamps are alredy relative
 		super.setControllerRelativeTime(0);
 	}
 
 	@Override
-	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
+	public void pipeToOutputStream(final OutputStream oStream) throws MeasurementException {
 		if (lrmConfig == null) {
 			throw new MeasurementException("LoadRunner Measurement Client has not been initialized yet!");
 		}
-		BufferedWriter bWriter = new BufferedWriter(new OutputStreamWriter(oStream));
+		final BufferedWriter bWriter = new BufferedWriter(new OutputStreamWriter(oStream));
 
 		try {
-			MeasurementData data = getMeasurementData();
-			for (AbstractRecord record : data.getRecords()) {
-				String line = record.toString();
+			final MeasurementData data = getMeasurementData();
+			for (final AbstractRecord record : data.getRecords()) {
+				final String line = record.toString();
 				bWriter.write(line);
 				bWriter.newLine();
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new MeasurementException(e);
 		} finally {
 			try {
 				bWriter.flush();
 				oStream.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new MeasurementException(e);
 			}
 		}
@@ -164,22 +164,22 @@ public class LoadRunnerMeasurementClient extends AbstractMeasurementAdapter {
 	}
 
 	@Override
-	public void storeReport(String path) throws MeasurementException {
-		String reportPath = path + System.getProperty("file.separator") + "LRReport";
-		File reportDir = new File(reportPath);
+	public void storeReport(final String path) throws MeasurementException {
+		final String reportPath = path + System.getProperty("file.separator") + "LRReport";
+		final File reportDir = new File(reportPath);
 		reportDir.mkdir();
-		File reportZip = new File(reportPath + System.getProperty("file.separator") + "report.zip");
+		final File reportZip = new File(reportPath + System.getProperty("file.separator") + "report.zip");
 
 		try {
-			FileOutputStream fos = new FileOutputStream(reportZip);
+			final FileOutputStream fos = new FileOutputStream(reportZip);
 			lrClient.pipeReportToOutputStream(fos, lrmConfig);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new MeasurementException(e);
 		}
 	}
 
 	@Override
-	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
+	public void prepareMonitoring(final InstrumentationDescription monitoringDescription) throws MeasurementException {
 		// TODO Auto-generated method stub
 		
 	}

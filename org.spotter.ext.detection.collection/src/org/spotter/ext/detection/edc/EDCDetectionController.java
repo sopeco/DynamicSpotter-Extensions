@@ -57,12 +57,12 @@ public class EDCDetectionController extends AbstractDetectionController {
 	public static final String NAME_STACK_TRACE_EXP = "stackTraceExp";
 	public static final String NAME_HIERARCHY_EXP = "hierarchyExp";
 
-	private IEDCAnalysisStrategy strategy = new RelativeQueryRTStrategy();
+	private final IEDCAnalysisStrategy strategy = new RelativeQueryRTStrategy();
 
 	private boolean reuser = false;
 	private double instrumentationGranularity;
 
-	public EDCDetectionController(IExtension<IDetectionController> provider) {
+	public EDCDetectionController(final IExtension provider) {
 		super(provider);
 	}
 
@@ -71,7 +71,7 @@ public class EDCDetectionController extends AbstractDetectionController {
 		reuser = Boolean.parseBoolean(this.getProblemDetectionConfiguration().getProperty(
 				AbstractDetectionExtension.REUSE_EXPERIMENTS_FROM_PARENT, "false"));
 
-		String sGranularity = getProblemDetectionConfiguration().getProperty(
+		final String sGranularity = getProblemDetectionConfiguration().getProperty(
 				EDCExtension.INSTRUMENTATION_GRANULARITY_KEY,
 				String.valueOf(EDCExtension.INSTRUMENTATION_GRANULARITY_DEFAULT));
 		if (!sGranularity.matches("0|1|0.[0-9]+")) {
@@ -96,7 +96,7 @@ public class EDCDetectionController extends AbstractDetectionController {
 	@Override
 	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
 		if (!reuser) {
-			int maxUsers = Integer.parseInt(LpeStringUtils.getPropertyOrFail(GlobalConfiguration.getInstance()
+			final int maxUsers = Integer.parseInt(LpeStringUtils.getPropertyOrFail(GlobalConfiguration.getInstance()
 					.getProperties(), ConfigKeys.WORKLOAD_MAXUSERS, null));
 
 			LOGGER.debug("Hierarchy description:\n" + getServletHierarchyDescription());
@@ -122,13 +122,13 @@ public class EDCDetectionController extends AbstractDetectionController {
 	}
 
 	@Override
-	protected SpotterResult analyze(DatasetCollection data) {
+	protected SpotterResult analyze(final DatasetCollection data) {
 		strategy.setMeasurementData(data);
 		return strategy.analyze();
 	}
 
-	private InstrumentationDescription getMainInstrumentationDescription(boolean useGranularity) {
-		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+	private InstrumentationDescription getMainInstrumentationDescription(final boolean useGranularity) {
+		final InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
 				.addProbe(ThreadTracingProbe.MODEL_PROBE).entityDone();
 		idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(SQLQueryProbe.MODEL_PROBE)
@@ -142,7 +142,7 @@ public class EDCDetectionController extends AbstractDetectionController {
 	}
 
 	private InstrumentationDescription getStackTraceInstrDescription() {
-		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		final InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(StackTraceProbe.MODEL_PROBE)
 				.addProbe(SQLQueryProbe.MODEL_PROBE).entityDone();
 
@@ -150,19 +150,19 @@ public class EDCDetectionController extends AbstractDetectionController {
 	}
 
 	private InstrumentationDescription getServletHierarchyDescription() {
-		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		final InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
 				.entityDone();
 
 		return idBuilder.build();
 	}
 
-	private void runExperiment(IDetectionController detectionController, int numUsers, String experimentName)
+	private void runExperiment(final IDetectionController detectionController, final int numUsers, final String experimentName)
 			throws WorkloadException, MeasurementException {
 		LOGGER.info("{} detection controller started experiment with {} users ...", detectionController.getProvider()
 				.getName(), numUsers);
 		ProgressManager.getInstance().updateProgressStatus(getProblemId(), DiagnosisStatus.EXPERIMENTING_RAMP_UP);
-		LoadConfig lConfig = new LoadConfig();
+		final LoadConfig lConfig = new LoadConfig();
 		lConfig.setNumUsers(numUsers);
 		lConfig.setRampUpIntervalLength(GlobalConfiguration.getInstance().getPropertyAsInteger(
 				ConfigKeys.EXPERIMENT_RAMP_UP_INTERVAL_LENGTH));
@@ -195,9 +195,9 @@ public class EDCDetectionController extends AbstractDetectionController {
 
 		ProgressManager.getInstance().updateProgressStatus(getProblemId(), DiagnosisStatus.COLLECTING_DATA);
 		LOGGER.info("Storing data ...");
-		long dataCollectionStart = System.currentTimeMillis();
-		Parameter experimentNameParameter = new Parameter(KEY_EXPERIMENT_NAME, experimentName);
-		Set<Parameter> parameters = new TreeSet<>();
+		final long dataCollectionStart = System.currentTimeMillis();
+		final Parameter experimentNameParameter = new Parameter(KEY_EXPERIMENT_NAME, experimentName);
+		final Set<Parameter> parameters = new TreeSet<>();
 		parameters.add(experimentNameParameter);
 		getResultManager().storeResults(parameters, getMeasurementController());
 		ProgressManager.getInstance()

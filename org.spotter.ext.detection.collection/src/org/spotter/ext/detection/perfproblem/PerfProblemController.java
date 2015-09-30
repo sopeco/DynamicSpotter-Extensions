@@ -33,7 +33,6 @@ import org.lpe.common.util.NumericPairList;
 import org.spotter.core.ProgressManager;
 import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;
-import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.detection.utils.Utils;
 import org.spotter.shared.configuration.ConfigKeys;
@@ -55,7 +54,7 @@ public class PerfProblemController extends AbstractDetectionController {
 	 * @param provider
 	 *            extension provider.
 	 */
-	public PerfProblemController(IExtension<IDetectionController> provider) {
+	public PerfProblemController(final IExtension provider) {
 		super(provider);
 
 	}
@@ -71,24 +70,24 @@ public class PerfProblemController extends AbstractDetectionController {
 	}
 
 	private InstrumentationDescription getInstrumentationDescription() {
-		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		final InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
 				.entityDone();
 		return idBuilder.build();
 	}
 
 	@Override
-	protected SpotterResult analyze(DatasetCollection data) {
+	protected SpotterResult analyze(final DatasetCollection data) {
 
-		double perfReqThreshold = GlobalConfiguration.getInstance().getPropertyAsInteger(
+		final double perfReqThreshold = GlobalConfiguration.getInstance().getPropertyAsInteger(
 				ConfigKeys.PERFORMANCE_REQUIREMENT_THRESHOLD, ConfigKeys.DEFAULT_PERFORMANCE_REQUIREMENT_THRESHOLD);
-		double perfReqConfidence = GlobalConfiguration.getInstance().getPropertyAsDouble(
+		final double perfReqConfidence = GlobalConfiguration.getInstance().getPropertyAsDouble(
 				ConfigKeys.PERFORMANCE_REQUIREMENT_CONFIDENCE, ConfigKeys.DEFAULT_PERFORMANCE_REQUIREMENT_CONFIDENCE);
 
-		SpotterResult result = new SpotterResult();
+		final SpotterResult result = new SpotterResult();
 		result.setDetected(false);
 
-		Dataset rtDataset = data.getDataSet(ResponseTimeRecord.class);
+		final Dataset rtDataset = data.getDataSet(ResponseTimeRecord.class);
 
 		if (rtDataset == null || rtDataset.size() == 0) {
 			result.setDetected(false);
@@ -96,16 +95,16 @@ public class PerfProblemController extends AbstractDetectionController {
 			return result;
 		}
 
-		for (String operation : rtDataset.getValueSet(ResponseTimeRecord.PAR_OPERATION, String.class)) {
-			ParameterSelection selectOperation = new ParameterSelection().select(ResponseTimeRecord.PAR_OPERATION,
+		for (final String operation : rtDataset.getValueSet(ResponseTimeRecord.PAR_OPERATION, String.class)) {
+			final ParameterSelection selectOperation = new ParameterSelection().select(ResponseTimeRecord.PAR_OPERATION,
 					operation);
-			Dataset operationSpecificDataset = selectOperation.applyTo(rtDataset);
+			final Dataset operationSpecificDataset = selectOperation.applyTo(rtDataset);
 
-			NumericPairList<Long, Double> responseTimeSeries = Utils.toTimestampRTPairs(operationSpecificDataset);
-			List<Double> responseTimes = responseTimeSeries.getValueList();
-			int reqViolationsCount = countRequirementViolations(perfReqThreshold, responseTimes);
+			final NumericPairList<Long, Double> responseTimeSeries = Utils.toTimestampRTPairs(operationSpecificDataset);
+			final List<Double> responseTimes = responseTimeSeries.getValueList();
+			final int reqViolationsCount = countRequirementViolations(perfReqThreshold, responseTimes);
 
-			double percentageViolations = ((double) reqViolationsCount) / ((double) responseTimes.size());
+			final double percentageViolations = ((double) reqViolationsCount) / ((double) responseTimes.size());
 			boolean detected = false;
 			if (percentageViolations > 1.0 - perfReqConfidence) {
 				result.addMessage("Performance Problem detected in operation: " + operation);
@@ -121,15 +120,15 @@ public class PerfProblemController extends AbstractDetectionController {
 
 	}
 
-	private void createChart(double perfReqThreshold, double perfReqConfidence, SpotterResult result, String operation,
-			List<Double> responseTimes, NumericPairList<Long, Double> responseTimeSeries, boolean detected) {
+	private void createChart(final double perfReqThreshold, final double perfReqConfidence, final SpotterResult result, final String operation,
+			final List<Double> responseTimes, final NumericPairList<Long, Double> responseTimeSeries, final boolean detected) {
 		String prefix = "";
 		if (detected) {
 			prefix = "DETECTED-";
 		}
 
 		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		String operationName = operation.contains("(") ? operation.substring(0, operation.indexOf("(")) : operation;
+		final String operationName = operation.contains("(") ? operation.substring(0, operation.indexOf("(")) : operation;
 		chartBuilder.startChart("CDF - " + operationName, "response time [ms]", "cummulative probability [%]");
 		chartBuilder.addCDFSeries(responseTimes, "CDF");
 		chartBuilder.addHorizontalLine(perfReqConfidence * _100_PERCENT, "requirements confidence");
@@ -145,9 +144,9 @@ public class PerfProblemController extends AbstractDetectionController {
 		getResultManager().storeImageChartResource(chartBuilder, prefix + "Response Times", result);
 	}
 
-	private int countRequirementViolations(double perfReqThreshold, List<Double> responseTimes) {
+	private int countRequirementViolations(final double perfReqThreshold, final List<Double> responseTimes) {
 		int count = 0;
-		for (Double rt : responseTimes) {
+		for (final Double rt : responseTimes) {
 			if (rt > perfReqThreshold) {
 				count++;
 			}

@@ -15,7 +15,6 @@ import org.lpe.common.extension.IExtension;
 import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 import org.spotter.core.detection.IExperimentReuser;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.detection.olb.strategies.QTStrategy;
@@ -44,13 +43,13 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 	 * @param provider
 	 *            extension provider
 	 */
-	public OLBDetectionController(IExtension<IDetectionController> provider) {
+	public OLBDetectionController(final IExtension provider) {
 		super(provider);
 	}
 
 	@Override
 	public void loadProperties() {
-		String experimentStepsStr = getProblemDetectionConfiguration().getProperty(OLBExtension.EXPERIMENT_STEPS_KEY);
+		final String experimentStepsStr = getProblemDetectionConfiguration().getProperty(OLBExtension.EXPERIMENT_STEPS_KEY);
 		experimentSteps = experimentStepsStr != null ? Integer.parseInt(experimentStepsStr)
 				: OLBExtension.EXPERIMENT_STEPS_DEFAULT;
 
@@ -118,13 +117,13 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 	}
 
 	@Override
-	protected SpotterResult analyze(DatasetCollection data) {
+	protected SpotterResult analyze(final DatasetCollection data) {
 		return analysisStrategyImpl.analyze(data);
 	}
 
 	@Override
 	public InstrumentationDescription getInstrumentationDescription() {
-		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		final InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		if (!reuser) {
 			switch (scope) {
 			case OLBExtension.SYNC_SCOPE:
@@ -164,8 +163,8 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 		return idBuilder.build();
 	}
 
-	public InstrumentationDescription getInstrumentationDescription(double granularity) {
-		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+	public InstrumentationDescription getInstrumentationDescription(final double granularity) {
+		final InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 
 		idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
 				.addProbe(SQLQueryProbe.MODEL_PROBE).entityDone();

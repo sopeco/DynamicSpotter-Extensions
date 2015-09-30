@@ -28,14 +28,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
-import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.shared.result.model.SpotterResult;
 
 public class StifleDetectionController extends AbstractDetectionController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StifleDetectionController.class);
 
-	public StifleDetectionController(IExtension<IDetectionController> provider) {
+	public StifleDetectionController(final IExtension provider) {
 		super(provider);
 		// TODO Auto-generated constructor stub
 	}
@@ -63,18 +62,18 @@ public class StifleDetectionController extends AbstractDetectionController {
 	}
 
 	@Override
-	protected SpotterResult analyze(DatasetCollection data) {
+	protected SpotterResult analyze(final DatasetCollection data) {
 
 		LOGGER.info("Fetching datasets.");
 
-		Dataset sqlDataset = data.getDataSet(SQLQueryRecord.class);
-		Dataset rtDataset = data.getDataSet(ResponseTimeRecord.class);
-		Dataset tracingDataset = data.getDataSet(ThreadTracingRecord.class);
+		final Dataset sqlDataset = data.getDataSet(SQLQueryRecord.class);
+		final Dataset rtDataset = data.getDataSet(ResponseTimeRecord.class);
+		final Dataset tracingDataset = data.getDataSet(ThreadTracingRecord.class);
 
 		LOGGER.info("Converting SQL dataset.");
 
 		List<SQLQueryRecord> sqlRecords = sqlDataset.getRecords(SQLQueryRecord.class);
-		List<ThreadTracingRecord> ttRecords = tracingDataset.getRecords(ThreadTracingRecord.class);
+		final List<ThreadTracingRecord> ttRecords = tracingDataset.getRecords(ThreadTracingRecord.class);
 
 		sqlRecords = filterQueryRecords(sqlRecords, ttRecords);
 
@@ -85,21 +84,21 @@ public class StifleDetectionController extends AbstractDetectionController {
 
 		LOGGER.info("Analyzing datasets.");
 
-		Map<String, List<StifleQuery>> stifleQueries = analyzeDatasets(rtRecords, sqlRecords);
+		final Map<String, List<StifleQuery>> stifleQueries = analyzeDatasets(rtRecords, sqlRecords);
 
 		LOGGER.info("Creating results.");
 
-		SpotterResult result = new SpotterResult();
+		final SpotterResult result = new SpotterResult();
 		result.setDetected(false);
 
 		if (!stifleQueries.isEmpty()) {
 			result.setDetected(true);
-			StringBuilder strBuilder = new StringBuilder();
-			for (String operation : stifleQueries.keySet()) {
+			final StringBuilder strBuilder = new StringBuilder();
+			for (final String operation : stifleQueries.keySet()) {
 				strBuilder.append("Stifles in operation " + operation + " found:");
 				strBuilder.append("\n");
-				List<StifleQuery> stifles = stifleQueries.get(operation);
-				for (StifleQuery stifle : stifles) {
+				final List<StifleQuery> stifles = stifleQueries.get(operation);
+				for (final StifleQuery stifle : stifles) {
 					strBuilder.append("Query: " + stifle.getQuery());
 					strBuilder.append("\n");
 					strBuilder.append("occured: ( " + LpeNumericUtils.min(stifle.getOccurrences()) + " , "
@@ -116,11 +115,11 @@ public class StifleDetectionController extends AbstractDetectionController {
 		return result;
 	}
 
-	private List<SQLQueryRecord> filterQueryRecords(List<SQLQueryRecord> sqlRecords, List<ThreadTracingRecord> ttRecords) {
+	private List<SQLQueryRecord> filterQueryRecords(final List<SQLQueryRecord> sqlRecords, final List<ThreadTracingRecord> ttRecords) {
 		MeasurementDataUtils.sortRecordsAscending(sqlRecords, SQLQueryRecord.PAR_CALL_ID);
 		MeasurementDataUtils.sortRecordsAscending(ttRecords, ThreadTracingRecord.PAR_CALL_ID);
-		List<SQLQueryRecord> sqlRecordsTmp = new ArrayList<>();
-		List<ThreadTracingRecord> ttRecordsTmp = new ArrayList<>();
+		final List<SQLQueryRecord> sqlRecordsTmp = new ArrayList<>();
+		final List<ThreadTracingRecord> ttRecordsTmp = new ArrayList<>();
 		int firstSQLIndex = 0;
 		int firstTTIndex = 0;
 		int lastSQLIndex = sqlRecords.size() - 1;
@@ -154,7 +153,7 @@ public class StifleDetectionController extends AbstractDetectionController {
 
 				sqlRecordsTmp.add(sqlRecords.get(i));
 				ttRecordsTmp.add(ttRecords.get(ttIndex));
-			} catch (Exception e) {
+			} catch (final Exception e) {
 			}
 			i++;
 		}
@@ -166,7 +165,7 @@ public class StifleDetectionController extends AbstractDetectionController {
 		if (sqlRecordsTmp.size() != ttRecordsTmp.size()) {
 			throw new RuntimeException("Unequal amount of records!");
 		}
-		List<SQLQueryRecord> uniqueSQLRecords = new ArrayList<>();
+		final List<SQLQueryRecord> uniqueSQLRecords = new ArrayList<>();
 		int index = 0;
 		long currentStart = -1;
 		long refEnd = -1;
@@ -185,9 +184,9 @@ public class StifleDetectionController extends AbstractDetectionController {
 		return uniqueSQLRecords;
 	}
 
-	private List<ResponseTimeRecord> filterResponsetimeRecords(List<ResponseTimeRecord> rtRecords) {
+	private List<ResponseTimeRecord> filterResponsetimeRecords(final List<ResponseTimeRecord> rtRecords) {
 		MeasurementDataUtils.sortRecordsAscending(rtRecords, ResponseTimeRecord.PAR_CALL_ID);
-		List<ResponseTimeRecord> uniqueServletRecords = new ArrayList<>();
+		final List<ResponseTimeRecord> uniqueServletRecords = new ArrayList<>();
 		int index = 0;
 		long currentStart = -1;
 		long refEnd = -1;
@@ -215,7 +214,7 @@ public class StifleDetectionController extends AbstractDetectionController {
 	 */
 	private InstrumentationDescription getInstrumentationDescription() throws InstrumentationException {
 
-		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		final InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
 				.entityDone();
 		idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(SQLQueryProbe.MODEL_PROBE)
@@ -224,29 +223,29 @@ public class StifleDetectionController extends AbstractDetectionController {
 		return idBuilder.build();
 	}
 
-	private Map<String, List<StifleQuery>> analyzeDatasets(List<ResponseTimeRecord> rtRecords,
-			List<SQLQueryRecord> sqlRecords) {
+	private Map<String, List<StifleQuery>> analyzeDatasets(final List<ResponseTimeRecord> rtRecords,
+			final List<SQLQueryRecord> sqlRecords) {
 
 		if (rtRecords.size() < 2) {
 			LOGGER.info("Less than two response time samples. We have too few data to do an analysis: Skipping stifle analyzing.");
 			return new HashMap<String, List<StifleQuery>>();
 		}
 
-		Map<String, List<StifleQuery>> stifleQueries = new HashMap<>();
+		final Map<String, List<StifleQuery>> stifleQueries = new HashMap<>();
 
 		// in this loop we will always be one index ahead of the element we
 		// currently analyze
 		ResponseTimeRecord currentRtRecord = null;
 		int sqlIndex = 0;
-		for (ResponseTimeRecord nextRtRecord : rtRecords) {
+		for (final ResponseTimeRecord nextRtRecord : rtRecords) {
 			if (currentRtRecord == null) {
 				currentRtRecord = nextRtRecord;
 				continue;
 			}
 
 			// the timespace is too inaccurate, hence we use the callId
-			long currentRTCallId = currentRtRecord.getCallId();
-			long nextRTCallId = nextRtRecord.getCallId();
+			final long currentRTCallId = currentRtRecord.getCallId();
+			final long nextRTCallId = nextRtRecord.getCallId();
 
 			// we skip the first SQL queries, which are not related to the first
 			// RT record
@@ -258,11 +257,11 @@ public class StifleDetectionController extends AbstractDetectionController {
 				return stifleQueries;
 			}
 
-			Map<String, Integer> potentialStifles = new HashMap<>();
+			final Map<String, Integer> potentialStifles = new HashMap<>();
 			while (sqlIndex < sqlRecords.size() && sqlRecords.get(sqlIndex).getCallId() <= nextRTCallId) {
 
 				String query = sqlRecords.get(sqlIndex).getQueryString();
-				String sql = query;
+				final String sql = query;
 				String generalizedSql = LpeStringUtils.getGeneralizedQuery(sql);
 				if (generalizedSql == null) {
 					if (sql.contains("$")) {
@@ -273,8 +272,8 @@ public class StifleDetectionController extends AbstractDetectionController {
 						}
 						idx_1 = idx_1 < 0 ? Integer.MAX_VALUE : idx_1;
 						idx_2 = idx_2 < 0 ? Integer.MAX_VALUE : idx_2;
-						int endIndex = Math.min(idx_1, idx_2);
-						String name = sql.substring(sql.indexOf("$"), endIndex);
+						final int endIndex = Math.min(idx_1, idx_2);
+						final String name = sql.substring(sql.indexOf("$"), endIndex);
 						generalizedSql = sql.replace(name, "tmp");
 					} else {
 						generalizedSql = sql;
@@ -284,10 +283,10 @@ public class StifleDetectionController extends AbstractDetectionController {
 
 				sqlIndex++;
 				boolean found = false;
-				for (String alreadyObservedQuery : potentialStifles.keySet()) {
+				for (final String alreadyObservedQuery : potentialStifles.keySet()) {
 
 					if (alreadyObservedQuery.equals(query)) {
-						int newCount = potentialStifles.get(alreadyObservedQuery) + 1;
+						final int newCount = potentialStifles.get(alreadyObservedQuery) + 1;
 						potentialStifles.put(alreadyObservedQuery, newCount);
 						found = true;
 						break;
@@ -299,16 +298,16 @@ public class StifleDetectionController extends AbstractDetectionController {
 				}
 
 			}
-			String operation = currentRtRecord.getOperation();
-			for (Entry<String, Integer> potStifle : potentialStifles.entrySet()) {
+			final String operation = currentRtRecord.getOperation();
+			for (final Entry<String, Integer> potStifle : potentialStifles.entrySet()) {
 				if (potStifle.getValue() > 1) {
 					if (!stifleQueries.containsKey(operation)) {
 						stifleQueries.put(operation, new ArrayList<StifleQuery>());
 					}
-					List<StifleQuery> tmpStifleQueries = stifleQueries.get(operation);
+					final List<StifleQuery> tmpStifleQueries = stifleQueries.get(operation);
 					StifleQuery sQuery = null;
 
-					for (StifleQuery tmpQuery : tmpStifleQueries) {
+					for (final StifleQuery tmpQuery : tmpStifleQueries) {
 						if (potStifle.getKey().equals(tmpQuery.getQuery())) {
 							sQuery = tmpQuery;
 							break;

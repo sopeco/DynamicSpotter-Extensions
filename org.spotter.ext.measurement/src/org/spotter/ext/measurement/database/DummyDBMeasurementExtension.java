@@ -21,8 +21,9 @@ public class DummyDBMeasurementExtension extends AbstractMeasurmentExtension {
 		return "DummyDB Sampling Measurement Satellite Adapter";
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IMeasurementAdapter createExtensionArtifact() {
+	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
 		return new DummyDBMeasurement(this);
 	}
 

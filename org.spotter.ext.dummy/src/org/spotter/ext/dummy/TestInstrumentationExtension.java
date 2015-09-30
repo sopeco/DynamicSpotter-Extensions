@@ -25,8 +25,9 @@ public class TestInstrumentationExtension extends AbstractInstrumentationExtensi
 														+ "satellite adapter is a dummy and does nothing. The dummy will be removed after "
 														+ "the first version has been officially released.";
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IInstrumentationAdapter createExtensionArtifact() {
+	public IInstrumentationAdapter createExtensionArtifact(final String ... args) {
 		return new TestInstrumentation(this);
 	}
 
@@ -46,7 +47,7 @@ public class TestInstrumentationExtension extends AbstractInstrumentationExtensi
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return true;
 	}
 

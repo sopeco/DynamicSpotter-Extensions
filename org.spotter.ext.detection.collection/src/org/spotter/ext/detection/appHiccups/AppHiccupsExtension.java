@@ -27,8 +27,9 @@ public class AppHiccupsExtension extends AbstractDetectionExtension {
 	protected static final String MAX_HICCUPS_TIME_PROPORTION_KEY = "maxHiccupsTimeProportion";
 	protected static final double MAX_HICCUPS_TIME_PROPORTION_DEFAULT = 0.3;
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IDetectionController createExtensionArtifact() {
+	public IDetectionController createExtensionArtifact(final String ... args) {
 		return new AppHiccupsController(this);
 	}
 
@@ -38,10 +39,10 @@ public class AppHiccupsExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createStrategyParameter() {
-		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(APP_HICCUPS_STRATEGY_KEY,
+		final ConfigParameterDescription scopeParameter = new ConfigParameterDescription(APP_HICCUPS_STRATEGY_KEY,
 				LpeSupportedTypes.String);
 
-		Set<String> scopeOptions = new HashSet<>();
+		final Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(MVA_STRATEGY);
 		scopeOptions.add(BUCKET_STRATEGY);
 		scopeOptions.add(DBSCAN_STRATEGY);
@@ -53,7 +54,7 @@ public class AppHiccupsExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription maxHiccupTimeProportionParameter() {
-		ConfigParameterDescription parameter = new ConfigParameterDescription(MAX_HICCUPS_TIME_PROPORTION_KEY,
+		final ConfigParameterDescription parameter = new ConfigParameterDescription(MAX_HICCUPS_TIME_PROPORTION_KEY,
 				LpeSupportedTypes.Double);
 		parameter.setMandatory(false);
 		parameter.setDefaultValue(String.valueOf(MAX_HICCUPS_TIME_PROPORTION_DEFAULT));
@@ -67,7 +68,7 @@ public class AppHiccupsExtension extends AbstractDetectionExtension {
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 		addConfigParameter(createStrategyParameter());
 		addConfigParameter(maxHiccupTimeProportionParameter());
-		for (ConfigParameterDescription cpd : HiccupDetectionConfig.getConfigurationParameters()) {
+		for (final ConfigParameterDescription cpd : HiccupDetectionConfig.getConfigurationParameters()) {
 			addConfigParameter(cpd);
 		}
 

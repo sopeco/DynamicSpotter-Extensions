@@ -24,7 +24,6 @@ import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.NumericPairList;
 import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;
-import org.spotter.core.detection.IDetectionController;
 import org.spotter.core.detection.IExperimentReuser;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.shared.configuration.ConfigKeys;
@@ -38,34 +37,34 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 	private int experimentSteps;
 	private boolean qtStrategy = false;
 
-	public DBCongestionDetectionController(IExtension<IDetectionController> provider) {
+	public DBCongestionDetectionController(final IExtension provider) {
 		super(provider);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void loadProperties() {
-		String experimentStepsStr = getProblemDetectionConfiguration().getProperty(
+		final String experimentStepsStr = getProblemDetectionConfiguration().getProperty(
 				DBCongestionExtension.EXPERIMENT_STEPS_KEY);
 		experimentSteps = experimentStepsStr != null ? Integer.parseInt(experimentStepsStr)
 				: DBCongestionExtension.EXPERIMENT_STEPS_DEFAULT;
 
-		String requiredSignificantStepsStr = getProblemDetectionConfiguration().getProperty(
+		final String requiredSignificantStepsStr = getProblemDetectionConfiguration().getProperty(
 				DBCongestionExtension.REQUIRED_SIGNIFICANT_STEPS_KEY);
 		requiredSignificantSteps = requiredSignificantStepsStr != null ? Integer.parseInt(requiredSignificantStepsStr)
 				: DBCongestionExtension.REQUIRED_SIGNIFICANT_STEPS_DEFAULT;
 
-		String requiredConfidenceLevelStr = getProblemDetectionConfiguration().getProperty(
+		final String requiredConfidenceLevelStr = getProblemDetectionConfiguration().getProperty(
 				DBCongestionExtension.REQUIRED_CONFIDENCE_LEVEL_KEY);
 		requiredSignificanceLevel = 1.0 - (requiredConfidenceLevelStr != null ? Double
 				.parseDouble(requiredConfidenceLevelStr) : DBCongestionExtension.REQUIRED_CONFIDENCE_LEVEL_DEFAULT);
 
-		String cpuThresholdStr = getProblemDetectionConfiguration()
+		final String cpuThresholdStr = getProblemDetectionConfiguration()
 				.getProperty(DBCongestionExtension.CPU_THRESHOLD_KEY);
 		cpuThreshold = cpuThresholdStr != null ? Double.parseDouble(cpuThresholdStr)
 				: DBCongestionExtension.CPU_THRESHOLD_DEFAULT;
 
-		String tmpStrategy = getProblemDetectionConfiguration().getProperty(
+		final String tmpStrategy = getProblemDetectionConfiguration().getProperty(
 				DBCongestionExtension.DETECTION_STRATEGY_KEY);
 		switch (tmpStrategy) {
 		case DBCongestionExtension.THRESHOLD_STRATEGY:
@@ -91,16 +90,16 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 	}
 
 	@Override
-	protected SpotterResult analyze(DatasetCollection data) {
-		SpotterResult result = new SpotterResult();
+	protected SpotterResult analyze(final DatasetCollection data) {
+		final SpotterResult result = new SpotterResult();
 
-		Dataset dbDataset = data.getDataSet(DBStatisticsRecrod.class);
+		final Dataset dbDataset = data.getDataSet(DBStatisticsRecrod.class);
 		if (dbDataset != null) {
 
-			for (String dbId : dbDataset.getValueSet(DBStatisticsRecrod.PAR_PROCESS_ID, String.class)) {
-				List<Integer> sortedNumUsersList = new ArrayList<Integer>(dbDataset.getValueSet(
+			for (final String dbId : dbDataset.getValueSet(DBStatisticsRecrod.PAR_PROCESS_ID, String.class)) {
+				final List<Integer> sortedNumUsersList = new ArrayList<Integer>(dbDataset.getValueSet(
 						AbstractDetectionController.NUMBER_OF_USERS_KEY, Integer.class));
-				boolean detected = analyzeDBStatistics(dbDataset, dbId, sortedNumUsersList, result);
+				final boolean detected = analyzeDBStatistics(dbDataset, dbId, sortedNumUsersList, result);
 				if (detected) {
 					result.setDetected(true);
 					result.addMessage("Database overhead detected on database " + dbId
@@ -109,18 +108,18 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 			}
 		}
 
-		Dataset dbUtilDataset = data.getDataSet(CPUUtilizationRecord.class);
+		final Dataset dbUtilDataset = data.getDataSet(CPUUtilizationRecord.class);
 
 		if (dbUtilDataset != null) {
 
-			String dbHostStr = GlobalConfiguration.getInstance().getProperty(ConfigKeys.SYSTEM_NODE_ROLE_DB);
-			List<String> dbHosts = new ArrayList<>();
-			for (String host : dbHostStr.split(ConfigParameterDescription.LIST_VALUE_SEPARATOR)) {
+			final String dbHostStr = GlobalConfiguration.getInstance().getProperty(ConfigKeys.SYSTEM_NODE_ROLE_DB);
+			final List<String> dbHosts = new ArrayList<>();
+			for (final String host : dbHostStr.split(ConfigParameterDescription.LIST_VALUE_SEPARATOR)) {
 				dbHosts.add(host);
 			}
-			for (String processID : dbUtilDataset.getValueSet(CPUUtilizationRecord.PAR_PROCESS_ID, String.class)) {
+			for (final String processID : dbUtilDataset.getValueSet(CPUUtilizationRecord.PAR_PROCESS_ID, String.class)) {
 				boolean isDBNode = false;
-				for (String dbHost : dbHosts) {
+				for (final String dbHost : dbHosts) {
 					if (processID.contains(dbHost)) {
 						isDBNode = true;
 						break;
@@ -131,7 +130,7 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 					continue;
 				}
 
-				boolean detected = analyzeCPUUtilization(dbUtilDataset, dbHosts, processID, result);
+				final boolean detected = analyzeCPUUtilization(dbUtilDataset, dbHosts, processID, result);
 				if (detected) {
 					result.setDetected(true);
 					result.addMessage("Database overhead detected on database " + processID
@@ -143,25 +142,25 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 		return result;
 	}
 
-	private boolean analyzeCPUUtilization(Dataset dbUtilDataset, List<String> dbHosts, String processID,
-			SpotterResult result) {
+	private boolean analyzeCPUUtilization(final Dataset dbUtilDataset, final List<String> dbHosts, final String processID,
+			final SpotterResult result) {
 		boolean detected = false;
-		NumericPairList<Integer, Double> chartDataUtils = new NumericPairList<>();
+		final NumericPairList<Integer, Double> chartDataUtils = new NumericPairList<>();
 
-		ParameterSelection dbNodeelection = new ParameterSelection().select(CPUUtilizationRecord.PAR_PROCESS_ID,
+		final ParameterSelection dbNodeelection = new ParameterSelection().select(CPUUtilizationRecord.PAR_PROCESS_ID,
 				processID);
-		Dataset dataset = dbNodeelection.applyTo(dbUtilDataset);
-		Map<String, Integer> mapNumCores = getNumberOfCPUCores(dataset);
-		for (Integer numUsers : dbUtilDataset.getValueSet(AbstractDetectionController.NUMBER_OF_USERS_KEY,
+		final Dataset dataset = dbNodeelection.applyTo(dbUtilDataset);
+		final Map<String, Integer> mapNumCores = getNumberOfCPUCores(dataset);
+		for (final Integer numUsers : dbUtilDataset.getValueSet(AbstractDetectionController.NUMBER_OF_USERS_KEY,
 				Integer.class)) {
-			ParameterSelection usersSelection = new ParameterSelection()
+			final ParameterSelection usersSelection = new ParameterSelection()
 					.select(AbstractDetectionController.NUMBER_OF_USERS_KEY, numUsers)
 					.select(CPUUtilizationRecord.PAR_PROCESS_ID, processID)
 					.select(CPUUtilizationRecord.PAR_CPU_ID, CPUUtilizationRecord.RES_CPU_AGGREGATED);
-			List<Double> cpuUtils = usersSelection.applyTo(dbUtilDataset).getValues(
+			final List<Double> cpuUtils = usersSelection.applyTo(dbUtilDataset).getValues(
 					CPUUtilizationRecord.PAR_UTILIZATION, Double.class);
 
-			double meanCPUUtil = LpeNumericUtils.average(cpuUtils);
+			final double meanCPUUtil = LpeNumericUtils.average(cpuUtils);
 
 			double actualThreshold = cpuThreshold;
 			if (qtStrategy) {
@@ -175,7 +174,7 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 			chartDataUtils.add(numUsers, meanCPUUtil);
 		}
 
-		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
+		final AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 		chartBuilder.startChart(processID, "number of users", "utilization [%]");
 		chartBuilder.addUtilizationLineSeries(chartDataUtils, "CPU utilization", true);
 		chartBuilder.addHorizontalLine(cpuThreshold * 100.0, "Threshold");
@@ -184,33 +183,33 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 		return detected;
 	}
 
-	private boolean analyzeDBStatistics(Dataset dbDataset, String dbId, List<Integer> sortedNumUsersList,
-			SpotterResult result) {
+	private boolean analyzeDBStatistics(final Dataset dbDataset, final String dbId, final List<Integer> sortedNumUsersList,
+			final SpotterResult result) {
 		Collections.sort(sortedNumUsersList);
 		int prevNumUsers = -1;
 		int firstSignificantNumUsers = -1;
 		int significantSteps = 0;
-		int minNumUsers = sortedNumUsersList.get(0);
-		NumericPairList<Integer, Double> rawData = new NumericPairList<>();
-		NumericPairList<Integer, Double> means = new NumericPairList<>();
-		List<Number> ci = new ArrayList<>();
+		final int minNumUsers = sortedNumUsersList.get(0);
+		final NumericPairList<Integer, Double> rawData = new NumericPairList<>();
+		final NumericPairList<Integer, Double> means = new NumericPairList<>();
+		final List<Number> ci = new ArrayList<>();
 		List<Double> waitTimesPerLock_prev = null;
-		for (Integer numUsers : sortedNumUsersList) {
-			Dataset tmpDataset = ParameterSelection.newSelection().select(NUMBER_OF_USERS_KEY, numUsers)
+		for (final Integer numUsers : sortedNumUsersList) {
+			final Dataset tmpDataset = ParameterSelection.newSelection().select(NUMBER_OF_USERS_KEY, numUsers)
 					.select(DBStatisticsRecrod.PAR_PROCESS_ID, dbId).applyTo(dbDataset);
 
-			NumericPairList<Long, Long> numWaitsSeries = getNumWaitsTimeseries(tmpDataset);
+			final NumericPairList<Long, Long> numWaitsSeries = getNumWaitsTimeseries(tmpDataset);
 
-			NumericPairList<Long, Long> waitTimeSeries = getWaitTimeTimeseries(tmpDataset);
+			final NumericPairList<Long, Long> waitTimeSeries = getWaitTimeTimeseries(tmpDataset);
 			if (numWaitsSeries.size() != waitTimeSeries.size()) {
 				throw new RuntimeException("Unequal list sizes!");
 			}
-			List<Double> waitTimesPerLock = new ArrayList<>();
+			final List<Double> waitTimesPerLock = new ArrayList<>();
 			for (int i = 1; i < numWaitsSeries.size(); i++) {
-				long numWait_prev = numWaitsSeries.get(i - 1).getValue();
-				long waitTime_prev = waitTimeSeries.get(i - 1).getValue();
-				long numWait = numWaitsSeries.get(i).getValue();
-				long waitTime = waitTimeSeries.get(i).getValue();
+				final long numWait_prev = numWaitsSeries.get(i - 1).getValue();
+				final long waitTime_prev = waitTimeSeries.get(i - 1).getValue();
+				final long numWait = numWaitsSeries.get(i).getValue();
+				final long waitTime = waitTimeSeries.get(i).getValue();
 				if (numWait - numWait_prev == 0L) {
 					waitTimesPerLock.add(0.0);
 				} else {
@@ -220,18 +219,18 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 			}
 
 			if (prevNumUsers > 0) {
-				List<Double> sums1 = new ArrayList<>();
-				List<Double> sums2 = new ArrayList<>();
+				final List<Double> sums1 = new ArrayList<>();
+				final List<Double> sums2 = new ArrayList<>();
 				LpeNumericUtils.createNormalDistributionByBootstrapping(waitTimesPerLock_prev, waitTimesPerLock, sums1,
 						sums2);
 
 				if (sums2.size() < 2 || sums1.size() < 2) {
 					throw new IllegalArgumentException("too small sets");
 				}
-				double prevMean = LpeNumericUtils.average(sums1);
-				double currentMean = LpeNumericUtils.average(sums2);
+				final double prevMean = LpeNumericUtils.average(sums1);
+				final double currentMean = LpeNumericUtils.average(sums2);
 
-				double pValue = LpeNumericUtils.tTest(sums2, sums1);
+				final double pValue = LpeNumericUtils.tTest(sums2, sums1);
 				if (pValue >= 0 && pValue <= requiredSignificanceLevel && prevMean < currentMean) {
 					if (firstSignificantNumUsers < 0) {
 						firstSignificantNumUsers = prevNumUsers;
@@ -244,21 +243,21 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 
 				// update chart data
 				if (prevNumUsers == minNumUsers) {
-					double stdDev = LpeNumericUtils.stdDev(sums1);
-					for (Double val : sums1) {
+					final double stdDev = LpeNumericUtils.stdDev(sums1);
+					for (final Double val : sums1) {
 						rawData.add(prevNumUsers, val);
 					}
-					double ciWidth = LpeNumericUtils.getConfidenceIntervalWidth(sums1.size(), stdDev,
+					final double ciWidth = LpeNumericUtils.getConfidenceIntervalWidth(sums1.size(), stdDev,
 							requiredSignificanceLevel);
 					means.add(prevNumUsers, prevMean);
 					ci.add(ciWidth / 2.0);
 				}
 
-				double stdDev = LpeNumericUtils.stdDev(sums2);
-				for (Double val : sums2) {
+				final double stdDev = LpeNumericUtils.stdDev(sums2);
+				for (final Double val : sums2) {
 					rawData.add(numUsers, val);
 				}
-				double ciWidth = LpeNumericUtils.getConfidenceIntervalWidth(sums2.size(), stdDev,
+				final double ciWidth = LpeNumericUtils.getConfidenceIntervalWidth(sums2.size(), stdDev,
 						requiredSignificanceLevel);
 				means.add(numUsers, currentMean);
 				ci.add(ciWidth / 2.0);
@@ -285,24 +284,24 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 
 	@Override
 	public InstrumentationDescription getInstrumentationDescription() {
-		InstrumentationDescriptionBuilder descrBuilder = new InstrumentationDescriptionBuilder();
+		final InstrumentationDescriptionBuilder descrBuilder = new InstrumentationDescriptionBuilder();
 		descrBuilder.newSampling(CPUSampler.class.getName(), 100);
 		descrBuilder.newSampling(SamplingDescription.SAMPLER_DATABASE_STATISTICS, 500);
 		return descrBuilder.build();
 	}
 
-	private NumericPairList<Long, Long> getNumWaitsTimeseries(Dataset rtDataSet) {
-		NumericPairList<Long, Long> timeSeries = new NumericPairList<>();
-		for (DBStatisticsRecrod rec : rtDataSet.getRecords(DBStatisticsRecrod.class)) {
+	private NumericPairList<Long, Long> getNumWaitsTimeseries(final Dataset rtDataSet) {
+		final NumericPairList<Long, Long> timeSeries = new NumericPairList<>();
+		for (final DBStatisticsRecrod rec : rtDataSet.getRecords(DBStatisticsRecrod.class)) {
 			timeSeries.add(rec.getTimeStamp(), rec.getNumLockWaits());
 		}
 		timeSeries.sort();
 		return timeSeries;
 	}
 
-	private NumericPairList<Long, Long> getWaitTimeTimeseries(Dataset rtDataSet) {
-		NumericPairList<Long, Long> timeSeries = new NumericPairList<>();
-		for (DBStatisticsRecrod rec : rtDataSet.getRecords(DBStatisticsRecrod.class)) {
+	private NumericPairList<Long, Long> getWaitTimeTimeseries(final Dataset rtDataSet) {
+		final NumericPairList<Long, Long> timeSeries = new NumericPairList<>();
+		for (final DBStatisticsRecrod rec : rtDataSet.getRecords(DBStatisticsRecrod.class)) {
 			timeSeries.add(rec.getTimeStamp(), rec.getLockTime());
 		}
 
@@ -310,12 +309,12 @@ public class DBCongestionDetectionController extends AbstractDetectionController
 		return timeSeries;
 	}
 
-	private Map<String, Integer> getNumberOfCPUCores(Dataset cpuUtilDataset) {
-		Map<String, Integer> cpuNumCores = new HashMap<>();
-		for (String processID : cpuUtilDataset.getValueSet(CPUUtilizationRecord.PAR_PROCESS_ID, String.class)) {
-			ParameterSelection selection = new ParameterSelection().select(CPUUtilizationRecord.PAR_PROCESS_ID,
+	private Map<String, Integer> getNumberOfCPUCores(final Dataset cpuUtilDataset) {
+		final Map<String, Integer> cpuNumCores = new HashMap<>();
+		for (final String processID : cpuUtilDataset.getValueSet(CPUUtilizationRecord.PAR_PROCESS_ID, String.class)) {
+			final ParameterSelection selection = new ParameterSelection().select(CPUUtilizationRecord.PAR_PROCESS_ID,
 					processID);
-			int numCores = selection.applyTo(cpuUtilDataset).getValueSet(CPUUtilizationRecord.PAR_CPU_ID).size() - 1;
+			final int numCores = selection.applyTo(cpuUtilDataset).getValueSet(CPUUtilizationRecord.PAR_CPU_ID).size() - 1;
 			cpuNumCores.put(processID, numCores);
 		}
 		return cpuNumCores;

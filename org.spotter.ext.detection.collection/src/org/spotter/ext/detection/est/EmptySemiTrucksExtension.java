@@ -30,8 +30,9 @@ public class EmptySemiTrucksExtension extends AbstractDetectionExtension {
 	// TODO: please provide a description
 	private static final String EXTENSION_DESCRIPTION = "no description";
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IDetectionController createExtensionArtifact() {
+	public IDetectionController createExtensionArtifact(final String ... args) {
 		return new EmptySemiTrucksDetectionController(this);
 	}
 

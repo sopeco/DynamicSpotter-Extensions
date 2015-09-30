@@ -76,7 +76,7 @@ public class JmsServerMeasurement extends AbstractMeasurementAdapter implements 
 	 * @param provider
 	 *            extension provider
 	 */
-	public JmsServerMeasurement(IExtension<?> provider) {
+	public JmsServerMeasurement(final IExtension provider) {
 		super(provider);
 	}
 
@@ -105,13 +105,13 @@ public class JmsServerMeasurement extends AbstractMeasurementAdapter implements 
 	private void resetActiveMQStatistics() {
 		try {
 			LOGGER.debug("purge and reset ActiveMQ server");
-			for (QueueViewMBean queueMbean : queueMbeans) {
+			for (final QueueViewMBean queueMbean : queueMbeans) {
 				// queueMbean.purge();
 				queueMbean.resetStatistics();
 			}
 			mbean.resetStatistics();
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -127,13 +127,13 @@ public class JmsServerMeasurement extends AbstractMeasurementAdapter implements 
 	}
 
 	@Override
-	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
+	public void pipeToOutputStream(final OutputStream oStream) throws MeasurementException {
 		if (samplerActivated && messagingServerAvailable) {
 			dataSource.pipeToOutputStream(oStream);
 		} else {
 			try {
 				oStream.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new MeasurementException(e);
 			}
 		}
@@ -143,31 +143,31 @@ public class JmsServerMeasurement extends AbstractMeasurementAdapter implements 
 	@Override
 	public void initialize() throws MeasurementException {
 
-		Properties collectorProperties = GlobalConfiguration.getInstance().getProperties();
+		final Properties collectorProperties = GlobalConfiguration.getInstance().getProperties();
 		collectorProperties.setProperty(FileDataSource.ADDITIONAL_FILE_PREFIX_KEY, "JMSServerSampler");
 
 		dataSource = CollectorFactory.createDataSource(FileDataSource.class.getName(), collectorProperties);
 
 		try {
 			LOGGER.debug("Connect to JMX ActiveMQ server");
-			String activeMqJMX = getProperties().getProperty(ACTIVE_MQJMX_URL);
+			final String activeMqJMX = getProperties().getProperty(ACTIVE_MQJMX_URL);
 
-			JMXConnector connector = JMXConnectorFactory.connect(new JMXServiceURL(activeMqJMX));
+			final JMXConnector connector = JMXConnectorFactory.connect(new JMXServiceURL(activeMqJMX));
 			connector.connect();
 
-			MBeanServerConnection connection = connector.getMBeanServerConnection();
+			final MBeanServerConnection connection = connector.getMBeanServerConnection();
 
-			ObjectName mbeanName = new ObjectName("org.apache.activemq:type=Broker,brokerName=myBroker");
+			final ObjectName mbeanName = new ObjectName("org.apache.activemq:type=Broker,brokerName=myBroker");
 			mbean = MBeanServerInvocationHandler.newProxyInstance(connection, mbeanName, BrokerViewMBean.class, true);
 
 			queueMbeans = new ArrayList<>();
-			for (ObjectName queueName : mbean.getQueues()) {
-				QueueViewMBean tempQueueMbean = (QueueViewMBean) MBeanServerInvocationHandler.newProxyInstance(
+			for (final ObjectName queueName : mbean.getQueues()) {
+				final QueueViewMBean tempQueueMbean = MBeanServerInvocationHandler.newProxyInstance(
 						connection, queueName, QueueViewMBean.class, true);
 				queueMbeans.add(tempQueueMbean);
 			}
 			messagingServerAvailable = true;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Messaging Server not available!");
 			messagingServerAvailable = false;
 		}
@@ -189,14 +189,14 @@ public class JmsServerMeasurement extends AbstractMeasurementAdapter implements 
 
 				try {
 					Thread.sleep(delay);
-				} catch (InterruptedException ie) {
+				} catch (final InterruptedException ie) {
 					LOGGER.debug("Sleeptime interrupted.");
 					running = false;
 				}
 			}
 
 			dataSource.disable();
-		} catch (MeasurementException e) {
+		} catch (final MeasurementException e) {
 
 			throw new RuntimeException(e);
 		}
@@ -206,8 +206,8 @@ public class JmsServerMeasurement extends AbstractMeasurementAdapter implements 
 	 * Samples JMS Server status
 	 */
 	private void sampleJmsServerStatistics() {
-		for (QueueViewMBean tempBean : queueMbeans) {
-			JmsServerRecord record = new JmsServerRecord();
+		for (final QueueViewMBean tempBean : queueMbeans) {
+			final JmsServerRecord record = new JmsServerRecord();
 			record.setQueueName(tempBean.getName());
 			record.setTimeStamp(System.currentTimeMillis());
 			record.setAverageEnqueueTime(tempBean.getAverageEnqueueTime());
@@ -223,13 +223,13 @@ public class JmsServerMeasurement extends AbstractMeasurementAdapter implements 
 	}
 
 	@Override
-	public void storeReport(String path) throws MeasurementException {
+	public void storeReport(final String path) throws MeasurementException {
 		// nothing to do here.
 	}
 
 	@Override
-	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
-		for (SamplingDescription sDescr : monitoringDescription.getSamplingDescriptions()) {
+	public void prepareMonitoring(final InstrumentationDescription monitoringDescription) throws MeasurementException {
+		for (final SamplingDescription sDescr : monitoringDescription.getSamplingDescriptions()) {
 			if (sDescr.getResourceName().equals(SamplingDescription.SAMPLER_MESSAGING_STATISTICS)) {
 				samplerActivated = true;
 				delay = sDescr.getDelay();

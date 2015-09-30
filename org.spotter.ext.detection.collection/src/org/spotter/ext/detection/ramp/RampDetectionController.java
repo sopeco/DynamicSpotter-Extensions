@@ -21,7 +21,6 @@ import org.aim.aiminterface.exceptions.MeasurementException;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.detection.AbstractDetectionController;
-import org.spotter.core.detection.IDetectionController;
 import org.spotter.core.detection.IExperimentReuser;
 import org.spotter.core.measurement.IMeasurementAdapter;
 import org.spotter.core.workload.IWorkloadAdapter;
@@ -48,7 +47,7 @@ public class RampDetectionController extends AbstractDetectionController impleme
 	 * @param provider
 	 *            extension provider.
 	 */
-	public RampDetectionController(IExtension<IDetectionController> provider) {
+	public RampDetectionController(final IExtension provider) {
 		super(provider);
 	}
 
@@ -59,7 +58,7 @@ public class RampDetectionController extends AbstractDetectionController impleme
 	}
 
 	@Override
-	protected SpotterResult analyze(DatasetCollection data) {
+	protected SpotterResult analyze(final DatasetCollection data) {
 		return analysisStrategyImpl.analyze(data);
 	}
 
@@ -96,7 +95,7 @@ public class RampDetectionController extends AbstractDetectionController impleme
 	 * @param descr
 	 *            description
 	 */
-	public void instrument(InstrumentationDescription descr) {
+	public void instrument(final InstrumentationDescription descr) {
 		try {
 			instrumentApplication(descr);
 		} catch (InstrumentationException | MeasurementException e) {
@@ -138,7 +137,7 @@ public class RampDetectionController extends AbstractDetectionController impleme
 	 * @param descr
 	 *            instrumentation description
 	 */
-	public void executeHighLoadExperiment(InstrumentationDescription descr) {
+	public void executeHighLoadExperiment(final InstrumentationDescription descr) {
 
 		try {
 			executeDefaultExperimentSeries(this, 1, descr);

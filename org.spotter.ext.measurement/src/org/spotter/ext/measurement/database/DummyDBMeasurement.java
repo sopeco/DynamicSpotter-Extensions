@@ -42,7 +42,7 @@ public class DummyDBMeasurement extends AbstractMeasurementAdapter implements Ru
 	private final Client client;
 	private WebResource webResource;
 
-	public DummyDBMeasurement(final IExtension<?> provider) {
+	public DummyDBMeasurement(final IExtension provider) {
 		super(provider);
 		client = LpeHTTPUtils.getWebClient();
 		client.setConnectTimeout(1000 * 60 * 60);

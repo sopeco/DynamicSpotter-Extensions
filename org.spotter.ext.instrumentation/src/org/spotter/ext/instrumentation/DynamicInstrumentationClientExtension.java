@@ -47,7 +47,7 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 	}
 
 	private ConfigParameterDescription createPackagesToIncludeParameter() {
-		ConfigParameterDescription packagesToIncludeParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription packagesToIncludeParameter = new ConfigParameterDescription(
 				IInstrumentationAdapter.INSTRUMENTATION_INCLUDES, LpeSupportedTypes.String);
 		packagesToIncludeParameter.setASet(true);
 		packagesToIncludeParameter.setDefaultValue("");
@@ -59,7 +59,7 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 	}
 
 	private ConfigParameterDescription createPackagesToExcludeParameter() {
-		ConfigParameterDescription packagesToExcludeParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription packagesToExcludeParameter = new ConfigParameterDescription(
 				IInstrumentationAdapter.INSTRUMENTATION_EXCLUDES, LpeSupportedTypes.String);
 		packagesToExcludeParameter.setASet(true);
 		packagesToExcludeParameter.setDefaultValue(InstrumentationConstants.JAVA_PACKAGE + ","
@@ -79,13 +79,14 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IInstrumentationAdapter createExtensionArtifact() {
+	public IInstrumentationAdapter createExtensionArtifact(final String ... args) {
 		return new DynamicInstrumentationClient(this);
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return InstrumentationClient.testConnection(host, port);
 	}
 

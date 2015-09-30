@@ -20,8 +20,9 @@ public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
 	public static final double REQUIRED_CONFIDENCE_LEVEL_DEFAULT = 0.95;
 	public static final int REQUIRED_SIGNIFICANT_STEPS_DEFAULT = 2;
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public IDetectionController createExtensionArtifact() {
+	public IDetectionController createExtensionArtifact(final String ... args) {
 		return new ExcessiveMessagingDetectionController(this);
 	}
 
@@ -31,7 +32,7 @@ public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createNumSignificantStepsParameter() {
-		ConfigParameterDescription numSignificantStepsParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription numSignificantStepsParameter = new ConfigParameterDescription(
 				REQUIRED_SIGNIFICANT_STEPS_KEY, LpeSupportedTypes.Integer);
 		numSignificantStepsParameter.setDefaultValue(String.valueOf(REQUIRED_SIGNIFICANT_STEPS_DEFAULT));
 		numSignificantStepsParameter.setRange(String.valueOf(1), String.valueOf(Integer.MAX_VALUE));
@@ -41,7 +42,7 @@ public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createConfidenceLevelParameter() {
-		ConfigParameterDescription requiredConfidenceLevel = new ConfigParameterDescription(
+		final ConfigParameterDescription requiredConfidenceLevel = new ConfigParameterDescription(
 				REQUIRED_CONFIDENCE_LEVEL_KEY, LpeSupportedTypes.Double);
 		requiredConfidenceLevel.setDefaultValue(String.valueOf(REQUIRED_CONFIDENCE_LEVEL_DEFAULT));
 		requiredConfidenceLevel.setRange("0.0", "1.0");
@@ -52,10 +53,10 @@ public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
 	}
 	
 	private ConfigParameterDescription createStrategyParameter() {
-		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
+		final ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
 				LpeSupportedTypes.String);
 
-		Set<String> scopeOptions = new HashSet<>();
+		final Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(STAGNATION_STRATEGY);
 		scopeOptions.add(THRESHOLD_STRATEGY);
 		scopeOptions.add(MSG_THORUGHPUT_STAGNATION_STRATEGY);

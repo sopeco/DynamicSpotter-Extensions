@@ -37,7 +37,7 @@ public class DynamicInstrumentationClient extends AbstractInstrumentationAdapter
 	 * @param provider
 	 *            extension provider
 	 */
-	public DynamicInstrumentationClient(IExtension<?> provider) {
+	public DynamicInstrumentationClient(final IExtension provider) {
 		super(provider);
 	}
 
@@ -52,7 +52,7 @@ public class DynamicInstrumentationClient extends AbstractInstrumentationAdapter
 	}
 
 	@Override
-	public void instrument(InstrumentationDescription description) throws InstrumentationException {
+	public void instrument(final InstrumentationDescription description) throws InstrumentationException {
 		if (client == null) {
 			initialize();
 		}

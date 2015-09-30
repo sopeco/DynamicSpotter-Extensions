@@ -39,7 +39,7 @@ public class MeasurementClient extends AbstractMeasurementAdapter {
 	 * @param provider
 	 *            extension provider
 	 */
-	public MeasurementClient(IExtension<?> provider) {
+	public MeasurementClient(final IExtension provider) {
 		super(provider);
 	}
 
@@ -79,19 +79,19 @@ public class MeasurementClient extends AbstractMeasurementAdapter {
 	}
 
 	@Override
-	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
+	public void pipeToOutputStream(final OutputStream oStream) throws MeasurementException {
 
 		agentClient.pipeToOutputStream(oStream);
 
 	}
 
 	@Override
-	public void storeReport(String path) throws MeasurementException {
+	public void storeReport(final String path) throws MeasurementException {
 		// nothing to do here.
 	}
 
 	@Override
-	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
+	public void prepareMonitoring(final InstrumentationDescription monitoringDescription) throws MeasurementException {
 		// already covered by instrument in corresponding instrumentation part
 
 	}

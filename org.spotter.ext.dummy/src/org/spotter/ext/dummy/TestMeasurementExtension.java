@@ -28,8 +28,9 @@ public class TestMeasurementExtension extends AbstractMeasurmentExtension {
 	
 	public static final String NUM_RECORDS = "org.spotter.test.numRecords";
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IMeasurementAdapter createExtensionArtifact() {
+	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
 		return new TestMeasurement(this);
 	}
 
@@ -45,7 +46,7 @@ public class TestMeasurementExtension extends AbstractMeasurmentExtension {
 	
 	@Override
 	protected void initializeConfigurationParameters() {
-		ConfigParameterDescription par = new ConfigParameterDescription(NUM_RECORDS, LpeSupportedTypes.Integer);
+		final ConfigParameterDescription par = new ConfigParameterDescription(NUM_RECORDS, LpeSupportedTypes.Integer);
 		par.setMandatory(false);
 		par.setDefaultValue(String.valueOf(100));
 		par.setDescription("Number of records to return as result.");
@@ -54,7 +55,7 @@ public class TestMeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return true;
 	}
 

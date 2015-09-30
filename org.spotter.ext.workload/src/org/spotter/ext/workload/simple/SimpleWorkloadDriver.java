@@ -94,7 +94,7 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 	 * @param provider
 	 *            extension provider
 	 */
-	public SimpleWorkloadDriver(IExtension<?> provider) {
+	public SimpleWorkloadDriver(final IExtension provider) {
 		super(provider);
 	}
 
@@ -106,7 +106,7 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 		experimentPhaseFinished = false;
 		numActiveUsers = 0;
 		final Object wlDriver = this;
-		Runnable task = new Runnable() {
+		final Runnable task = new Runnable() {
 
 			@Override
 			public void run() {
@@ -116,10 +116,10 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 					getProperties().putAll(GlobalConfiguration.getInstance().getProperties());
 
 					checkProperties(getProperties());
-					int numberUsers = loadConfig.getNumUsers();
+					final int numberUsers = loadConfig.getNumUsers();
 					LOGGER.info("starting " + numberUsers + " vUsers ...");
-					File userScriptFile = new File(getProperties().getProperty(USER_SCRIPT_PATH));
-					String userScriptClassNAme = getProperties().getProperty(USER_SCRIPT_CLASS_NAME);
+					final File userScriptFile = new File(getProperties().getProperty(USER_SCRIPT_PATH));
+					final String userScriptClassNAme = getProperties().getProperty(USER_SCRIPT_CLASS_NAME);
 
 					final long experimentDuration = loadConfig.getExperimentDuration() * _1000L; // [ms]
 
@@ -176,7 +176,7 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 					}
 
 					LOGGER.info("Simple load with " + numberUsers + " vUsers terminated");
-				} catch (Throwable e) {
+				} catch (final Throwable e) {
 					synchronized (warmUpMonitor) {
 						warmupPhaseFinished = true;
 						warmUpMonitor.notifyAll();
@@ -198,10 +198,10 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 
 	}
 
-	private void sleep(long delay) {
+	private void sleep(final long delay) {
 		try {
 			Thread.sleep(delay);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -215,11 +215,12 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 	 */
 	private void startVUser(final Class<?> vUserClass, final long coolDownDelay) {
 		LpeSystemUtils.submitTask(new Runnable() {
+			@Override
 			public void run() {
 				ISimpleVUser vUser;
 				try {
 					vUser = (ISimpleVUser) vUserClass.newInstance();
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					throw new RuntimeException(e);
 				}
 
@@ -228,7 +229,7 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 				while (!experimentPhaseFinished) {
 					vUser.executeIteration();
 				}
-				long coolDownPhaseStart = System.currentTimeMillis();
+				final long coolDownPhaseStart = System.currentTimeMillis();
 				while ((System.currentTimeMillis() - coolDownPhaseStart) < coolDownDelay) {
 					vUser.executeIteration();
 				}
@@ -238,19 +239,19 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 		});
 	}
 
-	private Class<?> loadVUserScript(File userScriptFile, String userScriptClassNAme) throws WorkloadException {
+	private Class<?> loadVUserScript(final File userScriptFile, final String userScriptClassNAme) throws WorkloadException {
 		URL url;
 		final Class<?> vUserClass;
 		try {
 			url = userScriptFile.toURI().toURL();
-			URL[] urls = new URL[] { url };
+			final URL[] urls = new URL[] { url };
 
 			urlClassLoader = new URLClassLoader(urls, this.getClass().getClassLoader());
 
 			vUserClass = urlClassLoader.loadClass(userScriptClassNAme);
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			throw new WorkloadException(e);
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			// Cannot include ClassNotFoundException because it is not parsable
 			// as JSON string due to unrecognized field ("ex" instead of
 			// "exception")
@@ -270,7 +271,7 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 	 * @param properties
 	 *            the properties to check
 	 */
-	private void checkProperties(Properties properties) {
+	private void checkProperties(final Properties properties) {
 
 		if (!properties.containsKey(USER_SCRIPT_PATH)) {
 			throw new RuntimeException("User script file has not been specified!");
@@ -311,7 +312,7 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 				LOGGER.debug("experimentPhaseFinished: {}", experimentPhaseFinished);
 				try {
 					this.wait();
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					throw new WorkloadException(e);
 				}
 			}
@@ -337,7 +338,7 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 			while (!warmupPhaseFinished) {
 				try {
 					warmUpMonitor.wait();
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					throw new WorkloadException(e);
 				}
 			}
@@ -354,7 +355,7 @@ public class SimpleWorkloadDriver extends AbstractWorkloadAdapter {
 				try {
 					LOGGER.debug("going to wait in: experiment phase termination ...");
 					experimentMonitor.wait();
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					throw new WorkloadException(e);
 				}
 			}

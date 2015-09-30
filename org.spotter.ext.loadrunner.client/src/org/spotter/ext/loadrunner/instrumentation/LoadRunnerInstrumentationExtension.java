@@ -31,8 +31,9 @@ public class LoadRunnerInstrumentationExtension extends AbstractInstrumentationE
 														+ "connect to an HP Loadrunner instrumentation satellite. It will only "
 														+ "be applicable if you have a Loadrunner as a workload generator.";
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public IInstrumentationAdapter createExtensionArtifact() {
+	public IInstrumentationAdapter createExtensionArtifact(final String ... args) {
 		return new LoadRunnerInstrumentationClient(this);
 	}
 
@@ -52,7 +53,7 @@ public class LoadRunnerInstrumentationExtension extends AbstractInstrumentationE
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return LoadGeneratorClient.testConnection(host, port);
 	}
 

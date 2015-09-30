@@ -12,7 +12,6 @@ import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
-import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.detection.trafficJam.strategies.LinearRegression;
 import org.spotter.ext.detection.trafficJam.strategies.TTestStrategy;
@@ -24,13 +23,13 @@ public class TrafficJamDetectionController extends AbstractDetectionController {
 	private ITrafficJamStrategy analysisStrategyImpl;
 	private int experimentSteps;
 
-	public TrafficJamDetectionController(IExtension<IDetectionController> provider) {
+	public TrafficJamDetectionController(final IExtension provider) {
 		super(provider);
 	}
 
 	@Override
 	public void loadProperties() {
-		String experimentStepsStr = getProblemDetectionConfiguration().getProperty(
+		final String experimentStepsStr = getProblemDetectionConfiguration().getProperty(
 				TrafficJamExtension.EXPERIMENT_STEPS_KEY);
 		experimentSteps = experimentStepsStr != null ? Integer.parseInt(experimentStepsStr)
 				: TrafficJamExtension.EXPERIMENT_STEPS_DEFAULT;
@@ -65,7 +64,7 @@ public class TrafficJamDetectionController extends AbstractDetectionController {
 	}
 
 	private InstrumentationDescription getInstrumentationDescription() {
-		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		final InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
 				.entityDone();
 		return idBuilder.build();
@@ -73,10 +72,10 @@ public class TrafficJamDetectionController extends AbstractDetectionController {
 	}
 
 	@Override
-	protected SpotterResult analyze(DatasetCollection data) {
-		SpotterResult result = new SpotterResult();
+	protected SpotterResult analyze(final DatasetCollection data) {
+		final SpotterResult result = new SpotterResult();
 
-		Dataset rtDataset = data.getDataSet(ResponseTimeRecord.class);
+		final Dataset rtDataset = data.getDataSet(ResponseTimeRecord.class);
 
 		if (rtDataset == null || rtDataset.size() == 0) {
 			result.setDetected(false);
@@ -84,16 +83,16 @@ public class TrafficJamDetectionController extends AbstractDetectionController {
 			return result;
 		}
 
-		for (String operation : rtDataset.getValueSet(ResponseTimeRecord.PAR_OPERATION, String.class)) {
+		for (final String operation : rtDataset.getValueSet(ResponseTimeRecord.PAR_OPERATION, String.class)) {
 
 			boolean operationDetected = false;
 			try {
 				operationDetected = analysisStrategyImpl.analyseOperationResponseTimes(rtDataset, operation, result);
-			} catch (NullPointerException npe) {
+			} catch (final NullPointerException npe) {
 				result.addMessage("Traffic Jam detection failed for the operation '" + operation
 						+ "', because the operation was not executed in each analysis cycle.");
 				continue;
-			} catch (IllegalArgumentException iae) {
+			} catch (final IllegalArgumentException iae) {
 				result.addMessage(iae.getMessage());
 				continue;
 			}

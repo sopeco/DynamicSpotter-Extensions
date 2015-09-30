@@ -43,15 +43,16 @@ public class JmsServerMeasurementExtension extends AbstractMeasurmentExtension {
 		return "JMSServer Sampling Measurement Satellite Adapter";
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public IMeasurementAdapter createExtensionArtifact() {
+	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
 		return new JmsServerMeasurement(this);
 	}
 
 
 
 	private ConfigParameterDescription createServerConnectionStringParameter() {
-		ConfigParameterDescription collectorTypeParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription collectorTypeParameter = new ConfigParameterDescription(
 				JmsServerMeasurement.ACTIVE_MQJMX_URL, LpeSupportedTypes.String);
 		collectorTypeParameter.setMandatory(true);
 		collectorTypeParameter.setDescription("Connection string to the JMX interface of the massaging service.");
@@ -66,7 +67,7 @@ public class JmsServerMeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return true;
 	}
 

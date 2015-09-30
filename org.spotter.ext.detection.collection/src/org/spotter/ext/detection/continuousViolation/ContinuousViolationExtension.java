@@ -25,8 +25,9 @@ public class ContinuousViolationExtension extends AbstractDetectionExtension {
 	protected static final String PERCENTILE_STRATEGY = "moving percentile analysis";
 	protected static final String BUCKET_STRATEGY = "bucket analysis";
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IDetectionController createExtensionArtifact() {
+	public IDetectionController createExtensionArtifact(final String ... args) {
 		return new ContinuousViolationController(this);
 	}
 
@@ -36,10 +37,10 @@ public class ContinuousViolationExtension extends AbstractDetectionExtension {
 	}
 	
 	private ConfigParameterDescription createStrategyParameter() {
-		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(VIOLATION_DETECTION_STRATEGY_KEY,
+		final ConfigParameterDescription scopeParameter = new ConfigParameterDescription(VIOLATION_DETECTION_STRATEGY_KEY,
 				LpeSupportedTypes.String);
 
-		Set<String> scopeOptions = new HashSet<>();
+		final Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(DBSCAN_STRATEGY);
 		scopeOptions.add(BUCKET_STRATEGY);
 		scopeOptions.add(PERCENTILE_STRATEGY);
@@ -58,7 +59,7 @@ public class ContinuousViolationExtension extends AbstractDetectionExtension {
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 		addConfigParameter(createStrategyParameter());
-		for (ConfigParameterDescription cpd : AnalysisConfig.getConfigurationParameters()) {
+		for (final ConfigParameterDescription cpd : AnalysisConfig.getConfigurationParameters()) {
 			addConfigParameter(cpd);
 		}
 

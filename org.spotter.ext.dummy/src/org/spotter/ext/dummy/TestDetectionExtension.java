@@ -24,8 +24,9 @@ public class TestDetectionExtension extends AbstractDetectionExtension {
 
 	private static final String EXTENSION_DESCRIPTION = "This is just a dummy extension doing dummy experiments.";
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IDetectionController createExtensionArtifact() {
+	public IDetectionController createExtensionArtifact(final String ... args) {
 		return new TestDetection(this);
 	}
 
@@ -36,7 +37,7 @@ public class TestDetectionExtension extends AbstractDetectionExtension {
 
 	@Override
 	protected void initializeConfigurationParameters() {
-		ConfigParameterDescription par = new ConfigParameterDescription("testParameter", LpeSupportedTypes.Integer);
+		final ConfigParameterDescription par = new ConfigParameterDescription("testParameter", LpeSupportedTypes.Integer);
 		par.setMandatory(false);
 		par.setDefaultValue(String.valueOf(100));
 		par.setDescription("It's just a test parameter.");

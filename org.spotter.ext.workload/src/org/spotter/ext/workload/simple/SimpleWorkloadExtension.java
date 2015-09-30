@@ -44,7 +44,7 @@ public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 	}
 	
 	private ConfigParameterDescription createScriptPathParameter() {
-		ConfigParameterDescription scriptParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription scriptParameter = new ConfigParameterDescription(
 				SimpleWorkloadDriver.USER_SCRIPT_PATH, LpeSupportedTypes.String);
 		scriptParameter.setMandatory(true);
 		scriptParameter.setASet(false);
@@ -58,7 +58,7 @@ public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createScriptClassParameter() {
-		ConfigParameterDescription classParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription classParameter = new ConfigParameterDescription(
 				SimpleWorkloadDriver.USER_SCRIPT_CLASS_NAME, LpeSupportedTypes.String);
 		classParameter.setMandatory(true);
 		classParameter.setASet(false);
@@ -75,13 +75,14 @@ public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IWorkloadAdapter createExtensionArtifact() {
+	public IWorkloadAdapter createExtensionArtifact(final String ... args) {
 		return new SimpleWorkloadDriver(this);
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return true;
 	}
 

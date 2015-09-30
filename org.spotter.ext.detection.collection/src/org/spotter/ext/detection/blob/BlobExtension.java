@@ -12,8 +12,10 @@ public class BlobExtension extends AbstractDetectionExtension {
 	protected static final String DETECTION_STRATEGY_KEY = "strategy";
 	protected static final String COMP_EXCLUSION_STRATEGY = "exclusion analysis strategy";
 	protected static final String MEAN_ANALYSIS_STRATEGY = "mean analysis strategy";
+
+	@SuppressWarnings("unchecked")
 	@Override
-	public IDetectionController createExtensionArtifact() {
+	public IDetectionController createExtensionArtifact(final String ... args) {
 		return new BlobDetectionController(this);
 	}
 
@@ -23,10 +25,10 @@ public class BlobExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createStrategyParameter() {
-		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
+		final ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
 				LpeSupportedTypes.String);
 
-		Set<String> scopeOptions = new HashSet<>();
+		final Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(COMP_EXCLUSION_STRATEGY);
 		scopeOptions.add(MEAN_ANALYSIS_STRATEGY);
 		scopeParameter.setOptions(scopeOptions);

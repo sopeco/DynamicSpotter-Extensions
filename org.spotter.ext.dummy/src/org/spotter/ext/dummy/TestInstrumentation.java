@@ -22,7 +22,7 @@ import org.spotter.core.instrumentation.AbstractInstrumentationAdapter;
 
 public class TestInstrumentation extends AbstractInstrumentationAdapter {
 
-	public TestInstrumentation(IExtension<?> provider) {
+	public TestInstrumentation(final IExtension provider) {
 		super(provider);
 	}
 
@@ -32,7 +32,7 @@ public class TestInstrumentation extends AbstractInstrumentationAdapter {
 	}
 
 	@Override
-	public void instrument(InstrumentationDescription description) throws InstrumentationException {
+	public void instrument(final InstrumentationDescription description) throws InstrumentationException {
 
 	}
 

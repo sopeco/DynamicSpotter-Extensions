@@ -51,10 +51,11 @@ public class MeasurementExtension extends AbstractMeasurmentExtension {
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IMeasurementAdapter createExtensionArtifact() {
-		IMeasurementAdapter mController = new MeasurementClient(this);
-		for (ConfigParameterDescription cpd : this.getConfigParameters()) {
+	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
+		final IMeasurementAdapter mController = new MeasurementClient(this);
+		for (final ConfigParameterDescription cpd : this.getConfigParameters()) {
 			if (cpd.getDefaultValue() != null) {
 				mController.getProperties().setProperty(cpd.getName(), cpd.getDefaultValue());
 			}
@@ -64,7 +65,7 @@ public class MeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return InstrumentationClient.testConnection(host, port);
 	}
 

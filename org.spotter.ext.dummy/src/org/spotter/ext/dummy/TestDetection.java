@@ -15,14 +15,18 @@
  */
 package org.spotter.ext.dummy;
 
+import java.util.Collections;
+
 import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.description.instrumentation.InstrumentationEntity;
+import org.aim.aiminterface.description.restriction.Restriction;
+import org.aim.aiminterface.description.sampling.SamplingDescription;
 import org.aim.aiminterface.exceptions.InstrumentationException;
 import org.aim.aiminterface.exceptions.MeasurementException;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
-import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.shared.result.model.ProblemOccurrence;
 import org.spotter.shared.result.model.SpotterResult;
@@ -38,7 +42,7 @@ public class TestDetection extends AbstractDetectionController {
 	 * @param provider
 	 *            the provider of the extension
 	 */
-	public TestDetection(IExtension<IDetectionController> provider) {
+	public TestDetection(final IExtension provider) {
 		super(provider);
 	}
 
@@ -49,21 +53,21 @@ public class TestDetection extends AbstractDetectionController {
 
 	@Override
 	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
-		executeDefaultExperimentSeries(this, 1, new InstrumentationDescription());
+		executeDefaultExperimentSeries(this, 1, new InstrumentationDescription(Collections.<InstrumentationEntity> emptySet(),Collections.<SamplingDescription> emptySet(),Restriction.EMPTY_RESTRICTION));
 	}
 
 	@Override
-	protected SpotterResult analyze(DatasetCollection data) {
+	protected SpotterResult analyze(final DatasetCollection data) {
 
-		SpotterResult result = new SpotterResult();
-		String message = "Detected a test bottleneck!";
+		final SpotterResult result = new SpotterResult();
+		final String message = "Detected a test bottleneck!";
 
-		String methodA = "methodA()";
-		ProblemOccurrence occurrenceA = new ProblemOccurrence(methodA, message);
-		String methodB = "methodB()";
-		ProblemOccurrence occurrenceB = new ProblemOccurrence(methodB, message);
-		String methodC = "methodC()";
-		ProblemOccurrence occurrenceC = new ProblemOccurrence(methodC, message);
+		final String methodA = "methodA()";
+		final ProblemOccurrence occurrenceA = new ProblemOccurrence(methodA, message);
+		final String methodB = "methodB()";
+		final ProblemOccurrence occurrenceB = new ProblemOccurrence(methodB, message);
+		final String methodC = "methodC()";
+		final ProblemOccurrence occurrenceC = new ProblemOccurrence(methodC, message);
 
 		result.addProblemOccurrence(occurrenceA);
 		result.addProblemOccurrence(occurrenceB);

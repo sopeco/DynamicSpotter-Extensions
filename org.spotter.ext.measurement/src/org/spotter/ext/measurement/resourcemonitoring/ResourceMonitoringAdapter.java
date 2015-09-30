@@ -49,7 +49,7 @@ public class ResourceMonitoringAdapter extends AbstractMeasurementAdapter {
 	 * @param provider
 	 *            extension provider
 	 */
-	public ResourceMonitoringAdapter(IExtension<?> provider) {
+	public ResourceMonitoringAdapter(final IExtension provider) {
 		super(provider);
 
 	}
@@ -57,7 +57,7 @@ public class ResourceMonitoringAdapter extends AbstractMeasurementAdapter {
 	@Override
 	public void enableMonitoring() throws MeasurementException {
 
-		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		final InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newSampling(CPUSampler.class.getName(), samplingDelay);
 		idBuilder.newSampling(NetworkIOSampler.class.getName(), samplingDelay);
 
@@ -74,7 +74,7 @@ public class ResourceMonitoringAdapter extends AbstractMeasurementAdapter {
 	@Override
 	public MeasurementData getMeasurementData() throws MeasurementException {
 
-		MeasurementData measurementData = client.getMeasurementData();
+		final MeasurementData measurementData = client.getMeasurementData();
 
 		return measurementData;
 	}
@@ -93,7 +93,7 @@ public class ResourceMonitoringAdapter extends AbstractMeasurementAdapter {
 				throw new MeasurementException("Connection to measurement satellite could not be established!");
 			}
 
-			Properties measurementProperties = getProperties();
+			final Properties measurementProperties = getProperties();
 
 			if (measurementProperties.containsKey(SAMPLING_DELAY)) {
 				samplingDelay = Long.valueOf(measurementProperties.getProperty(SAMPLING_DELAY));
@@ -104,18 +104,18 @@ public class ResourceMonitoringAdapter extends AbstractMeasurementAdapter {
 	}
 
 	@Override
-	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
+	public void pipeToOutputStream(final OutputStream oStream) throws MeasurementException {
 		client.pipeToOutputStream(oStream);
 
 	}
 
 	@Override
-	public void storeReport(String path) throws MeasurementException {
+	public void storeReport(final String path) throws MeasurementException {
 		// nothing to do here.
 	}
 
 	@Override
-	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
+	public void prepareMonitoring(final InstrumentationDescription monitoringDescription) throws MeasurementException {
 		// TODO Auto-generated method stub
 		
 	}

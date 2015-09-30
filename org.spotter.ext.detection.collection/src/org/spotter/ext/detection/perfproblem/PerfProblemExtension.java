@@ -30,8 +30,9 @@ public class PerfProblemExtension extends AbstractDetectionExtension {
 		return "Performance Problem";
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IDetectionController createExtensionArtifact() {
+	public IDetectionController createExtensionArtifact(final String ... args) {
 		return new PerfProblemController(this);
 	}
 

@@ -43,7 +43,7 @@ public class ResourceMonitoringExtension extends AbstractMeasurmentExtension {
 	}
 	
 	private ConfigParameterDescription createSamplingDelayParameter() {
-		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(
 				ResourceMonitoringAdapter.SAMPLING_DELAY, LpeSupportedTypes.Long);
 		samplingDelayParameter.setDefaultValue(String.valueOf(ResourceMonitoringAdapter.DEFAULT_DELAY));
 		samplingDelayParameter.setDescription("The sampling interval in milliseconds.");
@@ -57,13 +57,14 @@ public class ResourceMonitoringExtension extends AbstractMeasurmentExtension {
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IMeasurementAdapter createExtensionArtifact() {
+	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
 		return new ResourceMonitoringAdapter(this);
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return ResourceMonitoringClient.testConnection(host, port);
 	}
 

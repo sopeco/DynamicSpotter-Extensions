@@ -47,7 +47,6 @@ import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.system.LpeSystemUtils;
 import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
-import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.shared.result.model.SpotterResult;
 
@@ -68,7 +67,7 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 	 * @param provider
 	 *            extension provider
 	 */
-	public EmptySemiTrucksDetectionController(IExtension<IDetectionController> provider) {
+	public EmptySemiTrucksDetectionController(final IExtension provider) {
 		super(provider);
 		// TODO Auto-generated constructor stub
 	}
@@ -89,21 +88,21 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 	}
 
 	private InstrumentationDescription getInstrumentationDescription() {
-		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
-		return idBuilder.newTraceScopeEntity().setAPISubScope(EntryPointScope.class.getName())
+		final InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		return idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).enableTrace()
 				.addProbe(ThreadTracingProbe.MODEL_PROBE).entityDone().newAPIScopeEntity(JmsScope.class.getName())
 				.addProbe(JmsMessageSizeProbe.MODEL_PROBE).addProbe(JmsCommunicationProbe.MODEL_PROBE).entityDone()
 				.build();
 	}
 
 	@Override
-	protected SpotterResult analyze(DatasetCollection data) {
-		SpotterResult result = new SpotterResult();
+	protected SpotterResult analyze(final DatasetCollection data) {
+		final SpotterResult result = new SpotterResult();
 		result.setDetected(false);
 
-		Dataset threadTracingDataset = data.getDataSet(ThreadTracingRecord.class);
-		Dataset messagingDataset = data.getDataSet(JmsRecord.class);
-		Dataset messageSizesDataset = data.getDataSet(JmsMessageSizeRecord.class);
+		final Dataset threadTracingDataset = data.getDataSet(ThreadTracingRecord.class);
+		final Dataset messagingDataset = data.getDataSet(JmsRecord.class);
+		final Dataset messageSizesDataset = data.getDataSet(JmsMessageSizeRecord.class);
 
 		if (threadTracingDataset == null || threadTracingDataset.size() == 0) {
 			result.addMessage("No trace records found!");
@@ -123,11 +122,11 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 			return result;
 		}
 
-		for (String processId : messagingDataset.getValueSet(AbstractRecord.PAR_PROCESS_ID, String.class)) {
-			Dataset processRelatedTraceDataset = ParameterSelection.newSelection()
+		for (final String processId : messagingDataset.getValueSet(AbstractRecord.PAR_PROCESS_ID, String.class)) {
+			final Dataset processRelatedTraceDataset = ParameterSelection.newSelection()
 					.select(AbstractRecord.PAR_PROCESS_ID, processId).applyTo(threadTracingDataset);
 
-			Dataset processRelatedMessagingDataset = ParameterSelection.newSelection()
+			final Dataset processRelatedMessagingDataset = ParameterSelection.newSelection()
 					.select(AbstractRecord.PAR_PROCESS_ID, processId).applyTo(messagingDataset);
 
 			if (processRelatedTraceDataset == null || processRelatedTraceDataset.size() == 0) {
@@ -139,23 +138,23 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 				continue;
 			}
 
-			List<Trace> traces = extractTraces(processRelatedTraceDataset, processRelatedMessagingDataset,
+			final List<Trace> traces = extractTraces(processRelatedTraceDataset, processRelatedMessagingDataset,
 					messageSizesDataset);
 
 			// writeTracesToFile(result, traces, "traces");
 
-			List<AggTrace> aggregatedTraces = aggregateTraces(traces);
+			final List<AggTrace> aggregatedTraces = aggregateTraces(traces);
 
 			writeTracesToFile(result, aggregatedTraces, "traces-agg-" + processId.substring(processId.indexOf("@") + 1));
-			List<ESTCandidate> estCandidates = new ArrayList<>();
-			for (AggTrace aggTrace : aggregatedTraces) {
+			final List<ESTCandidate> estCandidates = new ArrayList<>();
+			for (final AggTrace aggTrace : aggregatedTraces) {
 				findESTCandidates(estCandidates, aggTrace, 1);
 			}
 
-			for (ESTCandidate candidate : estCandidates) {
+			for (final ESTCandidate candidate : estCandidates) {
 				result.setDetected(true);
-				double savingPotential = candidate.getAggTrace().getOverhead() * (candidate.getLoopCount() - 1);
-				double transmittedBytes = (candidate.getAggTrace().getPayload() + candidate.getAggTrace().getOverhead())
+				final double savingPotential = candidate.getAggTrace().getOverhead() * (candidate.getLoopCount() - 1);
+				final double transmittedBytes = (candidate.getAggTrace().getPayload() + candidate.getAggTrace().getOverhead())
 						* candidate.getLoopCount();
 				result.addMessage("*************************************************************");
 				result.addMessage("*************************************************************");
@@ -181,9 +180,9 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 
 	}
 
-	private void findESTCandidates(List<ESTCandidate> candidates, AggTrace aggTrace, int loopCount) {
+	private void findESTCandidates(final List<ESTCandidate> candidates, final AggTrace aggTrace, int loopCount) {
 		if (aggTrace.isSendMethod() && loopCount > 1) {
-			ESTCandidate candidate = new ESTCandidate();
+			final ESTCandidate candidate = new ESTCandidate();
 			candidate.setAggTrace(aggTrace);
 			candidate.setLoopCount(loopCount);
 			candidates.add(candidate);
@@ -192,16 +191,16 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 				loopCount *= aggTrace.getLoopCount();
 			}
 
-			for (AggTrace subTrace : aggTrace.getSubTraces()) {
+			for (final AggTrace subTrace : aggTrace.getSubTraces()) {
 				findESTCandidates(candidates, subTrace, loopCount);
 			}
 
 		}
 	}
 
-	private List<AggTrace> aggregateTraces(List<Trace> traces) {
-		Map<Trace, List<Trace>> traceGrouping = new HashMap<Trace, List<Trace>>();
-		for (Trace rootTrace : traces) {
+	private List<AggTrace> aggregateTraces(final List<Trace> traces) {
+		final Map<Trace, List<Trace>> traceGrouping = new HashMap<Trace, List<Trace>>();
+		for (final Trace rootTrace : traces) {
 			List<Trace> groupTraces = null;
 			if (!traceGrouping.containsKey(rootTrace)) {
 				groupTraces = new ArrayList<>();
@@ -213,9 +212,9 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 			groupTraces.add(rootTrace);
 
 		}
-		List<AggTrace> aggregatedTraces = new ArrayList<>();
+		final List<AggTrace> aggregatedTraces = new ArrayList<>();
 
-		for (Trace representative : traceGrouping.keySet()) {
+		for (final Trace representative : traceGrouping.keySet()) {
 
 			calculateAverageTrace(representative, traceGrouping.get(representative));
 
@@ -226,20 +225,20 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 
 	}
 
-	private void calculateAverageTrace(Trace reprTrace, List<Trace> tracesList) {
-		List<Iterator<Trace>> iterators = new ArrayList<>();
-		for (Trace tr : tracesList) {
+	private void calculateAverageTrace(Trace reprTrace, final List<Trace> tracesList) {
+		final List<Iterator<Trace>> iterators = new ArrayList<>();
+		for (final Trace tr : tracesList) {
 			iterators.add(tr.iterator());
 		}
 
-		Iterator<Trace> itMaster = reprTrace.iterator();
-		long size = tracesList.size();
+		final Iterator<Trace> itMaster = reprTrace.iterator();
+		final long size = tracesList.size();
 		while (itMaster.hasNext()) {
 			reprTrace = itMaster.next();
 			long avgPayload = 0;
 			long avgOverhead = 0;
-			for (Iterator<Trace> it : iterators) {
-				Trace subTrace = it.next();
+			for (final Iterator<Trace> it : iterators) {
+				final Trace subTrace = it.next();
 				avgPayload += subTrace.getPayload();
 				avgOverhead += subTrace.getOverhead();
 			}
@@ -249,30 +248,30 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 		}
 	}
 
-	private void writeTracesToFile(final SpotterResult result, final List<?> traces, String fileName) {
+	private void writeTracesToFile(final SpotterResult result, final List<?> traces, final String fileName) {
 
 		try {
 			final PipedOutputStream outStream = new PipedOutputStream();
-			PipedInputStream inStream = new PipedInputStream(outStream);
+			final PipedInputStream inStream = new PipedInputStream(outStream);
 
 			LpeSystemUtils.submitTask(new Runnable() {
 
 				@Override
 				public void run() {
-					BufferedWriter bWriter = new BufferedWriter(new OutputStreamWriter(outStream));
+					final BufferedWriter bWriter = new BufferedWriter(new OutputStreamWriter(outStream));
 					try {
-						for (Object trace : traces) {
+						for (final Object trace : traces) {
 							bWriter.write(trace.toString());
 							bWriter.newLine();
 							bWriter.newLine();
 						}
-					} catch (IOException e) {
+					} catch (final IOException e) {
 
 					} finally {
 						if (bWriter != null) {
 							try {
 								bWriter.close();
-							} catch (IOException e) {
+							} catch (final IOException e) {
 								throw new RuntimeException(e);
 							}
 						}
@@ -282,25 +281,25 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 
 			});
 			getResultManager().storeTextResource(fileName, result, inStream);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private List<Trace> extractTraces(Dataset threadTracingDataset, Dataset messagingDataset,
-			Dataset messageSizesDataset) {
-		List<Trace> traces = new ArrayList<>();
-		for (Long threadId : threadTracingDataset.getValueSet(ThreadTracingRecord.PAR_THREAD_ID, Long.class)) {
-			List<ThreadTracingRecord> threadRecords = ParameterSelection.newSelection()
+	private List<Trace> extractTraces(final Dataset threadTracingDataset, final Dataset messagingDataset,
+			final Dataset messageSizesDataset) {
+		final List<Trace> traces = new ArrayList<>();
+		for (final Long threadId : threadTracingDataset.getValueSet(ThreadTracingRecord.PAR_THREAD_ID, Long.class)) {
+			final List<ThreadTracingRecord> threadRecords = ParameterSelection.newSelection()
 					.select(ThreadTracingRecord.PAR_THREAD_ID, threadId).applyTo(threadTracingDataset)
 					.getRecords(ThreadTracingRecord.class);
 			MeasurementDataUtils.sortRecordsAscending(threadRecords, ThreadTracingRecord.PAR_CALL_ID);
 
 			Trace trace = null;
-			long nextValidTimestamp = Long.MIN_VALUE;
+			final long nextValidTimestamp = Long.MIN_VALUE;
 			Trace previousTraceRoot = null;
 			ThreadTracingRecord sendMethodRecord = null;
-			for (ThreadTracingRecord ttRecord : threadRecords) {
+			for (final ThreadTracingRecord ttRecord : threadRecords) {
 				if (sendMethodRecord == null || sendMethodRecord.getExitNanoTime() <= ttRecord.getEnterNanoTime()) {
 					sendMethodRecord = null;
 
@@ -309,9 +308,9 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 					if (ttRecord.getTimeStamp() < nextValidTimestamp) {
 						continue;
 					}
-					String operation = ttRecord.getOperation();
-					long callId = ttRecord.getCallId();
-					String processId = ttRecord.getProcessId();
+					final String operation = ttRecord.getOperation();
+					final long callId = ttRecord.getCallId();
+					final String processId = ttRecord.getProcessId();
 
 					if (trace == null) {
 						trace = new Trace(operation);
@@ -325,7 +324,7 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 						while (trace != null && trace.getExitTime() <= ttRecord.getEnterNanoTime()) {
 							trace = trace.getParent();
 						}
-						Trace parent = trace;
+						final Trace parent = trace;
 						trace = new Trace(parent, operation);
 						if (parent == null) {
 							if (previousTraceRoot != null) {
@@ -352,11 +351,11 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 		return traces;
 	}
 
-	private void setPayloadSizes(Trace trace, String operation, String processId, long callId,
-			Dataset messagingDataset, Dataset messageSizesDataset) {
+	private void setPayloadSizes(final Trace trace, final String operation, final String processId, final long callId,
+			final Dataset messagingDataset, final Dataset messageSizesDataset) {
 
 		if (operation.endsWith("send(javax.jms.Message)")) {
-			JmsMessageSizeRecord mSizeRecord = getMessageSizeRecord(processId, callId +1 , messagingDataset,
+			final JmsMessageSizeRecord mSizeRecord = getMessageSizeRecord(processId, callId +1 , messagingDataset,
 					messageSizesDataset);
 			if (mSizeRecord != null) {
 				trace.setSendMethod(true);
@@ -368,21 +367,21 @@ public class EmptySemiTrucksDetectionController extends AbstractDetectionControl
 
 	}
 
-	private JmsMessageSizeRecord getMessageSizeRecord(String processId, long callId, Dataset messagingDataset,
-			Dataset messageSizesDataset) {
-		ParameterSelection messageCorrelationSelection = ParameterSelection.newSelection().select(
+	private JmsMessageSizeRecord getMessageSizeRecord(final String processId, final long callId, final Dataset messagingDataset,
+			final Dataset messageSizesDataset) {
+		final ParameterSelection messageCorrelationSelection = ParameterSelection.newSelection().select(
 				AbstractRecord.PAR_CALL_ID, callId);
-		Dataset messageCorrelationDataset = messageCorrelationSelection.applyTo(messagingDataset);
+		final Dataset messageCorrelationDataset = messageCorrelationSelection.applyTo(messagingDataset);
 
 		if (messageCorrelationDataset == null || messageCorrelationDataset.size() == 0) {
 			return null;
 		}
-		String correlationId = messageCorrelationDataset.getValues(JmsRecord.PAR_MSG_CORRELATION_HASH, String.class)
+		final String correlationId = messageCorrelationDataset.getValues(JmsRecord.PAR_MSG_CORRELATION_HASH, String.class)
 				.get(0);
 
-		ParameterSelection messageSizeSelection = ParameterSelection.newSelection().select(
+		final ParameterSelection messageSizeSelection = ParameterSelection.newSelection().select(
 				JmsMessageSizeRecord.PAR_MSG_CORRELATION_HASH, correlationId);
-		Dataset mSizeDataset = messageSizeSelection.applyTo(messageSizesDataset);
+		final Dataset mSizeDataset = messageSizeSelection.applyTo(messageSizesDataset);
 
 		if (mSizeDataset == null || mSizeDataset.size() == 0) {
 			return null;

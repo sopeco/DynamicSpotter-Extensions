@@ -50,7 +50,7 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createJMeterHomeParameter() {
-		ConfigParameterDescription jMeterHomeParameter = new ConfigParameterDescription(JMeterConfigKeys.JMETER_HOME,
+		final ConfigParameterDescription jMeterHomeParameter = new ConfigParameterDescription(JMeterConfigKeys.JMETER_HOME,
 				LpeSupportedTypes.String);
 		jMeterHomeParameter.setADirectory(true);
 		jMeterHomeParameter.setMandatory(true);
@@ -61,7 +61,7 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createJMeterScenarioFileParameter() {
-		ConfigParameterDescription jMeterScenarioFileParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription jMeterScenarioFileParameter = new ConfigParameterDescription(
 				JMeterConfigKeys.SCENARIO_FILE, LpeSupportedTypes.String);
 		jMeterScenarioFileParameter.setAFile(true);
 		jMeterScenarioFileParameter.setMandatory(true);
@@ -73,7 +73,7 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createJMeterSamplingFileParameter() {
-		ConfigParameterDescription jMeterSamplingFileParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription jMeterSamplingFileParameter = new ConfigParameterDescription(
 				JMeterConfigKeys.SAMPLING_FILE, LpeSupportedTypes.String);
 		jMeterSamplingFileParameter.setAFile(true);
 		jMeterSamplingFileParameter.setMandatory(false);
@@ -88,7 +88,7 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createJMeterSamplingFileFlagParameter() {
-		ConfigParameterDescription jMeterSamplingFileFlag = new ConfigParameterDescription(
+		final ConfigParameterDescription jMeterSamplingFileFlag = new ConfigParameterDescription(
 				JMeterConfigKeys.SAMPLING_FLAG, LpeSupportedTypes.Boolean);
 		jMeterSamplingFileFlag.setMandatory(false);
 		jMeterSamplingFileFlag.setDefaultValue(String.valueOf(false));
@@ -99,7 +99,7 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createJMeterThinkTimeMinParameter() {
-		ConfigParameterDescription jMeterThinkTimeMinParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription jMeterThinkTimeMinParameter = new ConfigParameterDescription(
 				JMeterConfigKeys.THINK_TIME_MIN, LpeSupportedTypes.Integer);
 		jMeterThinkTimeMinParameter.setMandatory(true);
 		jMeterThinkTimeMinParameter.setDefaultValue(String.valueOf(1000));
@@ -109,7 +109,7 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createJMeterLogFilePrefixParameter() {
-		ConfigParameterDescription jMeterLogFilePrefixParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription jMeterLogFilePrefixParameter = new ConfigParameterDescription(
 				JMeterConfigKeys.LOG_FILE_PREFIX, LpeSupportedTypes.String);
 		jMeterLogFilePrefixParameter.setMandatory(false);
 		jMeterLogFilePrefixParameter.setDefaultValue("JMETWRAPPERLOG_");
@@ -121,7 +121,7 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createJMeterLogFileFlagParameter() {
-		ConfigParameterDescription jMeterLogFileFlag = new ConfigParameterDescription(JMeterConfigKeys.LOG_FILE_FLAG,
+		final ConfigParameterDescription jMeterLogFileFlag = new ConfigParameterDescription(JMeterConfigKeys.LOG_FILE_FLAG,
 				LpeSupportedTypes.Boolean);
 		jMeterLogFileFlag.setMandatory(false);
 		jMeterLogFileFlag.setDefaultValue(String.valueOf(false));
@@ -131,7 +131,7 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createJMeterThinkTimeMaxParameter() {
-		ConfigParameterDescription jMeterThinkTimeMaxParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription jMeterThinkTimeMaxParameter = new ConfigParameterDescription(
 				JMeterConfigKeys.THINK_TIME_MAX, LpeSupportedTypes.Integer);
 		jMeterThinkTimeMaxParameter.setMandatory(true);
 		jMeterThinkTimeMaxParameter.setDefaultValue(String.valueOf(2000));
@@ -153,13 +153,14 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IWorkloadAdapter createExtensionArtifact() {
+	public IWorkloadAdapter createExtensionArtifact(final String ... args) {
 		return new JMeterWorkloadClient(this);
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return true;
 	}
 

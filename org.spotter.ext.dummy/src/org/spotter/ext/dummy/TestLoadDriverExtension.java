@@ -28,8 +28,9 @@ public class TestLoadDriverExtension extends  AbstractWorkloadExtension  {
 
 	public static final String NUM_EXPERIMENTS = "org.spotter.test.numExperiments";
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IWorkloadAdapter createExtensionArtifact() {
+	public IWorkloadAdapter createExtensionArtifact(final String ... args) {
 		return new TestLoadDriver(this);
 	}
 
@@ -45,7 +46,7 @@ public class TestLoadDriverExtension extends  AbstractWorkloadExtension  {
 	
 	@Override
 	protected void initializeConfigurationParameters() {
-		ConfigParameterDescription par = new ConfigParameterDescription(NUM_EXPERIMENTS, LpeSupportedTypes.Integer);
+		final ConfigParameterDescription par = new ConfigParameterDescription(NUM_EXPERIMENTS, LpeSupportedTypes.Integer);
 		par.setMandatory(false);
 		par.setDefaultValue(String.valueOf(100));
 		par.setDescription("Number of experiments.");
@@ -54,7 +55,7 @@ public class TestLoadDriverExtension extends  AbstractWorkloadExtension  {
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return true;
 	}
 

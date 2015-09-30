@@ -16,7 +16,6 @@ import org.lpe.common.util.NumericPairList;
 import org.spotter.core.ProgressManager;
 import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;
-import org.spotter.core.detection.IDetectionController;
 import org.spotter.core.detection.IExperimentReuser;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.ext.detection.continuousViolation.strategies.BucketStrategy;
@@ -36,7 +35,7 @@ import org.spotter.shared.result.model.SpotterResult;
 public class ContinuousViolationController extends AbstractDetectionController implements IExperimentReuser {
 
 	private String analysisStrategy;
-	private AnalysisConfig analysisConfig = new AnalysisConfig();
+	private final AnalysisConfig analysisConfig = new AnalysisConfig();
 	private IViolationAnalysisStrategy analysisStrategyImpl;
 
 	/**
@@ -45,7 +44,7 @@ public class ContinuousViolationController extends AbstractDetectionController i
 	 * @param provider
 	 *            extension provider
 	 */
-	public ContinuousViolationController(IExtension<IDetectionController> provider) {
+	public ContinuousViolationController(final IExtension provider) {
 		super(provider);
 	}
 
@@ -55,12 +54,12 @@ public class ContinuousViolationController extends AbstractDetectionController i
 				ContinuousViolationExtension.VIOLATION_DETECTION_STRATEGY_KEY,
 				ContinuousViolationExtension.DBSCAN_STRATEGY);
 
-		String mvaWindowSize = getProblemDetectionConfiguration().getProperty(
+		final String mvaWindowSize = getProblemDetectionConfiguration().getProperty(
 				AnalysisConfig.MOVING_AVERAGE_WINDOW_SIZE_KEY,
 				String.valueOf(AnalysisConfig.MOVING_AVERAGE_WINDOW_SIZE_DEFAULT));
 		analysisConfig.setMvaWindowSize(Integer.parseInt(mvaWindowSize));
 
-		String minBucketTimeProportionStr = getProblemDetectionConfiguration().getProperty(
+		final String minBucketTimeProportionStr = getProblemDetectionConfiguration().getProperty(
 				AnalysisConfig.MIN_BUCKET_TIME_PROPORTION_KEY,
 				String.valueOf(AnalysisConfig.MIN_BUCKET_TIME_PROPORTION_DEFAULT));
 		analysisConfig.setMinBucketTimeProportion(Double.parseDouble(minBucketTimeProportionStr));
@@ -81,16 +80,16 @@ public class ContinuousViolationController extends AbstractDetectionController i
 	}
 
 	@Override
-	protected SpotterResult analyze(DatasetCollection data) {
-		double perfReqThreshold = GlobalConfiguration.getInstance().getPropertyAsInteger(
+	protected SpotterResult analyze(final DatasetCollection data) {
+		final double perfReqThreshold = GlobalConfiguration.getInstance().getPropertyAsInteger(
 				ConfigKeys.PERFORMANCE_REQUIREMENT_THRESHOLD, ConfigKeys.DEFAULT_PERFORMANCE_REQUIREMENT_THRESHOLD);
-		double perfReqConfidence = GlobalConfiguration.getInstance().getPropertyAsDouble(
+		final double perfReqConfidence = GlobalConfiguration.getInstance().getPropertyAsDouble(
 				ConfigKeys.PERFORMANCE_REQUIREMENT_CONFIDENCE, ConfigKeys.DEFAULT_PERFORMANCE_REQUIREMENT_CONFIDENCE);
 
-		SpotterResult result = new SpotterResult();
+		final SpotterResult result = new SpotterResult();
 		result.setDetected(false);
 
-		Dataset rtDataset = data.getDataSet(ResponseTimeRecord.class);
+		final Dataset rtDataset = data.getDataSet(ResponseTimeRecord.class);
 
 		if (rtDataset == null || rtDataset.size() == 0) {
 			result.setDetected(false);
@@ -98,18 +97,18 @@ public class ContinuousViolationController extends AbstractDetectionController i
 			return result;
 		}
 
-		for (String operation : rtDataset.getValueSet(ResponseTimeRecord.PAR_OPERATION, String.class)) {
-			ParameterSelection selectOperation = new ParameterSelection().select(ResponseTimeRecord.PAR_OPERATION,
+		for (final String operation : rtDataset.getValueSet(ResponseTimeRecord.PAR_OPERATION, String.class)) {
+			final ParameterSelection selectOperation = new ParameterSelection().select(ResponseTimeRecord.PAR_OPERATION,
 					operation);
-			Dataset operationSpecificDataset = selectOperation.applyTo(rtDataset);
+			final Dataset operationSpecificDataset = selectOperation.applyTo(rtDataset);
 
-			NumericPairList<Long, Double> responseTimeSeries = Utils.toTimestampRTPairs(operationSpecificDataset);
+			final NumericPairList<Long, Double> responseTimeSeries = Utils.toTimestampRTPairs(operationSpecificDataset);
 			if (responseTimeSeries.size() <= 5) {
 				continue;
 			}
 			// sort chronologically
 			responseTimeSeries.sort();
-			boolean detected = analysisStrategyImpl.analyze(responseTimeSeries, analysisConfig, perfReqThreshold,
+			final boolean detected = analysisStrategyImpl.analyze(responseTimeSeries, analysisConfig, perfReqThreshold,
 					perfReqConfidence);
 
 			if (detected) {
@@ -124,10 +123,10 @@ public class ContinuousViolationController extends AbstractDetectionController i
 		return result;
 	}
 
-	private void createChart(double perfReqThreshold, SpotterResult result, String operation,
-			NumericPairList<Long, Double> responseTimeSeries) {
-		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-		String operationName = operation.contains("(")?operation.substring(0, operation.indexOf("(")):operation;
+	private void createChart(final double perfReqThreshold, final SpotterResult result, final String operation,
+			final NumericPairList<Long, Double> responseTimeSeries) {
+		final AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
+		final String operationName = operation.contains("(")?operation.substring(0, operation.indexOf("(")):operation;
 		
 		chartBuilder.startChart(operationName, "experiment time [ms]", "response time [ms]");
 		chartBuilder.addTimeSeries(responseTimeSeries, "response times");
@@ -147,7 +146,7 @@ public class ContinuousViolationController extends AbstractDetectionController i
 	}
 
 	private InstrumentationDescription createInstrumentationDescription() {
-		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		final InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		idBuilder.newAPIScopeEntity(EntryPointScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
 				.entityDone();
 		return idBuilder.build();

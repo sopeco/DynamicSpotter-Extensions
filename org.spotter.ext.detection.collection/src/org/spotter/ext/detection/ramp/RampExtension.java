@@ -56,7 +56,7 @@ public class RampExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createStimulationPhaseDurationParameter() {
-		ConfigParameterDescription parameter = new ConfigParameterDescription(KEY_STIMULATION_PHASE_DURATION_FACTOR,
+		final ConfigParameterDescription parameter = new ConfigParameterDescription(KEY_STIMULATION_PHASE_DURATION_FACTOR,
 				LpeSupportedTypes.Double);
 		parameter.setDefaultValue(String.valueOf(STIMULATION_PHASE_DURATION_DEFAULT));
 		parameter.setDescription("ONLY for Time Windows Strategy! The duration of the stimulation phase.");
@@ -64,7 +64,7 @@ public class RampExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createLinearSlopeThresholdParameter() {
-		ConfigParameterDescription parameter = new ConfigParameterDescription(KEY_LIN_SLOPE, LpeSupportedTypes.Double);
+		final ConfigParameterDescription parameter = new ConfigParameterDescription(KEY_LIN_SLOPE, LpeSupportedTypes.Double);
 		parameter.setDefaultValue(String.valueOf(LIN_SLOPE_DEFAULT));
 		parameter.setDescription("ONLY for Linear Regression Strategy! Defines the threshold for linear slope. "
 				+ "Growth of response times per time unit of experiment. [ms / ms]");
@@ -72,7 +72,7 @@ public class RampExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createNumExperimentsParameter() {
-		ConfigParameterDescription parameter = new ConfigParameterDescription(KEY_EXPERIMENT_STEPS,
+		final ConfigParameterDescription parameter = new ConfigParameterDescription(KEY_EXPERIMENT_STEPS,
 				LpeSupportedTypes.Integer);
 		parameter.setDefaultValue(String.valueOf(EXPERIMENT_STEPS_DEFAULT));
 		parameter.setRange(String.valueOf(2), String.valueOf(Integer.MAX_VALUE));
@@ -82,7 +82,7 @@ public class RampExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createRequiredSignificanceLevelParameter() {
-		ConfigParameterDescription parameter = new ConfigParameterDescription(KEY_REQUIRED_SIGNIFICANCE_LEVEL,
+		final ConfigParameterDescription parameter = new ConfigParameterDescription(KEY_REQUIRED_SIGNIFICANCE_LEVEL,
 				LpeSupportedTypes.Double);
 		parameter.setDefaultValue(String.valueOf(REQUIRED_SIGNIFICANCE_LEVEL_DEFAULT));
 		parameter.setRange(String.valueOf(0.0), String.valueOf(1.0));
@@ -93,7 +93,7 @@ public class RampExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createRequiredSignificantStepsParameter() {
-		ConfigParameterDescription parameter = new ConfigParameterDescription(KEY_REQUIRED_SIGNIFICANT_STEPS,
+		final ConfigParameterDescription parameter = new ConfigParameterDescription(KEY_REQUIRED_SIGNIFICANT_STEPS,
 				LpeSupportedTypes.Integer);
 		parameter.setDefaultValue(String.valueOf(REQUIRED_SIGNIFICANT_STEPS_DEFAULT));
 		parameter.setRange(String.valueOf(2), String.valueOf(Integer.MAX_VALUE));
@@ -103,10 +103,10 @@ public class RampExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createStrategyParameter() {
-		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
+		final ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
 				LpeSupportedTypes.String);
 
-		Set<String> scopeOptions = new HashSet<>();
+		final Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(TIME_WINDOWS_STRATEGY);
 		scopeOptions.add(DIRECT_GROWTH_STRATEGY);
 		scopeOptions.add(LIN_REGRESSION_STRATEGY);
@@ -117,8 +117,9 @@ public class RampExtension extends AbstractDetectionExtension {
 		return scopeParameter;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IDetectionController createExtensionArtifact() {
+	public IDetectionController createExtensionArtifact(final String ... args) {
 		return new RampDetectionController(this);
 	}
 
