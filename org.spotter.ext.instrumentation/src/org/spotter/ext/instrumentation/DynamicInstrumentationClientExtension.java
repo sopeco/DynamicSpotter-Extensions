@@ -16,7 +16,7 @@
 package org.spotter.ext.instrumentation;
 
 import org.aim.api.instrumentation.description.internal.InstrumentationConstants;
-import org.aim.artifacts.instrumentation.InstrumentationClient;
+import org.aim.artifacts.instrumentation.JsonAdaptiveInstrumentationClient;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.instrumentation.AbstractInstrumentationExtension;
@@ -87,7 +87,7 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 
 	@Override
 	public boolean testConnection(final String host, final String port) {
-		return InstrumentationClient.testConnection(host, port);
+		return JsonAdaptiveInstrumentationClient.testConnection(host, port);
 	}
 
 	@Override

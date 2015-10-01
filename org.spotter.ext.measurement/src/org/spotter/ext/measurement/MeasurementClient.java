@@ -17,10 +17,11 @@ package org.spotter.ext.measurement;
 
 import java.io.OutputStream;
 
+import org.aim.aiminterface.IAdaptiveInstrumentation;
 import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
 import org.aim.aiminterface.entities.measurements.MeasurementData;
 import org.aim.aiminterface.exceptions.MeasurementException;
-import org.aim.artifacts.instrumentation.InstrumentationClient;
+import org.aim.artifacts.instrumentation.JsonAdaptiveInstrumentationClient;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.measurement.AbstractMeasurementAdapter;
 
@@ -31,7 +32,7 @@ import org.spotter.core.measurement.AbstractMeasurementAdapter;
  * 
  */
 public class MeasurementClient extends AbstractMeasurementAdapter {
-	private InstrumentationClient agentClient;
+	private IAdaptiveInstrumentation agentClient;
 
 	/**
 	 * Constructor.
@@ -70,7 +71,7 @@ public class MeasurementClient extends AbstractMeasurementAdapter {
 	@Override
 	public void initialize() throws MeasurementException {
 		if (agentClient == null) {
-			agentClient = new InstrumentationClient(getHost(), getPort());
+			agentClient = new JsonAdaptiveInstrumentationClient(getHost(), getPort());
 			if (!agentClient.testConnection()) {
 				throw new MeasurementException("Connection to measurement satellite could not be established!");
 			}
