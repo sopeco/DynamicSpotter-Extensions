@@ -22,18 +22,11 @@ import org.spotter.core.detection.IDetectionController;
 
 public class TestDetectionExtension extends AbstractDetectionExtension {
 
+	public TestDetectionExtension() {
+		super(TestDetection.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "This is just a dummy extension doing dummy experiments.";
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IDetectionController createExtensionArtifact(final String ... args) {
-		return new TestDetection(this);
-	}
-
-	@Override
-	public String getName() {
-		return "TestDetection";
-	}
 
 	@Override
 	protected void initializeConfigurationParameters() {

@@ -16,8 +16,9 @@
 package org.spotter.ext.instrumentation;
 
 import org.aim.api.instrumentation.description.internal.InstrumentationConstants;
-import org.aim.artifacts.instrumentation.JsonAdaptiveInstrumentationClient;
+import org.aim.mainagent.JsonAdaptiveInstrumentationClient;
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.instrumentation.AbstractInstrumentationExtension;
 import org.spotter.core.instrumentation.IInstrumentationAdapter;
@@ -29,17 +30,16 @@ import org.spotter.core.instrumentation.IInstrumentationAdapter;
  * 
  */
 public class DynamicInstrumentationClientExtension extends AbstractInstrumentationExtension {
+	public DynamicInstrumentationClientExtension() {
+		super(DynamicInstrumentationClient.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The default instrumentation satellite adapter can be used to connect "
 			+ "to a instrumentation satellite running in a JVM. This satellite adapter "
 			+ "will instrument the JVM. \n"
 			+ "The data collection with the instrumentation must be en-/disabled with a "
 			+ "measurement satellite. Hence, you should not forget to configure a "
 			+ "corresponding measurement satellite adapter.";
-
-	@Override
-	public String getName() {
-		return "instrumentation.satellite.adapter.default";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
@@ -77,12 +77,6 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 		addConfigParameter(createPackagesToIncludeParameter());
 		addConfigParameter(createPackagesToExcludeParameter());
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IInstrumentationAdapter createExtensionArtifact(final String ... args) {
-		return new DynamicInstrumentationClient(this);
 	}
 
 	@Override

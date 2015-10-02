@@ -16,10 +16,10 @@
 package org.spotter.ext.loadrunner.workload;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.workload.AbstractWorkloadExtension;
-import org.spotter.core.workload.IWorkloadAdapter;
 import org.spotter.ext.loadrunner.LRConfigKeys;
 
 /**
@@ -30,14 +30,13 @@ import org.spotter.ext.loadrunner.LRConfigKeys;
  */
 public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 
+	public LoadRunnerWorkloadExtension() {
+		super(LoadRunnerWorkloadClient.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The loadrunner workload satellite adapter connects to the workload "
 														+ "satellite executed on the Loadrunner system. This satellite adapter "
 														+ "provokes the workload satellite to start the workload on Loadrunner.";
-	
-	@Override
-	public String getName() {
-		return "workload.satellite.adapter.loadrunner";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
@@ -86,12 +85,6 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 		addConfigParameter(createScenarioPathParameter());
 		addConfigParameter(createResultDirParameter());
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IWorkloadAdapter createExtensionArtifact(final String ... args) {
-		return new LoadRunnerWorkloadClient(this);
 	}
 
 	@Override

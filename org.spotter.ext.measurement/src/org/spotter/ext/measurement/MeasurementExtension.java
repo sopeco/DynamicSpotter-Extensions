@@ -15,8 +15,9 @@
  */
 package org.spotter.ext.measurement;
 
-import org.aim.artifacts.instrumentation.JsonAdaptiveInstrumentationClient;
+import org.aim.mainagent.JsonAdaptiveInstrumentationClient;
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
 import org.spotter.core.measurement.IMeasurementAdapter;
 
@@ -28,18 +29,17 @@ import org.spotter.core.measurement.IMeasurementAdapter;
  */
 public class MeasurementExtension extends AbstractMeasurmentExtension {
 	
+	public MeasurementExtension() {
+		super(MeasurementClient.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The measurement satellite adapter is used to connect to system where "
 														+ "instrumentation is possible. This satellite adapter can enable and "
 														+ "disable the collecting of data fetched with instrumentation. "
 														+ "This satellite adapter will be mainly used on systems where "
 														+ "a instrumentation satellite is running. \n"
 														+ "In addition this satellite adapter comprises the sampling of "
-														+ "hardware utilization.";;
-
-	@Override
-	public String getName() {
-		return "measurement.satellite.adapter.instrumentation";
-	}
+														+ "hardware utilization.";
 	
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
@@ -53,7 +53,7 @@ public class MeasurementExtension extends AbstractMeasurmentExtension {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
+	public IMeasurementAdapter createExtensionArtifact(final Object ... args) {
 		final IMeasurementAdapter mController = new MeasurementClient(this);
 		for (final ConfigParameterDescription cpd : this.getConfigParameters()) {
 			if (cpd.getDefaultValue() != null) {
@@ -61,7 +61,6 @@ public class MeasurementExtension extends AbstractMeasurmentExtension {
 			}
 		}
 		return mController;
-
 	}
 
 	@Override

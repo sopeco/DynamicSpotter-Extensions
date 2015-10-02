@@ -16,11 +16,15 @@
 package org.spotter.ext.detection.edc;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 
 public class EDCExtension extends AbstractDetectionExtension {
+
+	public EDCExtension() {
+		super(EDCDetectionController.class);
+	}
 
 	private static final String EXTENSION_DESCRIPTION = "An expensive database call. ";
 	public static final String INSTRUMENTATION_GRANULARITY_KEY = "instrumentationGranularity";
@@ -30,17 +34,6 @@ public class EDCExtension extends AbstractDetectionExtension {
 	public static final double INSTRUMENTATION_GRANULARITY_DEFAULT = 0.01;
 	public static final double PERF_REQ_RELATIVE_QUERY_RT_DEFAULT = 0.5;
 	public static final double PERF_REQ_RELATIVE_QUERY_RT_DIFF_DEFAULT = 0.0;
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IDetectionController createExtensionArtifact(final String ... args) {
-		return new EDCDetectionController(this);
-	}
-
-	@Override
-	public String getName() {
-		return "Expensive Database Call";
-	}
 
 	private ConfigParameterDescription createInstrumentationGranularityParameter() {
 		final ConfigParameterDescription instrumentationGranularityParameter = new ConfigParameterDescription(

@@ -16,28 +16,21 @@
 package org.spotter.ext.dummy;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementAdapter;
 
 public class TestMeasurementExtension extends AbstractMeasurmentExtension {
+
+	public TestMeasurementExtension() {
+		super(TestMeasurement.class);
+	}
 
 	private static final String EXTENSION_DESCRIPTION = "The test measurement satellite adapter is used for test purposes only. The "
 														+ "satellite adapter is a dummy and does nothing. The dummy will be removed after "
 														+ "the first version has been officially released.";
 	
 	public static final String NUM_RECORDS = "org.spotter.test.numRecords";
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
-		return new TestMeasurement(this);
-	}
-
-	@Override
-	public String getName() {
-		return "measurement.satellite.adapter.test";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {

@@ -2,7 +2,7 @@ package org.spotter.ext.detection.appHiccups;
 
 import java.util.List;
 
-import org.lpe.common.util.NumericPairList;
+import org.lpe.common.utils.numeric.NumericPairList;
 import org.spotter.core.detection.DetectionResultManager;
 import org.spotter.ext.detection.appHiccups.utils.Hiccup;
 import org.spotter.ext.detection.appHiccups.utils.HiccupDetectionConfig;

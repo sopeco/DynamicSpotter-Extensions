@@ -4,11 +4,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.workload.AbstractWorkloadExtension;
-import org.spotter.core.workload.IWorkloadAdapter;
 
 public class TpcwRbeExtension extends AbstractWorkloadExtension {
+	public TpcwRbeExtension() {
+		super(TpcwRbeDriver.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "Used for TPCW Remote Browser Emulator!";
 
 	public static final String PAR_EB_FACTORY = "EB factory";
@@ -19,18 +23,6 @@ public class TpcwRbeExtension extends AbstractWorkloadExtension {
 	public static final String BROWSING_MIX = "Browsing Mix";
 	public static final String SHOPPING_MIX = "Shopping Mix";
 	public static final String ORDERING_MIX = "Ordering Mix";
-
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return "TPCW RBE Extension";
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IWorkloadAdapter createExtensionArtifact(final String ... args) {
-		return new TpcwRbeDriver(this);
-	}
 
 	private ConfigParameterDescription createEBFactoryParameter() {
 		final ConfigParameterDescription parameter = new ConfigParameterDescription(PAR_EB_FACTORY, LpeSupportedTypes.String);

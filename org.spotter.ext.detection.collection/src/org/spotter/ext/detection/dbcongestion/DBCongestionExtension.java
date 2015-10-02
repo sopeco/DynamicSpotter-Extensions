@@ -19,11 +19,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 
 public class DBCongestionExtension extends AbstractDetectionExtension {
+
+	public DBCongestionExtension() {
+		super(DBCongestionDetectionController.class);
+	}
 
 	// TODO: please provide a description
 	private static final String EXTENSION_DESCRIPTION = "no description";
@@ -41,17 +45,6 @@ public class DBCongestionExtension extends AbstractDetectionExtension {
 	public static final double CPU_THRESHOLD_DEFAULT = 0.90;
 	public static final int REQUIRED_SIGNIFICANT_STEPS_DEFAULT = 2;
 	public static final int EXPERIMENT_STEPS_DEFAULT = 4;
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IDetectionController createExtensionArtifact(final String ... args) {
-		return new DBCongestionDetectionController(this);
-	}
-
-	@Override
-	public String getName() {
-		return "DBO Congestion";
-	}
 
 	private ConfigParameterDescription createNumExperimentsParameter() {
 		final ConfigParameterDescription numExperimentsParameter = new ConfigParameterDescription(EXPERIMENT_STEPS_KEY,

@@ -12,7 +12,7 @@ import org.aim.artifacts.scopes.EntryPointScope;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
-import org.lpe.common.util.NumericPairList;
+import org.lpe.common.utils.numeric.NumericPairList;
 import org.spotter.core.ProgressManager;
 import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.AbstractDetectionController;

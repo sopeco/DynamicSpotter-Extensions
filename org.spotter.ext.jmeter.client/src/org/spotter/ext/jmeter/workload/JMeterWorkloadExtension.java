@@ -13,9 +13,9 @@
 package org.spotter.ext.jmeter.workload;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.workload.AbstractWorkloadExtension;
-import org.spotter.core.workload.IWorkloadAdapter;
 import org.spotter.ext.jmeter.JMeterConfigKeys;
 
 /**
@@ -25,6 +25,11 @@ import org.spotter.ext.jmeter.JMeterConfigKeys;
  * 
  */
 public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
+
+	public JMeterWorkloadExtension() {
+		super(JMeterWorkloadClient.class);
+		// TODO Auto-generated constructor stub
+	}
 
 	private static final String EXTENSION_DESCRIPTION = "This workload satellite adapter can execute a local "
 			+ "JMeter application with a given load script.";
@@ -38,11 +43,6 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 	public static final String THINK_TIME_MIN = "org.spotter.workload.jmeter.thinkTimeMin";
 
 	public static final String THINK_TIME_MAX = "org.spotter.workload.jmeter.thinkTimeMax";
-
-	@Override
-	public String getName() {
-		return "workload.satellite.adapter.jmeter";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
@@ -151,12 +151,6 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 		addConfigParameter(createJMeterLogFilePrefixParameter());
 		addConfigParameter(createJMeterSamplingFileFlagParameter());
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IWorkloadAdapter createExtensionArtifact(final String ... args) {
-		return new JMeterWorkloadClient(this);
 	}
 
 	@Override

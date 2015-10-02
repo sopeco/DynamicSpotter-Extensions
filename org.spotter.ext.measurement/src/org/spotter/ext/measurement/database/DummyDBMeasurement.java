@@ -18,8 +18,8 @@ import org.aim.artifacts.measurement.collector.FileDataSource;
 import org.aim.artifacts.measurement.collector.MemoryDataSource;
 import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
-import org.lpe.common.util.LpeHTTPUtils;
 import org.lpe.common.util.system.LpeSystemUtils;
+import org.lpe.common.util.web.LpeHTTPUtils;
 import org.spotter.core.measurement.AbstractMeasurementAdapter;
 
 import com.sun.jersey.api.client.Client;

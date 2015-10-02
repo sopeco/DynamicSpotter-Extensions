@@ -16,9 +16,9 @@
 package org.spotter.ext.workload.simple;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.workload.AbstractWorkloadExtension;
-import org.spotter.core.workload.IWorkloadAdapter;
 
 /**
  * Extension class for simple workload generator.
@@ -28,15 +28,14 @@ import org.spotter.core.workload.IWorkloadAdapter;
  */
 public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 
+	public SimpleWorkloadExtension() {
+		super(SimpleWorkloadDriver.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The customized workload satellite adapter can be used to "
 														+ "execute custom written Java client classes. This satellite "
 														+ "adapter is hence only applicable when you have written "
 														+ "your own Java client class.";
-	
-	@Override
-	public String getName() {
-		return "workload.satellite.adapter.customized";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
@@ -73,12 +72,6 @@ public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 		addConfigParameter(createScriptPathParameter());
 		addConfigParameter(createScriptClassParameter());
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IWorkloadAdapter createExtensionArtifact(final String ... args) {
-		return new SimpleWorkloadDriver(this);
 	}
 
 	@Override

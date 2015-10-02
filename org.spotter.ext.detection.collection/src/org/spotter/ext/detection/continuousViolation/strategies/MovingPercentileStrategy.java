@@ -1,6 +1,6 @@
 package org.spotter.ext.detection.continuousViolation.strategies;
 
-import org.lpe.common.util.NumericPairList;
+import org.lpe.common.utils.numeric.NumericPairList;
 import org.spotter.ext.detection.continuousViolation.IViolationAnalysisStrategy;
 import org.spotter.ext.detection.continuousViolation.util.AnalysisConfig;
 import org.spotter.ext.detection.utils.Utils;

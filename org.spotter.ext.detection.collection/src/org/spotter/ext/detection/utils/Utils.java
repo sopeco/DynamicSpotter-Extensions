@@ -7,7 +7,7 @@ import java.util.List;
 import org.aim.api.measurement.dataset.Dataset;
 import org.aim.api.measurement.dataset.ParameterSelection;
 import org.aim.artifacts.records.ResponseTimeRecord;
-import org.lpe.common.util.NumericPairList;
+import org.lpe.common.utils.numeric.NumericPairList;
 import org.spotter.core.detection.AbstractDetectionController;
 
 /**

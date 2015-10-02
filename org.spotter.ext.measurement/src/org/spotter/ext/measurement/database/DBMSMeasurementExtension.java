@@ -18,7 +18,6 @@ package org.spotter.ext.measurement.database;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementAdapter;
 
 /**
  * Extension for measurement / sampling of a DBMS.
@@ -28,6 +27,10 @@ import org.spotter.core.measurement.IMeasurementAdapter;
  */
 
 public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
+
+	public DBMSMeasurementExtension() {
+		super(DBMSMeasurement.class);
+	}
 
 	private static final String EXTENSION_DESCRIPTION = "The DBMS sampling measurement satellite adapter is used to connect "
 			+ "to a MySQL DBMS and to query the database status.";
@@ -41,19 +44,8 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 	public static final String CONNECTION_STRING = "org.spotter.sampling.mysql.connectionString";
 
 	@Override
-	public String getName() {
-		return "measurement.satellite.adapter.sampling.dbms";
-	}
-
-	@Override
 	protected String getDefaultSatelleiteExtensionName() {
 		return "DBMS Sampling Measurement Satellite Adapter";
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
-		return new DBMSMeasurement(this);
 	}
 
 	private ConfigParameterDescription createHostParameter() {

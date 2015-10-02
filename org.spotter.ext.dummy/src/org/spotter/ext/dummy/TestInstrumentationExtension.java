@@ -16,25 +16,18 @@
 package org.spotter.ext.dummy;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.spotter.core.instrumentation.AbstractInstrumentationExtension;
-import org.spotter.core.instrumentation.IInstrumentationAdapter;
 
 public class TestInstrumentationExtension extends AbstractInstrumentationExtension {
+
+	public TestInstrumentationExtension() {
+		super(TestInstrumentation.class);
+	}
 
 	private static final String EXTENSION_DESCRIPTION = "The test instrumentation satellite adapter is used for test purposes only. The "
 														+ "satellite adapter is a dummy and does nothing. The dummy will be removed after "
 														+ "the first version has been officially released.";
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IInstrumentationAdapter createExtensionArtifact(final String ... args) {
-		return new TestInstrumentation(this);
-	}
-
-	@Override
-	public String getName() {
-		return "instrumentation.satellite.adapter.test";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {

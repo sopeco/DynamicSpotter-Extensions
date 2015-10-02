@@ -2,8 +2,8 @@ package org.spotter.ext.detection.continuousViolation.strategies;
 
 import java.util.List;
 
-import org.lpe.common.util.LpeNumericUtils;
-import org.lpe.common.util.NumericPairList;
+import org.lpe.common.utils.numeric.LpeNumericUtils;
+import org.lpe.common.utils.numeric.NumericPairList;
 import org.spotter.ext.detection.continuousViolation.IViolationAnalysisStrategy;
 import org.spotter.ext.detection.continuousViolation.util.AnalysisConfig;
 

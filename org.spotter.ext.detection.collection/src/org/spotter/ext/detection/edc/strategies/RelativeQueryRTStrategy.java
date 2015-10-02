@@ -33,10 +33,11 @@ import org.aim.artifacts.records.SQLQueryRecord;
 import org.aim.artifacts.records.StackTraceRecord;
 import org.aim.artifacts.records.ThreadTracingRecord;
 import org.lpe.common.config.GlobalConfiguration;
-import org.lpe.common.util.LpeNumericUtils;
 import org.lpe.common.util.LpeStringUtils;
-import org.lpe.common.util.NumericPair;
-import org.lpe.common.util.NumericPairList;
+import org.lpe.common.utils.numeric.LpeNumericUtils;
+import org.lpe.common.utils.numeric.NumericPair;
+import org.lpe.common.utils.numeric.NumericPairList;
+import org.lpe.common.utils.sql.SQLStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spotter.core.chartbuilder.AnalysisChartBuilder;
@@ -75,7 +76,7 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 	String invalidDataMessage = "";
 
 	@Override
-	public void init(Properties problemDetectionConfiguration, EDCDetectionController controller) {
+	public void init(final Properties problemDetectionConfiguration, final EDCDetectionController controller) {
 		this.controller = controller;
 
 		perfReqThreshold = GlobalConfiguration.getInstance().getPropertyAsDouble(
@@ -83,11 +84,11 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		perfReqConfidence = GlobalConfiguration.getInstance().getPropertyAsDouble(
 				ConfigKeys.PERFORMANCE_REQUIREMENT_CONFIDENCE, ConfigKeys.DEFAULT_PERFORMANCE_REQUIREMENT_CONFIDENCE);
 
-		String sRelativeQRT = controller.getProblemDetectionConfiguration().getProperty(
+		final String sRelativeQRT = controller.getProblemDetectionConfiguration().getProperty(
 				EDCExtension.PERF_REQ_RELATIVE_QUERY_RT_KEY,
 				String.valueOf(EDCExtension.PERF_REQ_RELATIVE_QUERY_RT_DEFAULT));
 		perfReqRelativeQueryRT = Double.valueOf(sRelativeQRT);
-		String sRelativeQRTDiff = controller.getProblemDetectionConfiguration().getProperty(
+		final String sRelativeQRTDiff = controller.getProblemDetectionConfiguration().getProperty(
 				EDCExtension.PERF_REQ_RELATIVE_QUERY_RT_DIFF_KEY,
 				String.valueOf(EDCExtension.PERF_REQ_RELATIVE_QUERY_RT_DIFF_DEFAULT));
 		perfReqRelativeQueryRTDiff = Double.valueOf(sRelativeQRTDiff);
@@ -97,23 +98,23 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 	}
 
 	@Override
-	public void setMeasurementData(DatasetCollection data) {
+	public void setMeasurementData(final DatasetCollection data) {
 		LOGGER.info("Setting measurement data...");
 
 		validData = false;
 
-		ParameterSelection selectHierarchyExp = new ParameterSelection().select(
+		final ParameterSelection selectHierarchyExp = new ParameterSelection().select(
 				EDCDetectionController.KEY_EXPERIMENT_NAME, EDCDetectionController.NAME_HIERARCHY_EXP);
-		ParameterSelection selectSingleUserExp = new ParameterSelection().select(
+		final ParameterSelection selectSingleUserExp = new ParameterSelection().select(
 				EDCDetectionController.KEY_EXPERIMENT_NAME, EDCDetectionController.NAME_SINGLE_USER_EXP);
-		ParameterSelection selectMultiUserExp = new ParameterSelection().select(
+		final ParameterSelection selectMultiUserExp = new ParameterSelection().select(
 				EDCDetectionController.KEY_EXPERIMENT_NAME, EDCDetectionController.NAME_MAIN_EXP);
-		ParameterSelection selectStackTraceExp = new ParameterSelection().select(
+		final ParameterSelection selectStackTraceExp = new ParameterSelection().select(
 				EDCDetectionController.KEY_EXPERIMENT_NAME, EDCDetectionController.NAME_STACK_TRACE_EXP);
 
 		LOGGER.debug("Setting response time datasets...");
 
-		Dataset rtDataset = data.getDataSet(ResponseTimeRecord.class);
+		final Dataset rtDataset = data.getDataSet(ResponseTimeRecord.class);
 
 		if (rtDataset == null || rtDataset.size() == 0) {
 			invalidDataMessage = "Instrumentation achieved no response time results for the given scope!";
@@ -127,16 +128,16 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		LOGGER.debug("Response times set.");
 		LOGGER.debug("Setting SQL query datasets...");
 
-		Dataset sqlDataset = data.getDataSet(SQLQueryRecord.class);
+		final Dataset sqlDataset = data.getDataSet(SQLQueryRecord.class);
 
 		if (sqlDataset == null || sqlDataset.size() == 0) {
 			invalidDataMessage = "Instrumentation achieved no query results for the given scope!";
 			return;
 		}
 		
-		for (SQLQueryRecord record : sqlDataset.getRecords(SQLQueryRecord.class)) {
-			String sql = record.getQueryString().replace("#sc#", ";");
-			String generalizedSql = LpeStringUtils.getGeneralizedQuery(sql);
+		for (final SQLQueryRecord record : sqlDataset.getRecords(SQLQueryRecord.class)) {
+			final String sql = record.getQueryString().replace("#sc#", ";");
+			String generalizedSql = SQLStringUtils.getGeneralizedQuery(sql);
 			if (generalizedSql == null) {
 				if (sql.contains("$")) {
 					int idx_1 = sql.indexOf(",", sql.indexOf("$"));
@@ -146,8 +147,8 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 					}
 					idx_1 = idx_1 < 0 ? Integer.MAX_VALUE : idx_1;
 					idx_2 = idx_2 < 0 ? Integer.MAX_VALUE : idx_2;
-					int endIndex = Math.min(idx_1, idx_2);
-					String name = sql.substring(sql.indexOf("$"), endIndex);
+					final int endIndex = Math.min(idx_1, idx_2);
+					final String name = sql.substring(sql.indexOf("$"), endIndex);
 					generalizedSql = sql.replace(name, "tmp");
 				} else {
 					generalizedSql = sql;
@@ -164,7 +165,7 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		LOGGER.debug("SQL queries set.");
 		LOGGER.debug("Setting thread tracing datasets...");
 
-		Dataset ttDataset = data.getDataSet(ThreadTracingRecord.class);
+		final Dataset ttDataset = data.getDataSet(ThreadTracingRecord.class);
 
 		if (ttDataset == null || ttDataset.size() == 0) {
 			invalidDataMessage = "Instrumentation achieved no thread tracing results for the given scope!";
@@ -177,7 +178,7 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		LOGGER.debug("Thread tracing set.");
 		LOGGER.debug("Setting stack trace datasets...");
 
-		Dataset stDataset = data.getDataSet(StackTraceRecord.class);
+		final Dataset stDataset = data.getDataSet(StackTraceRecord.class);
 
 		if (stDataset == null || stDataset.size() == 0) {
 			invalidDataMessage = "Instrumentation achieved no stack trace results for the given scope!";
@@ -208,12 +209,12 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 
 		LOGGER.debug("Deriving servlet hierarchy...");
 		// Select servlets with requirements violating response times
-		Set<String> servletNames = DataAnalyzationUtils.extractUniqueMethodNames(hierarchyResponseTimes);
-		MethodCallSet servletHierarchy = DataAnalyzationUtils.getMethodCallSetOfMethods(servletNames,
+		final Set<String> servletNames = DataAnalyzationUtils.extractUniqueMethodNames(hierarchyResponseTimes);
+		final MethodCallSet servletHierarchy = DataAnalyzationUtils.getMethodCallSetOfMethods(servletNames,
 				multiUserResponseTimes, multiUserThreadTracing);
 		LOGGER.debug("Servlet hierarchy created.");
 		LOGGER.debug("Deriving lowest servlet layer...");
-		MethodCallSet servletQueryHierarchy = servletHierarchy.getSubsetOfLowestLayer();
+		final MethodCallSet servletQueryHierarchy = servletHierarchy.getSubsetOfLowestLayer();
 		LOGGER.debug("Lowest layer derived.");
 		LOGGER.debug("Deriving servlet-query hierarchy...");
 		DataAnalyzationUtils.addQueriesToMethodCallSet(servletQueryHierarchy, multiUserResponseTimes, multiUserQueries,
@@ -222,12 +223,12 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 
 		LOGGER.debug("Locating critical servlets...");
 
-		Set<String> criticalServlets = getCriticalServlets(servletQueryHierarchy);
-		Set<String> nonCriticalServlets = new TreeSet<>();
+		final Set<String> criticalServlets = getCriticalServlets(servletQueryHierarchy);
+		final Set<String> nonCriticalServlets = new TreeSet<>();
 		nonCriticalServlets.addAll(servletQueryHierarchy.getUniqueMethods());
 		nonCriticalServlets.removeAll(criticalServlets);
 
-		for (String nonCritServlet : nonCriticalServlets) {
+		for (final String nonCritServlet : nonCriticalServlets) {
 			servletQueryHierarchy.removeAllCallsWithName(nonCritServlet);
 		}
 
@@ -235,10 +236,10 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 
 		// Select queries with requirements violating relative response time
 		LOGGER.debug("Locate requirements violating queries...");
-		Map<String, Double> violatingReqQueriesART = getReqViolatingQueries(servletQueryHierarchy);
+		final Map<String, Double> violatingReqQueriesART = getReqViolatingQueries(servletQueryHierarchy);
 
-		for (MethodCall servletCall : servletQueryHierarchy.getMethodCalls()) {
-			for (MethodCall queryCall : servletCall.getCalledOperations()) {
+		for (final MethodCall servletCall : servletQueryHierarchy.getMethodCalls()) {
+			for (final MethodCall queryCall : servletCall.getCalledOperations()) {
 				if (!violatingReqQueriesART.containsKey(queryCall.getOperation())) {
 					servletCall.removeCall(queryCall);
 				}
@@ -256,16 +257,16 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 
 		LOGGER.debug("Drop false positives (single-user test)...");
 
-		MethodCallSet singleUserServletHierarchy = DataAnalyzationUtils.getMethodCallSetOfMethods(criticalServlets,
+		final MethodCallSet singleUserServletHierarchy = DataAnalyzationUtils.getMethodCallSetOfMethods(criticalServlets,
 				singleUserResponseTimes, singleUserThreadTracing);
-		MethodCallSet singleUserServletQueryHierarchy = singleUserServletHierarchy.getSubsetOfLowestLayer();
+		final MethodCallSet singleUserServletQueryHierarchy = singleUserServletHierarchy.getSubsetOfLowestLayer();
 		DataAnalyzationUtils.addQueriesToMethodCallSet(singleUserServletQueryHierarchy, singleUserResponseTimes,
 				singleUserQueries, singleUserThreadTracing);
 
 		filterViolatingReqQueriesBySingleUserTest(violatingReqQueriesART, servletQueryHierarchy,
 				singleUserServletQueryHierarchy);
 
-		for (MethodCall servletCall : servletQueryHierarchy.getMethodCalls()) {
+		for (final MethodCall servletCall : servletQueryHierarchy.getMethodCalls()) {
 			if (servletCall.getCalledOperations().size() == 0) {
 				servletQueryHierarchy.removeCall(servletCall);
 			}
@@ -282,14 +283,14 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		return result;
 	}
 
-	private Set<String> getCriticalServlets(MethodCallSet servletQueryHierarchy) {
-		Set<String> criticalServlets = new TreeSet<>();
+	private Set<String> getCriticalServlets(final MethodCallSet servletQueryHierarchy) {
+		final Set<String> criticalServlets = new TreeSet<>();
 
-		for (String methodName : servletQueryHierarchy.getUniqueMethods()) {
-			Set<MethodCall> callsOfMethod = servletQueryHierarchy.getCallsOfMethodAtLayer(methodName, 0);
+		for (final String methodName : servletQueryHierarchy.getUniqueMethods()) {
+			final Set<MethodCall> callsOfMethod = servletQueryHierarchy.getCallsOfMethodAtLayer(methodName, 0);
 			int numberOfReqViolatingCalls = 0;
 
-			for (MethodCall call : callsOfMethod) {
+			for (final MethodCall call : callsOfMethod) {
 				if (call.getResponseTime() > perfReqThreshold) {
 					numberOfReqViolatingCalls++;
 				}
@@ -303,18 +304,18 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		return criticalServlets;
 	}
 
-	private Map<String, Double> getReqViolatingQueries(MethodCallSet servletQueryHierarchy) {
+	private Map<String, Double> getReqViolatingQueries(final MethodCallSet servletQueryHierarchy) {
 
-		Set<String> possiblyCriticalQueries = servletQueryHierarchy.getUniqueMethodsOfLayer(1);
-		Map<String, Double> violatingReqQueriesART = new TreeMap<>();
+		final Set<String> possiblyCriticalQueries = servletQueryHierarchy.getUniqueMethodsOfLayer(1);
+		final Map<String, Double> violatingReqQueriesART = new TreeMap<>();
 
-		for (String query : possiblyCriticalQueries) {
-			List<Double> relativeRTs = DataAnalyzationUtils.getRelativeQueryResponseTimes(query, servletQueryHierarchy);
+		for (final String query : possiblyCriticalQueries) {
+			final List<Double> relativeRTs = DataAnalyzationUtils.getRelativeQueryResponseTimes(query, servletQueryHierarchy);
 
 			if (LpeNumericUtils.average(relativeRTs) > perfReqRelativeQueryRT) {
 				violatingReqQueriesART.put(query, LpeNumericUtils.average(relativeRTs));
 			} else {
-				for (MethodCall queryCall : servletQueryHierarchy.getCallsOfMethodAtLayer(query, 1)) {
+				for (final MethodCall queryCall : servletQueryHierarchy.getCallsOfMethodAtLayer(query, 1)) {
 					servletQueryHierarchy.removeCall(queryCall);
 				}
 			}
@@ -323,14 +324,14 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		return violatingReqQueriesART;
 	}
 
-	private void filterViolatingReqQueriesBySingleUserTest(Map<String, Double> violatingReqQueriesART,
-			MethodCallSet servletQueryHierarchy, MethodCallSet singleUserServletQueryHierarchy) {
-		Set<String> queriesToRemove = new TreeSet<>();
+	private void filterViolatingReqQueriesBySingleUserTest(final Map<String, Double> violatingReqQueriesART,
+			final MethodCallSet servletQueryHierarchy, final MethodCallSet singleUserServletQueryHierarchy) {
+		final Set<String> queriesToRemove = new TreeSet<>();
 
-		for (String query : violatingReqQueriesART.keySet()) {
-			List<Double> singleUserRRTs = DataAnalyzationUtils.getRelativeQueryResponseTimes(query,
+		for (final String query : violatingReqQueriesART.keySet()) {
+			final List<Double> singleUserRRTs = DataAnalyzationUtils.getRelativeQueryResponseTimes(query,
 					singleUserServletQueryHierarchy);
-			double avgRRTDiff = violatingReqQueriesART.get(query) - LpeNumericUtils.average(singleUserRRTs);
+			final double avgRRTDiff = violatingReqQueriesART.get(query) - LpeNumericUtils.average(singleUserRRTs);
 
 			if (avgRRTDiff < perfReqRelativeQueryRTDiff) {
 				queriesToRemove.add(query);
@@ -338,30 +339,30 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 			}
 		}
 
-		for (String query : queriesToRemove) {
+		for (final String query : queriesToRemove) {
 			violatingReqQueriesART.remove(query);
 		}
 	}
 
-	private SpotterResult generateResult(MethodCallSet servletQueryHierarchy,
-			MethodCallSet singleUserServletQueryHierarchy, Map<String, Double> violatingReqQueriesART) {
-		SpotterResult result = new SpotterResult();
+	private SpotterResult generateResult(final MethodCallSet servletQueryHierarchy,
+			final MethodCallSet singleUserServletQueryHierarchy, final Map<String, Double> violatingReqQueriesART) {
+		final SpotterResult result = new SpotterResult();
 		result.setDetected(false);
-		for (String servletMethod : servletQueryHierarchy.getUniqueMethodsOfLayer(0)) {
-			StringBuilder messageBuilder = new StringBuilder();
+		for (final String servletMethod : servletQueryHierarchy.getUniqueMethodsOfLayer(0)) {
+			final StringBuilder messageBuilder = new StringBuilder();
 			messageBuilder.append("EDC detected in service: ");
 			messageBuilder.append(servletMethod);
 			messageBuilder.append("\nQueries are:");
 
-			for (String query : violatingReqQueriesART.keySet()) {
-				String formattedServlet = LpeStringUtils.extractClassName(servletMethod) + "."
+			for (final String query : violatingReqQueriesART.keySet()) {
+				final String formattedServlet = LpeStringUtils.extractClassName(servletMethod) + "."
 						+ LpeStringUtils.getSimpleMethodName(servletMethod);
 				List<String> stackTrace = null;
-				for (String stackTraceString : DataAnalyzationUtils.getStackTracesOfQuery(query, stackTraceQueries,
+				for (final String stackTraceString : DataAnalyzationUtils.getStackTracesOfQuery(query, stackTraceQueries,
 						stackTraces)) {
 					if (stackTraceString.contains(formattedServlet)) {
 						stackTrace = new ArrayList<>();
-						for (String stackTraceElement : stackTraceString
+						for (final String stackTraceElement : stackTraceString
 								.split(StackTraceProbe.REGEX_DELIM_STACK_TRACE_ELEMENT)) {
 							stackTrace.add(stackTraceElement);
 						}
@@ -376,15 +377,15 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 					result.setDetected(true);
 				}
 
-				NumericPairList<Long, Long> multiUserServletRts = DataAnalyzationUtils.getServletResponseTimesOverTime(
+				final NumericPairList<Long, Long> multiUserServletRts = DataAnalyzationUtils.getServletResponseTimesOverTime(
 						servletMethod, multiUserResponseTimes);
-				NumericPairList<Long, Long> singleUserServletRts = DataAnalyzationUtils
+				final NumericPairList<Long, Long> singleUserServletRts = DataAnalyzationUtils
 						.getServletResponseTimesOverTime(servletMethod, singleUserResponseTimes);
 
-				double relativeRT = violatingReqQueriesART.get(query);
-				List<Double> singleUserRRTs = DataAnalyzationUtils.getRelativeQueryResponseTimes(query,
+				final double relativeRT = violatingReqQueriesART.get(query);
+				final List<Double> singleUserRRTs = DataAnalyzationUtils.getRelativeQueryResponseTimes(query,
 						singleUserServletQueryHierarchy);
-				double singleUserART = LpeNumericUtils.average(singleUserRRTs);
+				final double singleUserART = LpeNumericUtils.average(singleUserRRTs);
 
 				createTimeSeriesChart(servletMethod, query, numUsers, multiUserServletRts,
 						DataAnalyzationUtils.getQueryResponseTimesOverTime(query, multiUserResponseTimes,
@@ -393,7 +394,7 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 								singleUserQueries), result);
 				createRelativeChart(servletMethod, query, numUsers, relativeRT, singleUserART, result);
 
-				DecimalFormat df = new DecimalFormat("#.##");
+				final DecimalFormat df = new DecimalFormat("#.##");
 
 				messageBuilder.append("\n");
 				messageBuilder.append(query);
@@ -407,7 +408,7 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 				messageBuilder.append("%");
 				messageBuilder.append("\n\tStack trace:");
 
-				for (String stackTraceElement : stackTrace) {
+				for (final String stackTraceElement : stackTrace) {
 					messageBuilder.append("\n\t\t");
 					messageBuilder.append(stackTraceElement);
 				}
@@ -421,39 +422,39 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		return result;
 	}
 
-	private void createRelativeChart(String servlet, String query, long numMaxUsers, double multiUserQueryRRT,
-			double singleUserQueryRRT, SpotterResult result) {
-		NumericPairList<Integer, Double> muRRTSeries = new NumericPairList<>();
+	private void createRelativeChart(final String servlet, final String query, final long numMaxUsers, final double multiUserQueryRRT,
+			final double singleUserQueryRRT, final SpotterResult result) {
+		final NumericPairList<Integer, Double> muRRTSeries = new NumericPairList<>();
 		for (int i = 0; i < 50; i += 2) {
 			muRRTSeries.add(new NumericPair<Integer, Double>(i, 100.0));
 		}
 
-		NumericPairList<Integer, Double> muQRRTSeries = new NumericPairList<>();
+		final NumericPairList<Integer, Double> muQRRTSeries = new NumericPairList<>();
 		for (int i = 1; i < 50; i += 2) {
 			muQRRTSeries.add(new NumericPair<Integer, Double>(i, multiUserQueryRRT * 100.0));
 		}
 
-		NumericPairList<Integer, Double> suRRTSeries = new NumericPairList<>();
+		final NumericPairList<Integer, Double> suRRTSeries = new NumericPairList<>();
 		for (int i = 50; i <= 100; i += 2) {
 			suRRTSeries.add(new NumericPair<Integer, Double>(i, 100.0));
 		}
 
-		NumericPairList<Integer, Double> suQRRTSeries = new NumericPairList<>();
+		final NumericPairList<Integer, Double> suQRRTSeries = new NumericPairList<>();
 		for (int i = 51; i <= 100; i += 2) {
 			suQRRTSeries.add(new NumericPair<Integer, Double>(i, singleUserQueryRRT * 100.0));
 		}
 
-		NumericPairList<Integer, Double> nullSeries = new NumericPairList<>();
+		final NumericPairList<Integer, Double> nullSeries = new NumericPairList<>();
 		nullSeries.add(new NumericPair<Integer, Double>(100, 0.0));
 
-		String servletName = LpeStringUtils.shortenOperationName(servlet);
+		final String servletName = LpeStringUtils.shortenOperationName(servlet);
 		String queryName = query;
 
 		if (queryName.length() > 15) {
 			queryName = queryName.substring(0, 13) + "...";
 		}
 
-		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
+		final AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 
 		chartBuilder.startChart("Relation between " + servletName + " and " + queryName, "",
 				"Relative Response Time [%]");
@@ -466,13 +467,13 @@ public class RelativeQueryRTStrategy implements IEDCAnalysisStrategy {
 		controller.getResultManager().storeImageChartResource(chartBuilder, "Relative Response Times", result);
 	}
 
-	private void createTimeSeriesChart(String servlet, String query, long numMaxUsers,
-			NumericPairList<Long, Long> multiUserServletRTs, NumericPairList<Long, Long> multiUserQueryRTs,
-			NumericPairList<Long, Long> singleUserServletRTs, NumericPairList<Long, Long> singleUserQueryRTs,
-			SpotterResult result) {
-		AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
+	private void createTimeSeriesChart(final String servlet, final String query, final long numMaxUsers,
+			final NumericPairList<Long, Long> multiUserServletRTs, final NumericPairList<Long, Long> multiUserQueryRTs,
+			final NumericPairList<Long, Long> singleUserServletRTs, final NumericPairList<Long, Long> singleUserQueryRTs,
+			final SpotterResult result) {
+		final AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 
-		String servletName = LpeStringUtils.shortenOperationName(servlet);
+		final String servletName = LpeStringUtils.shortenOperationName(servlet);
 		String queryName = query;
 
 		if (queryName.length() > 15) {

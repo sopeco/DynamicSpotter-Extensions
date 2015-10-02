@@ -22,8 +22,8 @@ import org.aim.artifacts.scopes.EntryPointScope;
 import org.aim.artifacts.scopes.JDBCScope;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
-import org.lpe.common.util.LpeNumericUtils;
-import org.lpe.common.util.LpeStringUtils;
+import org.lpe.common.utils.numeric.LpeNumericUtils;
+import org.lpe.common.utils.sql.SQLStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spotter.core.ProgressManager;
@@ -262,7 +262,7 @@ public class StifleDetectionController extends AbstractDetectionController {
 
 				String query = sqlRecords.get(sqlIndex).getQueryString();
 				final String sql = query;
-				String generalizedSql = LpeStringUtils.getGeneralizedQuery(sql);
+				String generalizedSql = SQLStringUtils.getGeneralizedQuery(sql);
 				if (generalizedSql == null) {
 					if (sql.contains("$")) {
 						int idx_1 = sql.indexOf(",", sql.indexOf("$"));

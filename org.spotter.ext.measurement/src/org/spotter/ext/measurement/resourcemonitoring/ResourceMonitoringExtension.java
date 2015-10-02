@@ -17,9 +17,9 @@ package org.spotter.ext.measurement.resourcemonitoring;
 
 import org.aim.resourcemonitoring.ResourceMonitoringClient;
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementAdapter;
 
 /**
  * Extension for the resource monitoring client.
@@ -29,13 +29,12 @@ import org.spotter.core.measurement.IMeasurementAdapter;
  */
 public class ResourceMonitoringExtension extends AbstractMeasurmentExtension {
 	
+	public ResourceMonitoringExtension() {
+		super(ResourceMonitoringAdapter.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The sampling measurement satellite adapter is used to connect "
 														+ "to all sampling satellites.";
-
-	@Override
-	public String getName() {
-		return "measurement.satellite.adapter.sampling";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
@@ -55,12 +54,6 @@ public class ResourceMonitoringExtension extends AbstractMeasurmentExtension {
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createSamplingDelayParameter());
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
-		return new ResourceMonitoringAdapter(this);
 	}
 
 	@Override

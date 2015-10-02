@@ -6,7 +6,6 @@ import java.util.Set;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 import org.spotter.ext.detection.continuousViolation.util.AnalysisConfig;
 
 /**
@@ -17,6 +16,10 @@ import org.spotter.ext.detection.continuousViolation.util.AnalysisConfig;
  * 
  */
 public class ContinuousViolationExtension extends AbstractDetectionExtension {
+	public ContinuousViolationExtension() {
+		super(ContinuousViolationController.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "Checks if performance requirements are "
 			+ "violated continuously under high load.";
 	
@@ -25,17 +28,7 @@ public class ContinuousViolationExtension extends AbstractDetectionExtension {
 	protected static final String PERCENTILE_STRATEGY = "moving percentile analysis";
 	protected static final String BUCKET_STRATEGY = "bucket analysis";
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public IDetectionController createExtensionArtifact(final String ... args) {
-		return new ContinuousViolationController(this);
-	}
 
-	@Override
-	public String getName() {
-		return "Continuouos Violation";
-	}
-	
 	private ConfigParameterDescription createStrategyParameter() {
 		final ConfigParameterDescription scopeParameter = new ConfigParameterDescription(VIOLATION_DETECTION_STRATEGY_KEY,
 				LpeSupportedTypes.String);

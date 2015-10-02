@@ -4,11 +4,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 
 public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
+	public ExcessiveMessagingExtension() {
+		super(ExcessiveMessagingDetectionController.class);
+	}
+
 	public static final String REQUIRED_CONFIDENCE_LEVEL_KEY = "confidenceLevel";
 	public static final String REQUIRED_SIGNIFICANT_STEPS_KEY = "numSignificantSteps";
 	
@@ -19,17 +23,6 @@ public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
 	
 	public static final double REQUIRED_CONFIDENCE_LEVEL_DEFAULT = 0.95;
 	public static final int REQUIRED_SIGNIFICANT_STEPS_DEFAULT = 2;
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public IDetectionController createExtensionArtifact(final String ... args) {
-		return new ExcessiveMessagingDetectionController(this);
-	}
-
-	@Override
-	public String getName() {
-		return "Excessive Messaging";
-	}
 
 	private ConfigParameterDescription createNumSignificantStepsParameter() {
 		final ConfigParameterDescription numSignificantStepsParameter = new ConfigParameterDescription(

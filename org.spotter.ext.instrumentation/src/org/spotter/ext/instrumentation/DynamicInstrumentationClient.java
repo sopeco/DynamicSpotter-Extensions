@@ -18,7 +18,7 @@ package org.spotter.ext.instrumentation;
 import org.aim.aiminterface.IAdaptiveInstrumentation;
 import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
 import org.aim.aiminterface.exceptions.InstrumentationException;
-import org.aim.artifacts.instrumentation.JsonAdaptiveInstrumentationClient;
+import org.aim.artifacts.client.JMXAdaptiveInstrumentationClient;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.instrumentation.AbstractInstrumentationAdapter;
 
@@ -45,7 +45,7 @@ public class DynamicInstrumentationClient extends AbstractInstrumentationAdapter
 	@Override
 	public void initialize() throws InstrumentationException {
 		if (client == null) {
-			client = new JsonAdaptiveInstrumentationClient(getHost(), getPort());
+			client = new JMXAdaptiveInstrumentationClient(getHost(), getPort());
 			if (!client.testConnection()) {
 				throw new InstrumentationException("Connection to instrumentation could not be established!");
 			}

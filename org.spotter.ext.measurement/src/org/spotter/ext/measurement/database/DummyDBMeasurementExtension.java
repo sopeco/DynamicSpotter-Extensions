@@ -2,32 +2,23 @@ package org.spotter.ext.measurement.database;
 
 import javax.ws.rs.core.MediaType;
 
-import org.lpe.common.util.LpeHTTPUtils;
+import org.lpe.common.extension.IExtensionArtifact;
+import org.lpe.common.util.web.LpeHTTPUtils;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementAdapter;
 
 import com.sun.jersey.api.client.Client;
 
 public class DummyDBMeasurementExtension extends AbstractMeasurmentExtension {
 
 
-	@Override
-	public String getName() {
-		return "DummyDB Statistics Sampler";
+	public DummyDBMeasurementExtension() {
+		super(DummyDBMeasurement.class);
 	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
 		return "DummyDB Sampling Measurement Satellite Adapter";
 	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
-		return new DummyDBMeasurement(this);
-	}
-
-	
 
 	@Override
 	protected void initializeConfigurationParameters() {

@@ -9,6 +9,10 @@ import org.spotter.core.detection.AbstractDetectionExtension;
 import org.spotter.core.detection.IDetectionController;
 
 public class TrafficJamExtension extends AbstractDetectionExtension {
+	public TrafficJamExtension() {
+		super(TrafficJamDetectionController.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "Traffic Jam represents a scalability problem, "
 			+ "either due to software bottlenecks or hardware limitations. ";
 	public static final String REQUIRED_CONFIDENCE_LEVEL_KEY = "confidenceLevel";
@@ -24,17 +28,6 @@ public class TrafficJamExtension extends AbstractDetectionExtension {
 	protected static final String DETECTION_STRATEGY_KEY = "strategy";
 	protected static final String T_TEST_STRATEGY = "t-Test strategy";
 	protected static final String LIN_REGRESSION_STRATEGY = "linear regression strategy";
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IDetectionController createExtensionArtifact(final String ... args) {
-		return new TrafficJamDetectionController(this);
-	}
-
-	@Override
-	public String getName() {
-		return "Traffic Jam";
-	}
 
 	private ConfigParameterDescription createNumExperimentsParameter() {
 		final ConfigParameterDescription numExperimentsParameter = new ConfigParameterDescription(EXPERIMENT_STEPS_KEY,

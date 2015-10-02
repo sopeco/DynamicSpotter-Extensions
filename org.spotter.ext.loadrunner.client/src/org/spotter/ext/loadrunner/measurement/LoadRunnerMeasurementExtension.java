@@ -16,10 +16,10 @@
 package org.spotter.ext.loadrunner.measurement;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementAdapter;
 import org.spotter.ext.loadrunner.LRConfigKeys;
 
 /**
@@ -30,14 +30,13 @@ import org.spotter.ext.loadrunner.LRConfigKeys;
  */
 public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension {
 
+	public LoadRunnerMeasurementExtension() {
+		super(LoadRunnerMeasurementClient.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The loadrunner measurement satellite adapter connects to a measurement "
 			+ "satellite executed on a Loadrunner system. This satellite adapter is "
 			+ "responsible to fetch the result data after a Loadrunner workload " + "execution.";
-
-	@Override
-	public String getName() {
-		return "measurement.satellite.adapter.loadrunner";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
@@ -95,12 +94,6 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 		addConfigParameter(createResultDirParameter());
 		addConfigParameter(createAnalysisSessionParameter());
 		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
-		return new LoadRunnerMeasurementClient(this);
 	}
 
 	@Override

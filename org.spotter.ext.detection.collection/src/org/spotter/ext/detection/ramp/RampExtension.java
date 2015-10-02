@@ -30,6 +30,10 @@ import org.spotter.core.detection.IDetectionController;
  */
 public class RampExtension extends AbstractDetectionExtension {
 
+	public RampExtension() {
+		super(RampDetectionController.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The ramp occurs when processing time increases as the system is used.";
 
 	protected static final String DETECTION_STRATEGY_KEY = "strategy";
@@ -49,11 +53,6 @@ public class RampExtension extends AbstractDetectionExtension {
 	public static final double REQUIRED_SIGNIFICANCE_LEVEL_DEFAULT = 0.05; // [0-1]
 	public static final double LIN_SLOPE_DEFAULT = 0.01; // [ms / ms]
 	public static final int REQUIRED_SIGNIFICANT_STEPS_DEFAULT = 2;
-
-	@Override
-	public String getName() {
-		return "The Ramp";
-	}
 
 	private ConfigParameterDescription createStimulationPhaseDurationParameter() {
 		final ConfigParameterDescription parameter = new ConfigParameterDescription(KEY_STIMULATION_PHASE_DURATION_FACTOR,
@@ -115,12 +114,6 @@ public class RampExtension extends AbstractDetectionExtension {
 		scopeParameter.setDescription("This parameter determines the strategy, "
 				+ "used to analyse the Ramp anti-pattern.");
 		return scopeParameter;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IDetectionController createExtensionArtifact(final String ... args) {
-		return new RampDetectionController(this);
 	}
 
 	@Override

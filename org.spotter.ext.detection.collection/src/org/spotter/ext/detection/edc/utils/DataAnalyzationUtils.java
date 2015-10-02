@@ -13,8 +13,8 @@ import org.aim.artifacts.records.ResponseTimeRecord;
 import org.aim.artifacts.records.SQLQueryRecord;
 import org.aim.artifacts.records.StackTraceRecord;
 import org.aim.artifacts.records.ThreadTracingRecord;
-import org.lpe.common.util.NumericPair;
-import org.lpe.common.util.NumericPairList;
+import org.lpe.common.utils.numeric.NumericPair;
+import org.lpe.common.utils.numeric.NumericPairList;
 
 public class DataAnalyzationUtils {
 

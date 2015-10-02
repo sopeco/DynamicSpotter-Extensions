@@ -1,26 +1,19 @@
 package org.spotter.ext.measurement.database;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementAdapter;
 
 public class HDBMeasurementExtension extends AbstractMeasurmentExtension {
+	public HDBMeasurementExtension() {
+		super(HDBMeasurement.class);
+	}
+
 	public static final String HOST_KEY = "host";
 	public static final String PORT_KEY = "port";
 	public static final String USER_NAME_KEY = "username";
 	public static final String PASSWORD_KEY = "password";
-
-	@Override
-	public String getName() {
-		return "HDB Measurement";
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IMeasurementAdapter createExtensionArtifact(final String ... args) {
-		return new HDBMeasurement(this);
-	}
 
 	@Override
 	protected void initializeConfigurationParameters() {

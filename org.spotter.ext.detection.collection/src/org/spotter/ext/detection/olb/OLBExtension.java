@@ -4,9 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 
 /**
  * OLB extension.
@@ -15,6 +15,10 @@ import org.spotter.core.detection.IDetectionController;
  * 
  */
 public class OLBExtension extends AbstractDetectionExtension {
+	public OLBExtension() {
+		super(OLBDetectionController.class);
+	}
+
 	private static final double _100_PERCENT = 100.0;
 	private static final String EXTENSION_DESCRIPTION = "The One Lane Bridge anti-pattern is a typical software bottleneck. ";
 
@@ -30,17 +34,6 @@ public class OLBExtension extends AbstractDetectionExtension {
 	protected static final String DETECTION_STRATEGY_KEY = "strategy";
 	protected static final String QUEUEING_THEORY_STRATEGY = "queueing theory strategy";
 	protected static final String T_TEST_CPU_THRESHOLD_STRATEGY = "t-Test-CPU-threshold strategy";
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IDetectionController createExtensionArtifact(final String ... args) {
-		return new OLBDetectionController(this);
-	}
-
-	@Override
-	public String getName() {
-		return "One Lane Bridge";
-	}
 
 	private ConfigParameterDescription createCpuThresholdParameter() {
 		final ConfigParameterDescription cpuThresholdParameter = new ConfigParameterDescription(

@@ -16,28 +16,21 @@
 package org.spotter.ext.dummy;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.workload.AbstractWorkloadExtension;
-import org.spotter.core.workload.IWorkloadAdapter;
 
 public class TestLoadDriverExtension extends  AbstractWorkloadExtension  {
+
+	public TestLoadDriverExtension() {
+		super(TestLoadDriver.class);
+	}
 
 	private static final String EXTENSION_DESCRIPTION = "The test workload satellite adapter is used for test purposes only. The "
 														+ "satellite adapter is a dummy and does nothing. The dummy will be removed after "
 														+ "the first version has been officially released.";
 
 	public static final String NUM_EXPERIMENTS = "org.spotter.test.numExperiments";
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public IWorkloadAdapter createExtensionArtifact(final String ... args) {
-		return new TestLoadDriver(this);
-	}
-
-	@Override
-	public String getName() {
-		return "workload.satellite.adapter.test";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {

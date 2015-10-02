@@ -16,9 +16,9 @@
 package org.spotter.ext.loadrunner.instrumentation;
 
 import org.lpe.common.config.ConfigParameterDescription;
+import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.spotter.core.instrumentation.AbstractInstrumentationExtension;
-import org.spotter.core.instrumentation.IInstrumentationAdapter;
 
 /**
  * Extension for LoadRunner instrumentation.
@@ -27,20 +27,13 @@ import org.spotter.core.instrumentation.IInstrumentationAdapter;
  */
 public class LoadRunnerInstrumentationExtension extends AbstractInstrumentationExtension {
 
+	public LoadRunnerInstrumentationExtension() {
+		super(LoadRunnerInstrumentationClient.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The loadrunner instrumentation satellite adapter can be used to "
 														+ "connect to an HP Loadrunner instrumentation satellite. It will only "
 														+ "be applicable if you have a Loadrunner as a workload generator.";
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public IInstrumentationAdapter createExtensionArtifact(final String ... args) {
-		return new LoadRunnerInstrumentationClient(this);
-	}
-
-	@Override
-	public String getName() {
-		return "instrumentation.satellite.adapter.loadrunner";
-	}
 	
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
