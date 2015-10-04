@@ -15,9 +15,8 @@
  */
 package org.spotter.ext.measurement;
 
-import org.aim.mainagent.JsonAdaptiveInstrumentationClient;
+import org.aim.artifacts.client.JMXAdaptiveInstrumentationClient;
 import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.extension.IExtensionArtifact;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
 import org.spotter.core.measurement.IMeasurementAdapter;
 
@@ -65,7 +64,7 @@ public class MeasurementExtension extends AbstractMeasurmentExtension {
 
 	@Override
 	public boolean testConnection(final String host, final String port) {
-		return JsonAdaptiveInstrumentationClient.testConnection(host, port);
+		return JMXAdaptiveInstrumentationClient.testConnection(host, port);
 	}
 
 	@Override
