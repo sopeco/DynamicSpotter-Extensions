@@ -16,7 +16,6 @@
 package org.spotter.ext.detection.edc;
 
 import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
 
@@ -67,13 +66,20 @@ public class EDCExtension extends AbstractDetectionExtension {
 
 		return perfReqRelativeQueryRTParameter;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}	
 
 	@Override
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createInstrumentationGranularityParameter());
 		addConfigParameter(createPerfReqRelativeQueryRTParameter());
 		addConfigParameter(createPerfReqRelativeQueryRTDiffParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 }

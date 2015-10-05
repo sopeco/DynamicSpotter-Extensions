@@ -45,9 +45,16 @@ public class MeasurementExtension extends AbstractMeasurmentExtension {
 		return "Instrumentation Measurement Satellite Adapter";
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@SuppressWarnings("unchecked")

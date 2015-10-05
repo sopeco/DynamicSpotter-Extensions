@@ -15,8 +15,6 @@
  */
 package org.spotter.ext.dummy;
 
-import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.extension.IExtensionArtifact;
 import org.spotter.core.instrumentation.AbstractInstrumentationExtension;
 
 public class TestInstrumentationExtension extends AbstractInstrumentationExtension {
@@ -34,11 +32,14 @@ public class TestInstrumentationExtension extends AbstractInstrumentationExtensi
 		return "Test Instrumentation Satellite Adapter";
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
 	@Override
-	protected void initializeConfigurationParameters() {
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
 	}
-
+	
 	@Override
 	public boolean testConnection(final String host, final String port) {
 		return true;
@@ -47,6 +48,10 @@ public class TestInstrumentationExtension extends AbstractInstrumentationExtensi
 	@Override
 	public boolean isRemoteExtension() {
 		return false;
+	}
+
+	@Override
+	protected void initializeConfigurationParameters() {
 	}
 
 }

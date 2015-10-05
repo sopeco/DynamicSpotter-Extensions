@@ -17,7 +17,6 @@ package org.spotter.ext.measurement.resourcemonitoring;
 
 import org.aim.resourcemonitoring.ResourceMonitoringClient;
 import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
 
@@ -50,10 +49,17 @@ public class ResourceMonitoringExtension extends AbstractMeasurmentExtension {
 		return samplingDelayParameter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createSamplingDelayParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override

@@ -21,7 +21,6 @@ import java.util.Set;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 
 /**
  * The ramp antipattern detection extension.
@@ -116,9 +115,16 @@ public class RampExtension extends AbstractDetectionExtension {
 		return scopeParameter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 		addConfigParameter(createStimulationPhaseDurationParameter());
 		addConfigParameter(createNumExperimentsParameter());
 		addConfigParameter(createRequiredSignificanceLevelParameter());

@@ -16,7 +16,6 @@
 package org.spotter.ext.loadrunner.measurement;
 
 import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
@@ -87,13 +86,20 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 		return analysisSessionParameter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createAnalysisPathParameter());
 		addConfigParameter(createAnalysisTemplateParameter());
 		addConfigParameter(createResultDirParameter());
 		addConfigParameter(createAnalysisSessionParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override

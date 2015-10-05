@@ -13,7 +13,6 @@
 package org.spotter.ext.jmeter.workload;
 
 import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.workload.AbstractWorkloadExtension;
 import org.spotter.ext.jmeter.JMeterConfigKeys;
@@ -150,9 +149,16 @@ public class JMeterWorkloadExtension extends AbstractWorkloadExtension {
 		addConfigParameter(createJMeterLogFileFlagParameter());
 		addConfigParameter(createJMeterLogFilePrefixParameter());
 		addConfigParameter(createJMeterSamplingFileFlagParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	public boolean testConnection(final String host, final String port) {
 		return true;

@@ -16,7 +16,6 @@
 package org.spotter.ext.dummy;
 
 import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.workload.AbstractWorkloadExtension;
 
@@ -36,6 +35,14 @@ public class TestLoadDriverExtension extends  AbstractWorkloadExtension  {
 	protected String getDefaultSatelleiteExtensionName() {
 		return "Test Workload Satellite Adapter";
 	}
+
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
 	
 	@Override
 	protected void initializeConfigurationParameters() {
@@ -44,7 +51,6 @@ public class TestLoadDriverExtension extends  AbstractWorkloadExtension  {
 		par.setDefaultValue(String.valueOf(100));
 		par.setDescription("Number of experiments.");
 		addConfigParameter(par);
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override

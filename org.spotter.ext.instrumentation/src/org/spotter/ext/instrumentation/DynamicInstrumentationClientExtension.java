@@ -75,9 +75,16 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createPackagesToIncludeParameter());
 		addConfigParameter(createPackagesToExcludeParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	public boolean testConnection(final String host, final String port) {
 		return JMXAdaptiveInstrumentationClient.testConnection(host, port);

@@ -94,6 +94,14 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 		return samplingDelayParameter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createHostParameter());
@@ -101,7 +109,6 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 		addConfigParameter(createUserParameter());
 		addConfigParameter(createPasswordParameter());
 		addConfigParameter(createDatabaseParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override

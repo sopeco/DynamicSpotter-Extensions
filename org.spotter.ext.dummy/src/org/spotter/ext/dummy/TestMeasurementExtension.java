@@ -16,7 +16,6 @@
 package org.spotter.ext.dummy;
 
 import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
 
@@ -36,6 +35,14 @@ public class TestMeasurementExtension extends AbstractMeasurmentExtension {
 	protected String getDefaultSatelleiteExtensionName() {
 		return "Test Measurement Satellite Adapter";
 	}
+
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
 	
 	@Override
 	protected void initializeConfigurationParameters() {
@@ -44,7 +51,6 @@ public class TestMeasurementExtension extends AbstractMeasurmentExtension {
 		par.setDefaultValue(String.valueOf(100));
 		par.setDescription("Number of records to return as result.");
 		addConfigParameter(par);
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override

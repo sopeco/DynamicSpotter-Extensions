@@ -28,6 +28,13 @@ public class ContinuousViolationExtension extends AbstractDetectionExtension {
 	protected static final String PERCENTILE_STRATEGY = "moving percentile analysis";
 	protected static final String BUCKET_STRATEGY = "bucket analysis";
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
 
 	private ConfigParameterDescription createStrategyParameter() {
 		final ConfigParameterDescription scopeParameter = new ConfigParameterDescription(VIOLATION_DETECTION_STRATEGY_KEY,
@@ -44,13 +51,8 @@ public class ContinuousViolationExtension extends AbstractDetectionExtension {
 		return scopeParameter;
 	}
 	
-
-
-	
-
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 		addConfigParameter(createStrategyParameter());
 		for (final ConfigParameterDescription cpd : AnalysisConfig.getConfigurationParameters()) {
 			addConfigParameter(cpd);

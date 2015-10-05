@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
 
@@ -83,10 +82,16 @@ public class OLBExtension extends AbstractDetectionExtension {
 		return scopeParameter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
-
 		addConfigParameter(createCpuThresholdParameter());
 		addConfigParameter(createStrategyParameter());
 		addConfigParameter(createScopeParameter());

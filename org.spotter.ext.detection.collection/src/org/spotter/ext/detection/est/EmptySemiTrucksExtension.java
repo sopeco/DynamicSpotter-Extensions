@@ -15,8 +15,6 @@
  */
 package org.spotter.ext.detection.est;
 
-import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.extension.IExtensionArtifact;
 import org.spotter.core.detection.AbstractDetectionExtension;
 
 /**
@@ -36,7 +34,6 @@ public class EmptySemiTrucksExtension extends AbstractDetectionExtension {
 
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 }

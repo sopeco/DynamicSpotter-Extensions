@@ -15,8 +15,6 @@
  */
 package org.spotter.ext.loadrunner.instrumentation;
 
-import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.spotter.core.instrumentation.AbstractInstrumentationExtension;
 
@@ -40,9 +38,16 @@ public class LoadRunnerInstrumentationExtension extends AbstractInstrumentationE
 		return "LoadRunner Instrumentation Satellite Adapter";
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override
