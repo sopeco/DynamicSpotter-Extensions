@@ -1,6 +1,7 @@
 package org.spotter.ext.detection.stifle;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,6 +117,11 @@ public class StifleDetectionController extends AbstractDetectionController {
 	}
 
 	private List<SQLQueryRecord> filterQueryRecords(final List<SQLQueryRecord> sqlRecords, final List<ThreadTracingRecord> ttRecords) {
+		// TODO Check is ttRecords.isEmpty() is correct here
+		if (sqlRecords.isEmpty() || ttRecords.isEmpty()) {
+			return Collections.emptyList();
+		}
+		
 		MeasurementDataUtils.sortRecordsAscending(sqlRecords, SQLQueryRecord.PAR_CALL_ID);
 		MeasurementDataUtils.sortRecordsAscending(ttRecords, ThreadTracingRecord.PAR_CALL_ID);
 		final List<SQLQueryRecord> sqlRecordsTmp = new ArrayList<>();

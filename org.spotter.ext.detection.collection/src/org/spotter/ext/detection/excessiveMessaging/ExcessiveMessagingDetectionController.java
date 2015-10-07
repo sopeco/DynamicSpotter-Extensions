@@ -57,7 +57,7 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 				: ExcessiveMessagingExtension.REQUIRED_CONFIDENCE_LEVEL_DEFAULT);
 
 		analysisStrategy = getProblemDetectionConfiguration().getProperty(
-				ExcessiveMessagingExtension.DETECTION_STRATEGY_KEY);
+				ExcessiveMessagingExtension.DETECTION_STRATEGY_KEY, ExcessiveMessagingExtension.THRESHOLD_STRATEGY);
 
 	}
 
