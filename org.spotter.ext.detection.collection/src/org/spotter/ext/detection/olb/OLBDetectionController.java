@@ -85,37 +85,13 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 
 	}
 
-	@Override
-	public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
-		if (!reuser) {
-			// TODO: fix that
-			if (scope.equals(OLBExtension.DB_SCOPE)) {
-				instrumentApplication(getInstrumentationDescription(1.0));
-				runExperiment(this, 1);
-				uninstrumentApplication();
-
-				instrumentApplication(getInstrumentationDescription(1.0));
-				runExperiment(this, 125);
-				uninstrumentApplication();
-
-				instrumentApplication(getInstrumentationDescription(0.1));
-				runExperiment(this, 250);
-				uninstrumentApplication();
-
-				instrumentApplication(getInstrumentationDescription(0.1));
-				runExperiment(this, 375);
-				uninstrumentApplication();
-
-				instrumentApplication(getInstrumentationDescription(0.05));
-				runExperiment(this, 500);
-				uninstrumentApplication();
-			} else {
-				executeDefaultExperimentSeries(this, experimentSteps, getInstrumentationDescription());
-			}
-
-		}
-	}
-
+    @Override
+    public void executeExperiments() throws InstrumentationException, MeasurementException, WorkloadException {
+        if (!reuser) {
+            executeDefaultExperimentSeries(this, experimentSteps, getInstrumentationDescription());
+        }
+    }
+    
 	@Override
 	protected SpotterResult analyze(final DatasetCollection data) {
 		return analysisStrategyImpl.analyze(data);
@@ -138,9 +114,9 @@ public class OLBDetectionController extends AbstractDetectionController implemen
 				// .addProbe(ResponsetimeProbe.MODEL_PROBE).entityDone();
 				
 				// idBuilder.newSynchronizedScopeEntity().addProbe(MonitorWaitingTimeProbe.MODEL_PROBE).entityDone();
-				
-				idBuilder.newMethodScopeEntity("Nop.Web.Controllers.ShoppingCartController:ProblemMethod")
-						.addProbe(ResponsetimeProbe.MODEL_PROBE).entityDone();
+
+                idBuilder.newMethodScopeEntity(".*").addProbe(ResponsetimeProbe.MODEL_PROBE)
+                        .entityDone();
 				break;
 			case OLBExtension.DB_SCOPE:
 				idBuilder.newAPIScopeEntity(JDBCScope.class.getName()).addProbe(ResponsetimeProbe.MODEL_PROBE)
