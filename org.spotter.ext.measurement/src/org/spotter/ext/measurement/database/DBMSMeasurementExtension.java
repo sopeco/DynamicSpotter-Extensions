@@ -18,7 +18,6 @@ package org.spotter.ext.measurement.database;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementAdapter;
 
 /**
  * Extension for measurement / sampling of a DBMS.
@@ -28,6 +27,10 @@ import org.spotter.core.measurement.IMeasurementAdapter;
  */
 
 public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
+
+	public DBMSMeasurementExtension() {
+		super(DBMSMeasurement.class);
+	}
 
 	private static final String EXTENSION_DESCRIPTION = "The DBMS sampling measurement satellite adapter is used to connect "
 			+ "to a MySQL DBMS and to query the database status.";
@@ -41,22 +44,12 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 	public static final String CONNECTION_STRING = "org.spotter.sampling.mysql.connectionString";
 
 	@Override
-	public String getName() {
-		return "measurement.satellite.adapter.sampling.dbms";
-	}
-
-	@Override
 	protected String getDefaultSatelleiteExtensionName() {
 		return "DBMS Sampling Measurement Satellite Adapter";
 	}
 
-	@Override
-	public IMeasurementAdapter createExtensionArtifact() {
-		return new DBMSMeasurement(this);
-	}
-
 	private ConfigParameterDescription createHostParameter() {
-		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(HOST,
+		final ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(HOST,
 				LpeSupportedTypes.String);
 		samplingDelayParameter.setMandatory(true);
 		samplingDelayParameter.setDescription("Host");
@@ -65,7 +58,7 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	private ConfigParameterDescription createPortParameter() {
-		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(PORT,
+		final ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(PORT,
 				LpeSupportedTypes.String);
 		samplingDelayParameter.setDefaultValue("3306");
 		samplingDelayParameter.setMandatory(true);
@@ -75,7 +68,7 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	private ConfigParameterDescription createUserParameter() {
-		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(USER,
+		final ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(USER,
 				LpeSupportedTypes.String);
 		samplingDelayParameter.setMandatory(true);
 		samplingDelayParameter.setDescription("User");
@@ -84,7 +77,7 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	private ConfigParameterDescription createPasswordParameter() {
-		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(PASSWORD,
+		final ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(PASSWORD,
 				LpeSupportedTypes.String);
 		samplingDelayParameter.setMandatory(true);
 		samplingDelayParameter.setDescription("Password");
@@ -93,7 +86,7 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	private ConfigParameterDescription createDatabaseParameter() {
-		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(DATABASE,
+		final ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(DATABASE,
 				LpeSupportedTypes.String);
 		samplingDelayParameter.setMandatory(true);
 		samplingDelayParameter.setDescription("Database Name");
@@ -101,6 +94,14 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 		return samplingDelayParameter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createHostParameter());
@@ -108,11 +109,10 @@ public class DBMSMeasurementExtension extends AbstractMeasurmentExtension {
 		addConfigParameter(createUserParameter());
 		addConfigParameter(createPasswordParameter());
 		addConfigParameter(createDatabaseParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return true;
 	}
 

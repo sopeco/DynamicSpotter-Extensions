@@ -16,7 +16,7 @@
 package org.spotter.ext.instrumentation;
 
 import org.aim.api.instrumentation.description.internal.InstrumentationConstants;
-import org.aim.artifacts.instrumentation.InstrumentationClient;
+import org.aim.artifacts.client.JMXAdaptiveInstrumentationClient;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.instrumentation.AbstractInstrumentationExtension;
@@ -29,6 +29,10 @@ import org.spotter.core.instrumentation.IInstrumentationAdapter;
  * 
  */
 public class DynamicInstrumentationClientExtension extends AbstractInstrumentationExtension {
+	public DynamicInstrumentationClientExtension() {
+		super(DynamicInstrumentationClient.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The default instrumentation satellite adapter can be used to connect "
 			+ "to a instrumentation satellite running in a JVM. This satellite adapter "
 			+ "will instrument the JVM. \n"
@@ -37,17 +41,12 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 			+ "corresponding measurement satellite adapter.";
 
 	@Override
-	public String getName() {
-		return "instrumentation.satellite.adapter.default";
-	}
-
-	@Override
 	protected String getDefaultSatelleiteExtensionName() {
 		return "Default Instrumentation Satellite Adapter";
 	}
 
 	private ConfigParameterDescription createPackagesToIncludeParameter() {
-		ConfigParameterDescription packagesToIncludeParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription packagesToIncludeParameter = new ConfigParameterDescription(
 				IInstrumentationAdapter.INSTRUMENTATION_INCLUDES, LpeSupportedTypes.String);
 		packagesToIncludeParameter.setASet(true);
 		packagesToIncludeParameter.setDefaultValue("");
@@ -59,7 +58,7 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 	}
 
 	private ConfigParameterDescription createPackagesToExcludeParameter() {
-		ConfigParameterDescription packagesToExcludeParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription packagesToExcludeParameter = new ConfigParameterDescription(
 				IInstrumentationAdapter.INSTRUMENTATION_EXCLUDES, LpeSupportedTypes.String);
 		packagesToExcludeParameter.setASet(true);
 		packagesToExcludeParameter.setDefaultValue(InstrumentationConstants.JAVA_PACKAGE + ","
@@ -76,17 +75,19 @@ public class DynamicInstrumentationClientExtension extends AbstractInstrumentati
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createPackagesToIncludeParameter());
 		addConfigParameter(createPackagesToExcludeParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
 	@Override
-	public IInstrumentationAdapter createExtensionArtifact() {
-		return new DynamicInstrumentationClient(this);
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
 	}
-
+	
 	@Override
-	public boolean testConnection(String host, String port) {
-		return InstrumentationClient.testConnection(host, port);
+	public boolean testConnection(final String host, final String port) {
+		return JMXAdaptiveInstrumentationClient.testConnection(host, port);
 	}
 
 	@Override

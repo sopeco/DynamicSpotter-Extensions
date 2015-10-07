@@ -15,8 +15,8 @@
  */
 package org.spotter.ext.detection.perfproblem;
 
+import org.lpe.common.extension.IExtensionArtifact;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 
 /**
  * One Lane Bridge detection extension.
@@ -25,14 +25,9 @@ import org.spotter.core.detection.IDetectionController;
  * 
  */
 public class PerfProblemExtension extends AbstractDetectionExtension {
-	@Override
-	public String getName() {
-		return "Performance Problem";
-	}
 
-	@Override
-	public IDetectionController createExtensionArtifact() {
-		return new PerfProblemController(this);
+	public PerfProblemExtension() {
+		super(PerfProblemController.class);
 	}
 
 	@Override

@@ -18,30 +18,30 @@ package org.spotter.ext.dummy;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 
 public class TestDetectionExtension extends AbstractDetectionExtension {
+
+	public TestDetectionExtension() {
+		super(TestDetection.class);
+	}
 
 	private static final String EXTENSION_DESCRIPTION = "This is just a dummy extension doing dummy experiments.";
 
 	@Override
-	public IDetectionController createExtensionArtifact() {
-		return new TestDetection(this);
-	}
-
-	@Override
-	public String getName() {
-		return "TestDetection";
-	}
-
-	@Override
 	protected void initializeConfigurationParameters() {
-		ConfigParameterDescription par = new ConfigParameterDescription("testParameter", LpeSupportedTypes.Integer);
+		final ConfigParameterDescription par = new ConfigParameterDescription("testParameter", LpeSupportedTypes.Integer);
 		par.setMandatory(false);
 		par.setDefaultValue(String.valueOf(100));
 		par.setDescription("It's just a test parameter.");
 		addConfigParameter(par);
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
 	}
 
 }

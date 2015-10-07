@@ -6,15 +6,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.aim.api.measurement.AbstractRecord;
+import org.aim.aiminterface.entities.measurements.AbstractRecord;
 import org.aim.api.measurement.dataset.Dataset;
 import org.aim.api.measurement.dataset.ParameterSelection;
 import org.aim.artifacts.records.ResponseTimeRecord;
 import org.aim.artifacts.records.SQLQueryRecord;
 import org.aim.artifacts.records.StackTraceRecord;
 import org.aim.artifacts.records.ThreadTracingRecord;
-import org.lpe.common.util.NumericPair;
-import org.lpe.common.util.NumericPairList;
+import org.lpe.common.utils.numeric.NumericPair;
+import org.lpe.common.utils.numeric.NumericPairList;
 
 public class DataAnalyzationUtils {
 

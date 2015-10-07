@@ -50,7 +50,7 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 	 * @param provider
 	 *            extension provider
 	 */
-	public JMeterWorkloadClient(IExtension<?> provider) {
+	public JMeterWorkloadClient(final IExtension provider) {
 		super(provider);
 	}
 
@@ -60,9 +60,9 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 	}
 
 	@Override
-	public void startLoad(LoadConfig loadConfig) throws WorkloadException {
+	public void startLoad(final LoadConfig loadConfig) throws WorkloadException {
 
-		JMeterWorkloadConfig jMeterConfig = createJMeterConfig(loadConfig);
+		final JMeterWorkloadConfig jMeterConfig = createJMeterConfig(loadConfig);
 
 		LOGGER.info("Triggered load with {} users ...", jMeterConfig.getNumUsers());
 		experimentStartTime = System.currentTimeMillis();
@@ -71,7 +71,7 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 
 		try {
 			jmClient.startLoadTest(jMeterConfig);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new WorkloadException(e);
 		}
 	}
@@ -83,10 +83,10 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 	 *            the {@link JMeterWorkloadConfig}
 	 * @return the time
 	 */
-	private long calculateActualRampUpDuration(JMeterWorkloadConfig jMeterConfig) {
-		int rampUpInterval = (int) jMeterConfig.getRampUpInterval();
-		int rampUpUsersPerInterval = (int) jMeterConfig.getRampUpNumUsersPerInterval();
-		int numUsers = jMeterConfig.getNumUsers();
+	private long calculateActualRampUpDuration(final JMeterWorkloadConfig jMeterConfig) {
+		final int rampUpInterval = (int) jMeterConfig.getRampUpInterval();
+		final int rampUpUsersPerInterval = (int) jMeterConfig.getRampUpNumUsersPerInterval();
+		final int numUsers = jMeterConfig.getNumUsers();
 
 		return ((numUsers / rampUpUsersPerInterval) - ((numUsers % rampUpUsersPerInterval == 0) ? 1 : 0))
 				* rampUpInterval;
@@ -96,14 +96,14 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 	public void waitForFinishedLoad() throws WorkloadException {
 		try {
 			jmClient.waitForLoadTestFinish();
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			throw new WorkloadException(e);
 		}
 		LOGGER.info("Load generation finished.");
 	}
 
-	private JMeterWorkloadConfig createJMeterConfig(LoadConfig loadConfig) {
-		JMeterWorkloadConfig jMeterConfig = new JMeterWorkloadConfig();
+	private JMeterWorkloadConfig createJMeterConfig(final LoadConfig loadConfig) {
+		final JMeterWorkloadConfig jMeterConfig = new JMeterWorkloadConfig();
 
 		// required properties
 		jMeterConfig.setExperimentDuration(loadConfig.getExperimentDuration());
@@ -131,7 +131,7 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 				JMeterConfigKeys.THINK_TIME_MAX, null)));
 
 		// optional properties
-		boolean sampleInFile = Boolean.parseBoolean(getProperties().getProperty(JMeterConfigKeys.SAMPLING_FLAG));
+		final boolean sampleInFile = Boolean.parseBoolean(getProperties().getProperty(JMeterConfigKeys.SAMPLING_FLAG));
 
 		if (sampleInFile) {
 			jMeterConfig.setSamplingFileFlag(true);
@@ -140,7 +140,7 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 					JMeterConfigKeys.SAMPLING_FILE, null));
 		}
 
-		boolean createLogFile = Boolean.parseBoolean(getProperties().getProperty(JMeterConfigKeys.LOG_FILE_FLAG));
+		final boolean createLogFile = Boolean.parseBoolean(getProperties().getProperty(JMeterConfigKeys.LOG_FILE_FLAG));
 
 		if (createLogFile) {
 			jMeterConfig.setCreateLogFlag(true);
@@ -155,7 +155,7 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 		while (System.currentTimeMillis() < experimentStartTime + rampUpDuration) {
 			try {
 				Thread.sleep(POLLING_INTERVAL);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				throw new WorkloadException(e);
 			}
 		}
@@ -167,7 +167,7 @@ public class JMeterWorkloadClient extends AbstractWorkloadAdapter {
 		while (System.currentTimeMillis() < experimentStartTime + rampUpDuration + experimentDuration) {
 			try {
 				Thread.sleep(POLLING_INTERVAL);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				throw new WorkloadException(e);
 			}
 		}

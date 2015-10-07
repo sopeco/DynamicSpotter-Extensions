@@ -18,9 +18,12 @@ package org.spotter.ext.detection.edc;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 
 public class EDCExtension extends AbstractDetectionExtension {
+
+	public EDCExtension() {
+		super(EDCDetectionController.class);
+	}
 
 	private static final String EXTENSION_DESCRIPTION = "An expensive database call. ";
 	public static final String INSTRUMENTATION_GRANULARITY_KEY = "instrumentationGranularity";
@@ -31,18 +34,8 @@ public class EDCExtension extends AbstractDetectionExtension {
 	public static final double PERF_REQ_RELATIVE_QUERY_RT_DEFAULT = 0.5;
 	public static final double PERF_REQ_RELATIVE_QUERY_RT_DIFF_DEFAULT = 0.0;
 
-	@Override
-	public IDetectionController createExtensionArtifact() {
-		return new EDCDetectionController(this);
-	}
-
-	@Override
-	public String getName() {
-		return "Expensive Database Call";
-	}
-
 	private ConfigParameterDescription createInstrumentationGranularityParameter() {
-		ConfigParameterDescription instrumentationGranularityParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription instrumentationGranularityParameter = new ConfigParameterDescription(
 				INSTRUMENTATION_GRANULARITY_KEY, LpeSupportedTypes.Double);
 		instrumentationGranularityParameter.setDefaultValue(String.valueOf(INSTRUMENTATION_GRANULARITY_DEFAULT));
 		instrumentationGranularityParameter.setRange(String.valueOf(0), String.valueOf(1));
@@ -53,7 +46,7 @@ public class EDCExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createPerfReqRelativeQueryRTParameter() {
-		ConfigParameterDescription perfReqRelativeQueryRTParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription perfReqRelativeQueryRTParameter = new ConfigParameterDescription(
 				PERF_REQ_RELATIVE_QUERY_RT_KEY, LpeSupportedTypes.Double);
 		perfReqRelativeQueryRTParameter.setDefaultValue(String.valueOf(PERF_REQ_RELATIVE_QUERY_RT_DEFAULT));
 		perfReqRelativeQueryRTParameter.setRange(String.valueOf(0), String.valueOf(1));
@@ -64,7 +57,7 @@ public class EDCExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createPerfReqRelativeQueryRTDiffParameter() {
-		ConfigParameterDescription perfReqRelativeQueryRTParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription perfReqRelativeQueryRTParameter = new ConfigParameterDescription(
 				PERF_REQ_RELATIVE_QUERY_RT_DIFF_KEY, LpeSupportedTypes.Double);
 		perfReqRelativeQueryRTParameter.setDefaultValue(String.valueOf(PERF_REQ_RELATIVE_QUERY_RT_DIFF_DEFAULT));
 		perfReqRelativeQueryRTParameter.setRange(String.valueOf(-1), String.valueOf(1));
@@ -73,13 +66,20 @@ public class EDCExtension extends AbstractDetectionExtension {
 
 		return perfReqRelativeQueryRTParameter;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}	
 
 	@Override
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createInstrumentationGranularityParameter());
 		addConfigParameter(createPerfReqRelativeQueryRTParameter());
 		addConfigParameter(createPerfReqRelativeQueryRTDiffParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 }

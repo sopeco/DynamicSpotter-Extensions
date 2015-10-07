@@ -23,18 +23,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.measurement.AbstractRecord;
-import org.aim.api.measurement.MeasurementData;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.entities.measurements.AbstractRecord;
+import org.aim.aiminterface.entities.measurements.MeasurementData;
+import org.aim.aiminterface.exceptions.MeasurementException;
 import org.aim.artifacts.records.CPUUtilizationRecord;
 import org.aim.artifacts.records.ResponseTimeRecord;
-import org.aim.description.InstrumentationDescription;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.measurement.AbstractMeasurementAdapter;
 
 public class TestMeasurement extends AbstractMeasurementAdapter {
 
-	public TestMeasurement(IExtension<?> provider) {
+	public TestMeasurement(final IExtension provider) {
 		super(provider);
 	}
 
@@ -50,15 +50,15 @@ public class TestMeasurement extends AbstractMeasurementAdapter {
 
 	@Override
 	public MeasurementData getMeasurementData() throws MeasurementException {
-		List<AbstractRecord> records = new ArrayList<>();
-		Random rand = new Random();
+		final List<AbstractRecord> records = new ArrayList<>();
+		final Random rand = new Random();
 
 		for (long i = 0; i < Integer.parseInt(getProperties().getProperty(TestMeasurementExtension.NUM_RECORDS, "100")); i++) {
-			ResponseTimeRecord rtRecord = new ResponseTimeRecord(System.currentTimeMillis() + i * 10L, "operation-"
+			final ResponseTimeRecord rtRecord = new ResponseTimeRecord(System.currentTimeMillis() + i * 10L, "operation-"
 					+ (i % 5), (long) (rand.nextDouble() * 100L));
-			CPUUtilizationRecord cpuRecord = new CPUUtilizationRecord(System.currentTimeMillis() + i * 10L, "CPU-"
+			final CPUUtilizationRecord cpuRecord = new CPUUtilizationRecord(System.currentTimeMillis() + i * 10L, "CPU-"
 					+ (i % 2), rand.nextDouble());
-			CPUUtilizationRecord cpuRecordAgg = new CPUUtilizationRecord(System.currentTimeMillis() + i * 10L, CPUUtilizationRecord.RES_CPU_AGGREGATED, rand.nextDouble());
+			final CPUUtilizationRecord cpuRecordAgg = new CPUUtilizationRecord(System.currentTimeMillis() + i * 10L, CPUUtilizationRecord.RES_CPU_AGGREGATED, rand.nextDouble());
 			records.add(rtRecord);
 			records.add(cpuRecord);
 
@@ -66,32 +66,32 @@ public class TestMeasurement extends AbstractMeasurementAdapter {
 
 		}
 
-		MeasurementData mData = new MeasurementData();
+		final MeasurementData mData = new MeasurementData();
 		mData.setRecords(records);
 
 		return mData;
 	}
 
 	@Override
-	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
+	public void pipeToOutputStream(final OutputStream oStream) throws MeasurementException {
 		BufferedWriter writer = null;
 		try {
 
-			List<AbstractRecord> recordList = getMeasurementData().getRecords();
+			final List<AbstractRecord> recordList = getMeasurementData().getRecords();
 			writer = new BufferedWriter(new OutputStreamWriter(oStream), 1024);
 
-			for (AbstractRecord rec : recordList) {
+			for (final AbstractRecord rec : recordList) {
 				writer.write(rec.toString());
 				writer.newLine();
 			}
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new MeasurementException(e);
 		} finally {
 			if (writer != null) {
 				try {
 					writer.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					throw new MeasurementException(e);
 				}
 			}
@@ -110,12 +110,12 @@ public class TestMeasurement extends AbstractMeasurementAdapter {
 	}
 
 	@Override
-	public void storeReport(String path) throws MeasurementException {
+	public void storeReport(final String path) throws MeasurementException {
 
 	}
 
 	@Override
-	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
+	public void prepareMonitoring(final InstrumentationDescription monitoringDescription) throws MeasurementException {
 		// TODO Auto-generated method stub
 		
 	}

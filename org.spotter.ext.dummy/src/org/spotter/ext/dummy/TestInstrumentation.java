@@ -15,14 +15,14 @@
  */
 package org.spotter.ext.dummy;
 
-import org.aim.api.exceptions.InstrumentationException;
-import org.aim.description.InstrumentationDescription;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.exceptions.InstrumentationException;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.instrumentation.AbstractInstrumentationAdapter;
 
 public class TestInstrumentation extends AbstractInstrumentationAdapter {
 
-	public TestInstrumentation(IExtension<?> provider) {
+	public TestInstrumentation(final IExtension provider) {
 		super(provider);
 	}
 
@@ -32,7 +32,7 @@ public class TestInstrumentation extends AbstractInstrumentationAdapter {
 	}
 
 	@Override
-	public void instrument(InstrumentationDescription description) throws InstrumentationException {
+	public void instrument(final InstrumentationDescription description) throws InstrumentationException {
 
 	}
 

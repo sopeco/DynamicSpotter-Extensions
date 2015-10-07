@@ -6,7 +6,6 @@ import java.util.Set;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 
 /**
  * OLB extension.
@@ -15,6 +14,10 @@ import org.spotter.core.detection.IDetectionController;
  * 
  */
 public class OLBExtension extends AbstractDetectionExtension {
+	public OLBExtension() {
+		super(OLBDetectionController.class);
+	}
+
 	private static final double _100_PERCENT = 100.0;
 	private static final String EXTENSION_DESCRIPTION = "The One Lane Bridge anti-pattern is a typical software bottleneck. ";
 
@@ -31,18 +34,8 @@ public class OLBExtension extends AbstractDetectionExtension {
 	protected static final String QUEUEING_THEORY_STRATEGY = "queueing theory strategy";
 	protected static final String T_TEST_CPU_THRESHOLD_STRATEGY = "t-Test-CPU-threshold strategy";
 
-	@Override
-	public IDetectionController createExtensionArtifact() {
-		return new OLBDetectionController(this);
-	}
-
-	@Override
-	public String getName() {
-		return "One Lane Bridge";
-	}
-
 	private ConfigParameterDescription createCpuThresholdParameter() {
-		ConfigParameterDescription cpuThresholdParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription cpuThresholdParameter = new ConfigParameterDescription(
 				CPU_UTILIZATION_THRESHOLD_KEY, LpeSupportedTypes.Double);
 		cpuThresholdParameter.setDefaultValue(String.valueOf(CPU_UTILIZATION_THRESHOLD_DEFAULT));
 		cpuThresholdParameter.setRange(String.valueOf(0.0), String.valueOf(_100_PERCENT));
@@ -53,10 +46,10 @@ public class OLBExtension extends AbstractDetectionExtension {
 	}
 
 	private ConfigParameterDescription createStrategyParameter() {
-		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
+		final ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
 				LpeSupportedTypes.String);
 
-		Set<String> scopeOptions = new HashSet<>();
+		final Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(QUEUEING_THEORY_STRATEGY);
 		scopeOptions.add(T_TEST_CPU_THRESHOLD_STRATEGY);
 		scopeParameter.setOptions(scopeOptions);
@@ -66,7 +59,7 @@ public class OLBExtension extends AbstractDetectionExtension {
 		return scopeParameter;
 	}
 	private ConfigParameterDescription createNumExperimentsParameter() {
-		ConfigParameterDescription numExperimentsParameter = new ConfigParameterDescription(EXPERIMENT_STEPS_KEY,
+		final ConfigParameterDescription numExperimentsParameter = new ConfigParameterDescription(EXPERIMENT_STEPS_KEY,
 				LpeSupportedTypes.Integer);
 		numExperimentsParameter.setDefaultValue(String.valueOf(EXPERIMENT_STEPS_DEFAULT));
 		numExperimentsParameter.setRange(String.valueOf(2), String.valueOf(Integer.MAX_VALUE));
@@ -75,10 +68,10 @@ public class OLBExtension extends AbstractDetectionExtension {
 		return numExperimentsParameter;
 	}
 	private ConfigParameterDescription createScopeParameter() {
-		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(SCOPE_KEY,
+		final ConfigParameterDescription scopeParameter = new ConfigParameterDescription(SCOPE_KEY,
 				LpeSupportedTypes.String);
 
-		Set<String> scopeOptions = new HashSet<>();
+		final Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(ENTRY_SCOPE);
 		scopeOptions.add(SYNC_SCOPE);
 		scopeOptions.add(DB_SCOPE);
@@ -89,10 +82,16 @@ public class OLBExtension extends AbstractDetectionExtension {
 		return scopeParameter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
-
 		addConfigParameter(createCpuThresholdParameter());
 		addConfigParameter(createStrategyParameter());
 		addConfigParameter(createScopeParameter());

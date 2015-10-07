@@ -15,9 +15,7 @@
  */
 package org.spotter.ext.detection.est;
 
-import org.lpe.common.config.ConfigParameterDescription;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 
 /**
  * Extension provider for the detection of Empty Semi Trucks.
@@ -27,22 +25,15 @@ import org.spotter.core.detection.IDetectionController;
  */
 public class EmptySemiTrucksExtension extends AbstractDetectionExtension {
 
+	public EmptySemiTrucksExtension() {
+		super(EmptySemiTrucksDetectionController.class);
+	}
+
 	// TODO: please provide a description
 	private static final String EXTENSION_DESCRIPTION = "no description";
 
 	@Override
-	public IDetectionController createExtensionArtifact() {
-		return new EmptySemiTrucksDetectionController(this);
-	}
-
-	@Override
-	public String getName() {
-		return "EmptySemiTrucks";
-	}
-
-	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 }

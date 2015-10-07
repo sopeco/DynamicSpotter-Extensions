@@ -1,31 +1,31 @@
 package org.spotter.ext.detection.stifle;
 
+import static org.lpe.common.utils.sql.SQLStringUtils.areEqualSql;
+
 import java.util.Random;
 import java.util.UUID;
 
-import org.lpe.common.util.LpeStringUtils;
-
 public class TestTmp {
 	static Random rand = new Random(System.currentTimeMillis());
-public static void main(String[] args) {
+public static void main(final String[] args) {
 	
-	String sql1 ="SELECT a FROM "+getSubQuery(0, 4)+" WHERE fibo=25 AND a=1";
+	final String sql1 ="SELECT a FROM "+getSubQuery(0, 4)+" WHERE fibo=25 AND a=1";
 	System.out.println(sql1);
-	String sql2 = "SELECT max(a) FROM a WHERE b=2";
-	System.out.println(LpeStringUtils.areEqualSql(sql1, sql2));
+	final String sql2 = "SELECT max(a) FROM a WHERE b=2";
+	System.out.println(areEqualSql(sql1, sql2));
 }
 
 
 
-private static  String getSubQuery(int count, int maxDepth) {
-	int i = rand.nextInt(20);
-	String [] strArray = {"a","b","c","d","e","f","g","h","j","i","k","l","m","n","o","p","q","r","s","t"};
-	String s = strArray[rand.nextInt(strArray.length)];
+private static  String getSubQuery(int count, final int maxDepth) {
+	final int i = rand.nextInt(20);
+	final String [] strArray = {"a","b","c","d","e","f","g","h","j","i","k","l","m","n","o","p","q","r","s","t"};
+	final String s = strArray[rand.nextInt(strArray.length)];
 
 	String randStr = "";
-	int n = rand.nextInt(5);
+	final int n = rand.nextInt(5);
 	
-	String uuid = getUniqueString(strArray);
+	final String uuid = getUniqueString(strArray);
 	
 	if (n < 1) {
 		randStr = "(SELECT max(a) FROM A WHERE D = 2 ORDER BY x) as "  + uuid;
@@ -49,11 +49,11 @@ private static  String getSubQuery(int count, int maxDepth) {
 
 
 
-private static String getUniqueString(String[] strArray) {
+private static String getUniqueString(final String[] strArray) {
 	String uuid = "";
-	String str = UUID.randomUUID().toString().replace("-", "");
+	final String str = UUID.randomUUID().toString().replace("-", "");
 	for(int a = 0; a < str.length(); a++){
-		Character c = str.charAt(a);
+		final Character c = str.charAt(a);
 		
 		if(Character.isDigit(c)){
 			uuid += strArray[rand.nextInt(20)];

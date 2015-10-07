@@ -2,18 +2,17 @@ package org.spotter.ext.measurement.database;
 
 import javax.ws.rs.core.MediaType;
 
-import org.lpe.common.util.web.LpeWebUtils;
+import org.lpe.common.extension.IExtensionArtifact;
+import org.lpe.common.util.web.LpeHTTPUtils;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementAdapter;
 
 import com.sun.jersey.api.client.Client;
 
 public class DummyDBMeasurementExtension extends AbstractMeasurmentExtension {
 
 
-	@Override
-	public String getName() {
-		return "DummyDB Statistics Sampler";
+	public DummyDBMeasurementExtension() {
+		super(DummyDBMeasurement.class);
 	}
 
 	@Override
@@ -22,27 +21,20 @@ public class DummyDBMeasurementExtension extends AbstractMeasurmentExtension {
 	}
 
 	@Override
-	public IMeasurementAdapter createExtensionArtifact() {
-		return new DummyDBMeasurement(this);
-	}
-
-	
-
-	@Override
 	protected void initializeConfigurationParameters() {
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		boolean connect = false;
 		try {
-			Client client = LpeWebUtils.getWebClient();
+			final Client client = LpeHTTPUtils.getWebClient();
 			client.setConnectTimeout(1000 * 60 * 60);
 			client.setReadTimeout(1000 * 60 * 60);
 			connect = client.resource("http://" + host + ":" + port + "/").path("dummyDB").path("testConnection")
 					.accept(MediaType.APPLICATION_JSON).get(Boolean.class);
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			connect = false;
 		}
 		return connect;

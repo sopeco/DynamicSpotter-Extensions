@@ -17,10 +17,11 @@ package org.spotter.ext.measurement;
 
 import java.io.OutputStream;
 
-import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.measurement.MeasurementData;
-import org.aim.artifacts.instrumentation.InstrumentationClient;
-import org.aim.description.InstrumentationDescription;
+import org.aim.aiminterface.IAdaptiveInstrumentation;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.entities.measurements.MeasurementData;
+import org.aim.aiminterface.exceptions.MeasurementException;
+import org.aim.artifacts.client.JMXAdaptiveInstrumentationClient;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.measurement.AbstractMeasurementAdapter;
 
@@ -31,7 +32,7 @@ import org.spotter.core.measurement.AbstractMeasurementAdapter;
  * 
  */
 public class MeasurementClient extends AbstractMeasurementAdapter {
-	private InstrumentationClient agentClient;
+	private IAdaptiveInstrumentation agentClient;
 
 	/**
 	 * Constructor.
@@ -39,7 +40,7 @@ public class MeasurementClient extends AbstractMeasurementAdapter {
 	 * @param provider
 	 *            extension provider
 	 */
-	public MeasurementClient(IExtension<?> provider) {
+	public MeasurementClient(final IExtension provider) {
 		super(provider);
 	}
 
@@ -70,7 +71,7 @@ public class MeasurementClient extends AbstractMeasurementAdapter {
 	@Override
 	public void initialize() throws MeasurementException {
 		if (agentClient == null) {
-			agentClient = new InstrumentationClient(getHost(), getPort());
+			agentClient = new JMXAdaptiveInstrumentationClient(getHost(), getPort());
 			if (!agentClient.testConnection()) {
 				throw new MeasurementException("Connection to measurement satellite could not be established!");
 			}
@@ -79,19 +80,19 @@ public class MeasurementClient extends AbstractMeasurementAdapter {
 	}
 
 	@Override
-	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
+	public void pipeToOutputStream(final OutputStream oStream) throws MeasurementException {
 
 		agentClient.pipeToOutputStream(oStream);
 
 	}
 
 	@Override
-	public void storeReport(String path) throws MeasurementException {
+	public void storeReport(final String path) throws MeasurementException {
 		// nothing to do here.
 	}
 
 	@Override
-	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
+	public void prepareMonitoring(final InstrumentationDescription monitoringDescription) throws MeasurementException {
 		// already covered by instrument in corresponding instrumentation part
 
 	}

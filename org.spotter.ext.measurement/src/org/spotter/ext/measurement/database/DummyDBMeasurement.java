@@ -7,19 +7,19 @@ import java.util.concurrent.Future;
 
 import javax.ws.rs.core.MediaType;
 
-import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.measurement.AbstractRecord;
-import org.aim.api.measurement.MeasurementData;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.description.sampling.SamplingDescription;
+import org.aim.aiminterface.entities.measurements.AbstractRecord;
+import org.aim.aiminterface.entities.measurements.MeasurementData;
+import org.aim.aiminterface.exceptions.MeasurementException;
 import org.aim.api.measurement.collector.AbstractDataSource;
 import org.aim.api.measurement.collector.CollectorFactory;
 import org.aim.artifacts.measurement.collector.FileDataSource;
 import org.aim.artifacts.measurement.collector.MemoryDataSource;
-import org.aim.description.InstrumentationDescription;
-import org.aim.description.sampling.SamplingDescription;
 import org.lpe.common.config.GlobalConfiguration;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.system.LpeSystemUtils;
-import org.lpe.common.util.web.LpeWebUtils;
+import org.lpe.common.util.web.LpeHTTPUtils;
 import org.spotter.core.measurement.AbstractMeasurementAdapter;
 
 import com.sun.jersey.api.client.Client;
@@ -39,12 +39,12 @@ public class DummyDBMeasurement extends AbstractMeasurementAdapter implements Ru
 	private boolean samplerActivated = false;
 	protected static final long DEFAULT_DELAY = 500;
 
-	private Client client;
+	private final Client client;
 	private WebResource webResource;
 
-	public DummyDBMeasurement(IExtension<?> provider) {
+	public DummyDBMeasurement(final IExtension provider) {
 		super(provider);
-		client = LpeWebUtils.getWebClient();
+		client = LpeHTTPUtils.getWebClient();
 		client.setConnectTimeout(1000 * 60 * 60);
 		client.setReadTimeout(1000 * 60 * 60);
 
@@ -65,7 +65,7 @@ public class DummyDBMeasurement extends AbstractMeasurementAdapter implements Ru
 				running = false;
 				measurementTask.get();
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new MeasurementException(e);
 			}
 		}
@@ -81,13 +81,13 @@ public class DummyDBMeasurement extends AbstractMeasurementAdapter implements Ru
 	}
 
 	@Override
-	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
+	public void pipeToOutputStream(final OutputStream oStream) throws MeasurementException {
 		if (samplerActivated) {
 				dataSource.pipeToOutputStream(oStream);
 		}else{
 			try {
 				oStream.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new MeasurementException(e);
 			}
 		}
@@ -99,7 +99,7 @@ public class DummyDBMeasurement extends AbstractMeasurementAdapter implements Ru
 		port = getPort();
 
 		webResource = client.resource("http://" + host + ":" + port + "/").path("dummyDB").path("getStatistics");
-		Properties collectorProperties = GlobalConfiguration.getInstance().getProperties();
+		final Properties collectorProperties = GlobalConfiguration.getInstance().getProperties();
 		synchronized (instanceId) {
 			collectorProperties.setProperty(FileDataSource.ADDITIONAL_FILE_PREFIX_KEY, "DummyDBSampler-" + instanceId);
 			instanceId++;
@@ -123,30 +123,30 @@ public class DummyDBMeasurement extends AbstractMeasurementAdapter implements Ru
 				sampleStatistics();
 				try {
 					Thread.sleep(delay);
-				} catch (InterruptedException ie) {
+				} catch (final InterruptedException ie) {
 					running = false;
 				}
 			}
 
 			dataSource.disable();
-		} catch (MeasurementException e) {
+		} catch (final MeasurementException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	private void sampleStatistics() {
-		String recStr = webResource.accept(MediaType.APPLICATION_JSON).get(String.class);
+		final String recStr = webResource.accept(MediaType.APPLICATION_JSON).get(String.class);
 		dataSource.newRecord(AbstractRecord.fromString(recStr));
 	}
 
 	@Override
-	public void storeReport(String path) throws MeasurementException {
+	public void storeReport(final String path) throws MeasurementException {
 		// nothing to do here
 	}
 
 	@Override
-	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
-		for (SamplingDescription sDescr : monitoringDescription.getSamplingDescriptions()) {
+	public void prepareMonitoring(final InstrumentationDescription monitoringDescription) throws MeasurementException {
+		for (final SamplingDescription sDescr : monitoringDescription.getSamplingDescriptions()) {
 			if (sDescr.getResourceName().equals(SamplingDescription.SAMPLER_DATABASE_STATISTICS)) {
 				samplerActivated = true;
 				delay = sDescr.getDelay();

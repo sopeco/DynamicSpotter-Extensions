@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.lpe.common.util.LpeNumericUtils;
-import org.lpe.common.util.NumericPairList;
+import org.lpe.common.utils.numeric.LpeNumericUtils;
+import org.lpe.common.utils.numeric.NumericPairList;
 import org.spotter.core.chartbuilder.AnalysisChartBuilder;
 import org.spotter.core.detection.DetectionResultManager;
 import org.spotter.shared.result.model.SpotterResult;

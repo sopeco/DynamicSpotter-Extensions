@@ -18,7 +18,6 @@ package org.spotter.ext.measurement.jmsserver;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementAdapter;
 
 /**
  * Extension for JMS server sampler.
@@ -28,30 +27,22 @@ import org.spotter.core.measurement.IMeasurementAdapter;
  */
 public class JmsServerMeasurementExtension extends AbstractMeasurmentExtension {
 
+	public JmsServerMeasurementExtension() {
+		super(JmsServerMeasurement.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The jmsserver sampling measurement satellite adapter is used "
 														+ "to connect to the special sampling satellites for Java Messaging "
 														+ "Service (JMS) server. They sample more than the default sampling "
 														+ "satellites.";
-	
-	@Override
-	public String getName() {
-		return "measurement.satellite.adapter.sampling.jmsserver";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
 		return "JMSServer Sampling Measurement Satellite Adapter";
 	}
-	
-	@Override
-	public IMeasurementAdapter createExtensionArtifact() {
-		return new JmsServerMeasurement(this);
-	}
-
-
 
 	private ConfigParameterDescription createServerConnectionStringParameter() {
-		ConfigParameterDescription collectorTypeParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription collectorTypeParameter = new ConfigParameterDescription(
 				JmsServerMeasurement.ACTIVE_MQJMX_URL, LpeSupportedTypes.String);
 		collectorTypeParameter.setMandatory(true);
 		collectorTypeParameter.setDescription("Connection string to the JMX interface of the massaging service.");
@@ -59,14 +50,21 @@ public class JmsServerMeasurementExtension extends AbstractMeasurmentExtension {
 		return collectorTypeParameter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createServerConnectionStringParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return true;
 	}
 

@@ -15,9 +15,10 @@
  */
 package org.spotter.ext.instrumentation;
 
-import org.aim.api.exceptions.InstrumentationException;
-import org.aim.artifacts.instrumentation.InstrumentationClient;
-import org.aim.description.InstrumentationDescription;
+import org.aim.aiminterface.IAdaptiveInstrumentation;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.exceptions.InstrumentationException;
+import org.aim.artifacts.client.JMXAdaptiveInstrumentationClient;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.instrumentation.AbstractInstrumentationAdapter;
 
@@ -29,7 +30,7 @@ import org.spotter.core.instrumentation.AbstractInstrumentationAdapter;
  */
 public class DynamicInstrumentationClient extends AbstractInstrumentationAdapter {
 
-	private InstrumentationClient client;
+	private IAdaptiveInstrumentation client;
 
 	/**
 	 * Constructor.
@@ -37,14 +38,14 @@ public class DynamicInstrumentationClient extends AbstractInstrumentationAdapter
 	 * @param provider
 	 *            extension provider
 	 */
-	public DynamicInstrumentationClient(IExtension<?> provider) {
+	public DynamicInstrumentationClient(final IExtension provider) {
 		super(provider);
 	}
 
 	@Override
 	public void initialize() throws InstrumentationException {
 		if (client == null) {
-			client = new InstrumentationClient(getHost(), getPort());
+			client = new JMXAdaptiveInstrumentationClient(getHost(), getPort());
 			if (!client.testConnection()) {
 				throw new InstrumentationException("Connection to instrumentation could not be established!");
 			}
@@ -52,7 +53,7 @@ public class DynamicInstrumentationClient extends AbstractInstrumentationAdapter
 	}
 
 	@Override
-	public void instrument(InstrumentationDescription description) throws InstrumentationException {
+	public void instrument(final InstrumentationDescription description) throws InstrumentationException {
 		if (client == null) {
 			initialize();
 		}

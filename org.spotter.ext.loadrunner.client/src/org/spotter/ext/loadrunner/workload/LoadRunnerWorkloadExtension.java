@@ -19,7 +19,6 @@ import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.workload.AbstractWorkloadExtension;
-import org.spotter.core.workload.IWorkloadAdapter;
 import org.spotter.ext.loadrunner.LRConfigKeys;
 
 /**
@@ -30,14 +29,13 @@ import org.spotter.ext.loadrunner.LRConfigKeys;
  */
 public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 
+	public LoadRunnerWorkloadExtension() {
+		super(LoadRunnerWorkloadClient.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The loadrunner workload satellite adapter connects to the workload "
 														+ "satellite executed on the Loadrunner system. This satellite adapter "
 														+ "provokes the workload satellite to start the workload on Loadrunner.";
-	
-	@Override
-	public String getName() {
-		return "workload.satellite.adapter.loadrunner";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
@@ -45,7 +43,7 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 	}
 	
 	private ConfigParameterDescription createLoadRunnerPathParameter() {
-		ConfigParameterDescription loadRunnerPathParameter = new ConfigParameterDescription(LRConfigKeys.CONTROLLER_EXE,
+		final ConfigParameterDescription loadRunnerPathParameter = new ConfigParameterDescription(LRConfigKeys.CONTROLLER_EXE,
 				LpeSupportedTypes.String);
 		loadRunnerPathParameter.setADirectory(false);
 		loadRunnerPathParameter.setMandatory(true);
@@ -56,7 +54,7 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createResultDirParameter() {
-		ConfigParameterDescription resultDirParameter = new ConfigParameterDescription(LRConfigKeys.RESULT_DIR,
+		final ConfigParameterDescription resultDirParameter = new ConfigParameterDescription(LRConfigKeys.RESULT_DIR,
 				LpeSupportedTypes.String);
 		resultDirParameter.setADirectory(false);
 		resultDirParameter.setMandatory(true);
@@ -67,7 +65,7 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createScenarioPathParameter() {
-		ConfigParameterDescription scenarioPathParameter = new ConfigParameterDescription(LRConfigKeys.SCENARIO_FILE,
+		final ConfigParameterDescription scenarioPathParameter = new ConfigParameterDescription(LRConfigKeys.SCENARIO_FILE,
 				LpeSupportedTypes.String);
 		scenarioPathParameter.setADirectory(false);
 		scenarioPathParameter.setMandatory(true);
@@ -78,23 +76,23 @@ public class LoadRunnerWorkloadExtension extends AbstractWorkloadExtension {
 		return scenarioPathParameter;
 	}
 
-
-
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createLoadRunnerPathParameter());
 		addConfigParameter(createScenarioPathParameter());
 		addConfigParameter(createResultDirParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override
-	public IWorkloadAdapter createExtensionArtifact() {
-		return new LoadRunnerWorkloadClient(this);
-	}
-
-	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return LoadGeneratorClient.testConnection(host, port);
 	}
 

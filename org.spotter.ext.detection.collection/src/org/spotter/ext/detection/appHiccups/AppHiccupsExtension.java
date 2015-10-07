@@ -6,7 +6,6 @@ import java.util.Set;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
-import org.spotter.core.detection.IDetectionController;
 import org.spotter.ext.detection.appHiccups.utils.HiccupDetectionConfig;
 
 /**
@@ -16,6 +15,10 @@ import org.spotter.ext.detection.appHiccups.utils.HiccupDetectionConfig;
  * 
  */
 public class AppHiccupsExtension extends AbstractDetectionExtension {
+
+	public AppHiccupsExtension() {
+		super(AppHiccupsController.class);
+	}
 
 	private static final String EXTENSION_DESCRIPTION = "Application Hiccups "
 			+ "represents the problem of periodically violated performancerequirements.";
@@ -27,21 +30,11 @@ public class AppHiccupsExtension extends AbstractDetectionExtension {
 	protected static final String MAX_HICCUPS_TIME_PROPORTION_KEY = "maxHiccupsTimeProportion";
 	protected static final double MAX_HICCUPS_TIME_PROPORTION_DEFAULT = 0.3;
 
-	@Override
-	public IDetectionController createExtensionArtifact() {
-		return new AppHiccupsController(this);
-	}
-
-	@Override
-	public String getName() {
-		return "Application Hiccups";
-	}
-
 	private ConfigParameterDescription createStrategyParameter() {
-		ConfigParameterDescription scopeParameter = new ConfigParameterDescription(APP_HICCUPS_STRATEGY_KEY,
+		final ConfigParameterDescription scopeParameter = new ConfigParameterDescription(APP_HICCUPS_STRATEGY_KEY,
 				LpeSupportedTypes.String);
 
-		Set<String> scopeOptions = new HashSet<>();
+		final Set<String> scopeOptions = new HashSet<>();
 		scopeOptions.add(MVA_STRATEGY);
 		scopeOptions.add(BUCKET_STRATEGY);
 		scopeOptions.add(DBSCAN_STRATEGY);
@@ -52,8 +45,16 @@ public class AppHiccupsExtension extends AbstractDetectionExtension {
 		return scopeParameter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+
 	private ConfigParameterDescription maxHiccupTimeProportionParameter() {
-		ConfigParameterDescription parameter = new ConfigParameterDescription(MAX_HICCUPS_TIME_PROPORTION_KEY,
+		final ConfigParameterDescription parameter = new ConfigParameterDescription(MAX_HICCUPS_TIME_PROPORTION_KEY,
 				LpeSupportedTypes.Double);
 		parameter.setMandatory(false);
 		parameter.setDefaultValue(String.valueOf(MAX_HICCUPS_TIME_PROPORTION_DEFAULT));
@@ -64,10 +65,9 @@ public class AppHiccupsExtension extends AbstractDetectionExtension {
 
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 		addConfigParameter(createStrategyParameter());
 		addConfigParameter(maxHiccupTimeProportionParameter());
-		for (ConfigParameterDescription cpd : HiccupDetectionConfig.getConfigurationParameters()) {
+		for (final ConfigParameterDescription cpd : HiccupDetectionConfig.getConfigurationParameters()) {
 			addConfigParameter(cpd);
 		}
 

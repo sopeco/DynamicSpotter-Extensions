@@ -20,7 +20,7 @@ import org.spotter.exceptions.WorkloadException;
 public class TpcwRbeDriver extends AbstractWorkloadAdapter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TpcwRbeDriver.class);
 
-	public TpcwRbeDriver(IExtension<?> provider) {
+	public TpcwRbeDriver(final IExtension provider) {
 		super(provider);
 	}
 
@@ -50,13 +50,13 @@ public class TpcwRbeDriver extends AbstractWorkloadAdapter {
 			ebFactory = "rbe.EBTPCW1Factory";
 		}
 
-		String thinkTimeFactorStr = getProperties().getProperty(TpcwRbeExtension.PAR_THINK_TIME, String.valueOf(1.0));
+		final String thinkTimeFactorStr = getProperties().getProperty(TpcwRbeExtension.PAR_THINK_TIME, String.valueOf(1.0));
 		thinkTimeFactor = Double.parseDouble(thinkTimeFactorStr);
 
-		String dbNumCustomersStr = getProperties().getProperty(TpcwRbeExtension.PAR_NUM_CUSTOMERS, String.valueOf(10));
+		final String dbNumCustomersStr = getProperties().getProperty(TpcwRbeExtension.PAR_NUM_CUSTOMERS, String.valueOf(10));
 		dbNumCustomers = Integer.parseInt(dbNumCustomersStr);
 
-		String dbNumItemsStr = getProperties().getProperty(TpcwRbeExtension.PAR_NUM_ITEMS, String.valueOf(10));
+		final String dbNumItemsStr = getProperties().getProperty(TpcwRbeExtension.PAR_NUM_ITEMS, String.valueOf(10));
 		dbNumItems = Integer.parseInt(dbNumItemsStr);
 
 		baseUrl = getProperties().getProperty(TpcwRbeExtension.PAR_URL, "");
@@ -64,34 +64,34 @@ public class TpcwRbeDriver extends AbstractWorkloadAdapter {
 	}
 
 	@Override
-	public void startLoad(LoadConfig loadConfig) throws WorkloadException {
+	public void startLoad(final LoadConfig loadConfig) throws WorkloadException {
 		try {
 			running = true;
 			warmUpTerminated = false;
 			experimentTerminated = false;
 			final int numEBs = loadConfig.getNumUsers();
-			final int rampUpDuration = (int) (((double) numEBs) / ((double) loadConfig.getRampUpUsersPerInterval()) * (double) loadConfig
+			final int rampUpDuration = (int) (((double) numEBs) / ((double) loadConfig.getRampUpUsersPerInterval()) * loadConfig
 					.getRampUpIntervalLength());
-			final int coolDownDuration = (int) (((double) numEBs) / ((double) loadConfig.getCoolDownUsersPerInterval()) * (double) loadConfig
+			final int coolDownDuration = (int) (((double) numEBs) / ((double) loadConfig.getCoolDownUsersPerInterval()) * loadConfig
 					.getCoolDownIntervalLength());
 			final int duration = loadConfig.getExperimentDuration();
 
 			String tmpDir = LpeSystemUtils.getSystemTempDir();
 			tmpDir += tmpDir.endsWith(System.getProperty("file.separator")) ? "rbeTmp" : System
 					.getProperty("file.separator") + "rbeTmp";
-			File dir = new File(tmpDir);
+			final File dir = new File(tmpDir);
 			if (dir.exists()) {
 				LpeFileUtils.removeDir(tmpDir);
 			}
 			LpeFileUtils.createDir(tmpDir);
 			final String filename = tmpDir + System.getProperty("file.separator") + "rbe.jar";
-			File file = new File(filename);
+			final File file = new File(filename);
 
-			InputStream iStream = getClass().getClassLoader().getResourceAsStream("rbe.jar");
-			FileOutputStream foStream = new FileOutputStream(file);
+			final InputStream iStream = getClass().getClassLoader().getResourceAsStream("rbe.jar");
+			final FileOutputStream foStream = new FileOutputStream(file);
 			LpeStreamUtils.pipe(iStream, foStream);
 
-			String whiteSpace = " ";
+			final String whiteSpace = " ";
 			final StringBuilder cmdBuilder = new StringBuilder();
 			cmdBuilder.append("java -jar ");
 			cmdBuilder.append(filename);
@@ -116,8 +116,8 @@ public class TpcwRbeDriver extends AbstractWorkloadAdapter {
 				@Override
 				public void run() {
 					try {
-						Process process = Runtime.getRuntime().exec(cmdBuilder.toString());
-						BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+						final Process process = Runtime.getRuntime().exec(cmdBuilder.toString());
+						final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 						String line =  reader.readLine();
 						while(line!=null){
 							LOGGER.debug(line);
@@ -140,7 +140,7 @@ public class TpcwRbeDriver extends AbstractWorkloadAdapter {
 					while (System.currentTimeMillis() < startTime + (rampUpDuration * 1000L)) {
 						try {
 							Thread.sleep(500);
-						} catch (InterruptedException e) {
+						} catch (final InterruptedException e) {
 							break;
 						}
 					}
@@ -148,7 +148,7 @@ public class TpcwRbeDriver extends AbstractWorkloadAdapter {
 					while (System.currentTimeMillis() < startTime + ((rampUpDuration + duration) * 1000L)) {
 						try {
 							Thread.sleep(500);
-						} catch (InterruptedException e) {
+						} catch (final InterruptedException e) {
 							break;
 						}
 					}
@@ -157,7 +157,7 @@ public class TpcwRbeDriver extends AbstractWorkloadAdapter {
 			}).start();
 
 			
-		} catch (IOException e1) {
+		} catch (final IOException e1) {
 			throw new WorkloadException(e1);
 		}
 	}
@@ -167,7 +167,7 @@ public class TpcwRbeDriver extends AbstractWorkloadAdapter {
 		while (!warmUpTerminated) {
 			try {
 				Thread.sleep(500);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				break;
 			}
 		}
@@ -178,7 +178,7 @@ public class TpcwRbeDriver extends AbstractWorkloadAdapter {
 		while (!experimentTerminated) {
 			try {
 				Thread.sleep(500);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				break;
 			}
 		}
@@ -189,7 +189,7 @@ public class TpcwRbeDriver extends AbstractWorkloadAdapter {
 		while (running) {
 			try {
 				Thread.sleep(500);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				break;
 			}
 		}

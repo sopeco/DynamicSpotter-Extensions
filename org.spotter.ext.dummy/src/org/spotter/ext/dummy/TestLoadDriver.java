@@ -22,7 +22,7 @@ import org.spotter.exceptions.WorkloadException;
 
 public class TestLoadDriver extends AbstractWorkloadAdapter {
 
-	public TestLoadDriver(IExtension<?> provider) {
+	public TestLoadDriver(final IExtension provider) {
 		super(provider);
 
 	}
@@ -33,7 +33,7 @@ public class TestLoadDriver extends AbstractWorkloadAdapter {
 	}
 
 	@Override
-	public void startLoad(LoadConfig loadConfig) throws WorkloadException {
+	public void startLoad(final LoadConfig loadConfig) throws WorkloadException {
 
 	}
 
@@ -41,7 +41,7 @@ public class TestLoadDriver extends AbstractWorkloadAdapter {
 	public void waitForWarmupPhaseTermination() throws WorkloadException {
 		try {
 			Thread.sleep(1000);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -52,7 +52,7 @@ public class TestLoadDriver extends AbstractWorkloadAdapter {
 	public void waitForExperimentPhaseTermination() throws WorkloadException {
 		try {
 			Thread.sleep(2000);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -63,7 +63,7 @@ public class TestLoadDriver extends AbstractWorkloadAdapter {
 	public void waitForFinishedLoad() throws WorkloadException {
 		try {
 			Thread.sleep(1000);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

@@ -2,19 +2,18 @@ package org.spotter.ext.detection.blob;
 
 import java.util.List;
 
-import org.aim.api.exceptions.InstrumentationException;
-import org.aim.api.exceptions.MeasurementException;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.exceptions.InstrumentationException;
+import org.aim.aiminterface.exceptions.MeasurementException;
 import org.aim.api.measurement.dataset.DatasetCollection;
 import org.aim.artifacts.probes.JmsCommunicationProbe;
 import org.aim.artifacts.scopes.JmsScope;
-import org.aim.description.InstrumentationDescription;
 import org.aim.description.builder.InstrumentationDescriptionBuilder;
 import org.lpe.common.extension.IExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spotter.core.ProgressManager;
 import org.spotter.core.detection.AbstractDetectionController;
-import org.spotter.core.detection.IDetectionController;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.shared.result.model.SpotterResult;
 
@@ -24,7 +23,7 @@ public class BlobDetectionController extends AbstractDetectionController {
 	private String analysisStrategy;
 	private IBlobAnalyzer analysisStrategyImpl;
 
-	public BlobDetectionController(IExtension<IDetectionController> provider) {
+	public BlobDetectionController(final IExtension provider) {
 		super(provider);
 	}
 
@@ -58,31 +57,31 @@ public class BlobDetectionController extends AbstractDetectionController {
 	}
 
 	private InstrumentationDescription getInstrumentationDescription() throws InstrumentationException {
-		InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
+		final InstrumentationDescriptionBuilder idBuilder = new InstrumentationDescriptionBuilder();
 		return idBuilder.newAPIScopeEntity(JmsScope.class.getName()).addProbe(JmsCommunicationProbe.MODEL_PROBE)
 				.entityDone().build();
 	}
 
 	@Override
-	protected SpotterResult analyze(DatasetCollection data) {
+	protected SpotterResult analyze(final DatasetCollection data) {
 		LOGGER.debug("Analyze data for GodClass Antipattern..");
 
-		SpotterResult result = new SpotterResult();
+		final SpotterResult result = new SpotterResult();
 		result.setDetected(false);
 
 		/** Process the raw measurement data */
 		LOGGER.debug("process data..");
-		ProcessedData processData = DataProcessor.processData(data);
+		final ProcessedData processData = DataProcessor.processData(data);
 
 		/** Analyze the processed data */
 		LOGGER.debug("analyze data..");
 
-		List<Component> blobs = analysisStrategyImpl.analyze(processData, getResultManager(), result);
+		final List<Component> blobs = analysisStrategyImpl.analyze(processData, getResultManager(), result);
 
 		if (!blobs.isEmpty()) {
 			result.setDetected(true);
 			int i = 1;
-			for (Component blob : blobs) {
+			for (final Component blob : blobs) {
 				result.addMessage("Blob Component:");
 				result.addMessage("CP " + i + ": " + blob.getId());
 				result.addMessage("");

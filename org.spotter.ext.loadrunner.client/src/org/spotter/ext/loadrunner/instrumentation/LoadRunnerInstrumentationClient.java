@@ -15,8 +15,8 @@
  */
 package org.spotter.ext.loadrunner.instrumentation;
 
-import org.aim.api.exceptions.InstrumentationException;
-import org.aim.description.InstrumentationDescription;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.exceptions.InstrumentationException;
 import org.lpe.common.extension.IExtension;
 import org.spotter.core.instrumentation.AbstractInstrumentationAdapter;
 
@@ -33,7 +33,7 @@ public class LoadRunnerInstrumentationClient extends AbstractInstrumentationAdap
 	 * Constructor.
 	 * @param provider extension provider
 	 */
-	public LoadRunnerInstrumentationClient(IExtension<?> provider) {
+	public LoadRunnerInstrumentationClient(final IExtension provider) {
 		super(provider);
 	}
 
@@ -44,7 +44,7 @@ public class LoadRunnerInstrumentationClient extends AbstractInstrumentationAdap
 	}
 
 	@Override
-	public void instrument(InstrumentationDescription description) throws InstrumentationException {
+	public void instrument(final InstrumentationDescription description) throws InstrumentationException {
 		setInstrumented(true);
 	}
 
@@ -65,7 +65,7 @@ public class LoadRunnerInstrumentationClient extends AbstractInstrumentationAdap
 	 * @param instrumented
 	 *            the instrumented to set
 	 */
-	private void setInstrumented(boolean instrumented) {
+	private void setInstrumented(final boolean instrumented) {
 		this.instrumented = instrumented;
 	}
 

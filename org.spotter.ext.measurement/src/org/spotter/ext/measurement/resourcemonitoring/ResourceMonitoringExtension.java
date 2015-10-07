@@ -19,7 +19,6 @@ import org.aim.resourcemonitoring.ResourceMonitoringClient;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementAdapter;
 
 /**
  * Extension for the resource monitoring client.
@@ -29,13 +28,12 @@ import org.spotter.core.measurement.IMeasurementAdapter;
  */
 public class ResourceMonitoringExtension extends AbstractMeasurmentExtension {
 	
+	public ResourceMonitoringExtension() {
+		super(ResourceMonitoringAdapter.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The sampling measurement satellite adapter is used to connect "
 														+ "to all sampling satellites.";
-
-	@Override
-	public String getName() {
-		return "measurement.satellite.adapter.sampling";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
@@ -43,7 +41,7 @@ public class ResourceMonitoringExtension extends AbstractMeasurmentExtension {
 	}
 	
 	private ConfigParameterDescription createSamplingDelayParameter() {
-		ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription samplingDelayParameter = new ConfigParameterDescription(
 				ResourceMonitoringAdapter.SAMPLING_DELAY, LpeSupportedTypes.Long);
 		samplingDelayParameter.setDefaultValue(String.valueOf(ResourceMonitoringAdapter.DEFAULT_DELAY));
 		samplingDelayParameter.setDescription("The sampling interval in milliseconds.");
@@ -51,19 +49,21 @@ public class ResourceMonitoringExtension extends AbstractMeasurmentExtension {
 		return samplingDelayParameter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createSamplingDelayParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override
-	public IMeasurementAdapter createExtensionArtifact() {
-		return new ResourceMonitoringAdapter(this);
-	}
-
-	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return ResourceMonitoringClient.testConnection(host, port);
 	}
 

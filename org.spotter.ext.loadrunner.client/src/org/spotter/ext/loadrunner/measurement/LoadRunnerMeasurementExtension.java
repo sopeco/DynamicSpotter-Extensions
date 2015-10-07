@@ -19,7 +19,6 @@ import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.measurement.AbstractMeasurmentExtension;
-import org.spotter.core.measurement.IMeasurementAdapter;
 import org.spotter.ext.loadrunner.LRConfigKeys;
 
 /**
@@ -30,14 +29,13 @@ import org.spotter.ext.loadrunner.LRConfigKeys;
  */
 public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension {
 
+	public LoadRunnerMeasurementExtension() {
+		super(LoadRunnerMeasurementClient.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The loadrunner measurement satellite adapter connects to a measurement "
 			+ "satellite executed on a Loadrunner system. This satellite adapter is "
 			+ "responsible to fetch the result data after a Loadrunner workload " + "execution.";
-
-	@Override
-	public String getName() {
-		return "measurement.satellite.adapter.loadrunner";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
@@ -45,7 +43,7 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 	}
 
 	private ConfigParameterDescription createAnalysisPathParameter() {
-		ConfigParameterDescription analysisPathParameter = new ConfigParameterDescription(LRConfigKeys.ANALYSIS_EXE,
+		final ConfigParameterDescription analysisPathParameter = new ConfigParameterDescription(LRConfigKeys.ANALYSIS_EXE,
 				LpeSupportedTypes.String);
 		analysisPathParameter.setADirectory(false);
 		analysisPathParameter.setMandatory(true);
@@ -56,7 +54,7 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 	}
 
 	private ConfigParameterDescription createAnalysisTemplateParameter() {
-		ConfigParameterDescription analysisTemplateParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription analysisTemplateParameter = new ConfigParameterDescription(
 				LRConfigKeys.ANALYSIS_TEMPLATE_NAME, LpeSupportedTypes.String);
 		analysisTemplateParameter.setMandatory(true);
 		analysisTemplateParameter.setDefaultValue("");
@@ -67,7 +65,7 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 	}
 
 	private ConfigParameterDescription createResultDirParameter() {
-		ConfigParameterDescription resultDirParameter = new ConfigParameterDescription(LRConfigKeys.RESULT_DIR,
+		final ConfigParameterDescription resultDirParameter = new ConfigParameterDescription(LRConfigKeys.RESULT_DIR,
 				LpeSupportedTypes.String);
 		resultDirParameter.setADirectory(false);
 		resultDirParameter.setMandatory(true);
@@ -78,7 +76,7 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 	}
 
 	private ConfigParameterDescription createAnalysisSessionParameter() {
-		ConfigParameterDescription analysisSessionParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription analysisSessionParameter = new ConfigParameterDescription(
 				LRConfigKeys.ANALYSIS_SESSION_NAME, LpeSupportedTypes.String);
 		analysisSessionParameter.setMandatory(true);
 		analysisSessionParameter.setDefaultValue("");
@@ -88,22 +86,24 @@ public class LoadRunnerMeasurementExtension extends AbstractMeasurmentExtension 
 		return analysisSessionParameter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createAnalysisPathParameter());
 		addConfigParameter(createAnalysisTemplateParameter());
 		addConfigParameter(createResultDirParameter());
 		addConfigParameter(createAnalysisSessionParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override
-	public IMeasurementAdapter createExtensionArtifact() {
-		return new LoadRunnerMeasurementClient(this);
-	}
-
-	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return LoadGeneratorClient.testConnection(host, port);
 	}
 

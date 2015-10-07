@@ -10,14 +10,14 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.Future;
 
-import org.aim.api.exceptions.MeasurementException;
-import org.aim.api.measurement.MeasurementData;
+import org.aim.aiminterface.description.instrumentation.InstrumentationDescription;
+import org.aim.aiminterface.description.sampling.SamplingDescription;
+import org.aim.aiminterface.entities.measurements.MeasurementData;
+import org.aim.aiminterface.exceptions.MeasurementException;
 import org.aim.api.measurement.collector.AbstractDataSource;
 import org.aim.api.measurement.collector.CollectorFactory;
 import org.aim.artifacts.measurement.collector.FileDataSource;
 import org.aim.artifacts.records.DBStatisticsRecrod;
-import org.aim.description.InstrumentationDescription;
-import org.aim.description.sampling.SamplingDescription;
 import org.lpe.common.extension.IExtension;
 import org.lpe.common.util.system.LpeSystemUtils;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public class HDBMeasurement extends AbstractMeasurementAdapter implements Runnab
 	private Future<?> measurementTask;
 	private static final String SQL_QUERY = "SELECT * FROM M_LOCK_WAITS_STATISTICS WHERE PORT LIKE '%03' AND LOCK_TYPE='TABLE';";
 
-	public HDBMeasurement(IExtension<?> provider) {
+	public HDBMeasurement(final IExtension provider) {
 		super(provider);
 	}
 
@@ -49,7 +49,7 @@ public class HDBMeasurement extends AbstractMeasurementAdapter implements Runnab
 		if (samplerActivated) {
 			try {
 				sqlStatement = getConnection().prepareStatement(SQL_QUERY);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new RuntimeException(e);
 			}
 			measurementTask = LpeSystemUtils.submitTask(this);
@@ -72,7 +72,7 @@ public class HDBMeasurement extends AbstractMeasurementAdapter implements Runnab
 					connection = null;
 				}
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new MeasurementException(e);
 			}
 		}
@@ -89,13 +89,13 @@ public class HDBMeasurement extends AbstractMeasurementAdapter implements Runnab
 	}
 
 	@Override
-	public void pipeToOutputStream(OutputStream oStream) throws MeasurementException {
+	public void pipeToOutputStream(final OutputStream oStream) throws MeasurementException {
 		if (samplerActivated) {
 			dataSource.pipeToOutputStream(oStream);
 		} else {
 			try {
 				oStream.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new MeasurementException(e);
 			}
 		}
@@ -108,7 +108,7 @@ public class HDBMeasurement extends AbstractMeasurementAdapter implements Runnab
 		username = getProperties().getProperty(HDBMeasurementExtension.USER_NAME_KEY, "");
 		password = getProperties().getProperty(HDBMeasurementExtension.PASSWORD_KEY, "");
 
-		Properties collectorProperties = new Properties();
+		final Properties collectorProperties = new Properties();
 		synchronized (instanceId) {
 			collectorProperties.setProperty(FileDataSource.ADDITIONAL_FILE_PREFIX_KEY, "HDBSampler-" + instanceId);
 			instanceId++;
@@ -123,7 +123,7 @@ public class HDBMeasurement extends AbstractMeasurementAdapter implements Runnab
 	}
 
 	@Override
-	public void storeReport(String path) throws MeasurementException {
+	public void storeReport(final String path) throws MeasurementException {
 		// TODO Auto-generated method stub
 
 	}
@@ -139,37 +139,37 @@ public class HDBMeasurement extends AbstractMeasurementAdapter implements Runnab
 				counter++;
 				try {
 					Thread.sleep(delay);
-				} catch (InterruptedException ie) {
+				} catch (final InterruptedException ie) {
 					LOGGER.debug("Sleeptime interrupted.");
 					running = false;
 				}
 			}
 
 			dataSource.disable();
-		} catch (MeasurementException e) {
+		} catch (final MeasurementException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void sampleLockStatistics(long ownNumQueries) {
+	private void sampleLockStatistics(final long ownNumQueries) {
 
 		try {
-			ResultSet resultSet = sqlStatement.executeQuery();
-			long numQueueries = -1;
+			final ResultSet resultSet = sqlStatement.executeQuery();
+			final long numQueueries = -1;
 			long numLockWaits = 0;
 			long lockTime = 0;
 			resultSet.next();
 			numLockWaits = resultSet.getLong("TOTAL_LOCK_WAITS");
 			lockTime = resultSet.getLong("TOTAL_LOCK_WAIT_TIME");
 			resultSet.close();
-			DBStatisticsRecrod record = new DBStatisticsRecrod();
+			final DBStatisticsRecrod record = new DBStatisticsRecrod();
 			record.setTimeStamp(System.currentTimeMillis());
 			record.setNumQueueries(numQueueries);
 			record.setProcessId(host + ":" + port);
 			record.setNumLockWaits(numLockWaits);
 			record.setLockTime(lockTime);
 			dataSource.newRecord(record);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -179,19 +179,19 @@ public class HDBMeasurement extends AbstractMeasurementAdapter implements Runnab
 		if (connection != null) {
 			return connection;
 		}
-		Properties props = new Properties();
+		final Properties props = new Properties();
 		props.setProperty("user", username);
 		props.setProperty("password", password);
-		String connectionString = "jdbc:sap://" + host + ":" + port;
+		final String connectionString = "jdbc:sap://" + host + ":" + port;
 		try {
 			Class.forName("com.sap.db.jdbc.Driver");
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			LOGGER.error(e.getMessage());
 			return null;
 		}
 		try {
 			connection = DriverManager.getConnection(connectionString, props);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOGGER.error(e.getMessage());
 			return null;
 		}
@@ -203,8 +203,8 @@ public class HDBMeasurement extends AbstractMeasurementAdapter implements Runnab
 	}
 
 	@Override
-	public void prepareMonitoring(InstrumentationDescription monitoringDescription) throws MeasurementException {
-		for (SamplingDescription sDescr : monitoringDescription.getSamplingDescriptions()) {
+	public void prepareMonitoring(final InstrumentationDescription monitoringDescription) throws MeasurementException {
+		for (final SamplingDescription sDescr : monitoringDescription.getSamplingDescriptions()) {
 			if (sDescr.getResourceName().equals(SamplingDescription.SAMPLER_DATABASE_STATISTICS)) {
 				samplerActivated = true;
 				delay = sDescr.getDelay();

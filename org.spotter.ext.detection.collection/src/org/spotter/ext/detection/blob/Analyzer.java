@@ -19,7 +19,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lpe.common.util.LpeNumericUtils;
+import org.lpe.common.utils.numeric.LpeNumericUtils;
 import org.spotter.shared.result.model.SpotterResult;
 
 /**

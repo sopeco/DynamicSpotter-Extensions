@@ -15,10 +15,8 @@
  */
 package org.spotter.ext.loadrunner.instrumentation;
 
-import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.loadgenerator.LoadGeneratorClient;
 import org.spotter.core.instrumentation.AbstractInstrumentationExtension;
-import org.spotter.core.instrumentation.IInstrumentationAdapter;
 
 /**
  * Extension for LoadRunner instrumentation.
@@ -27,32 +25,33 @@ import org.spotter.core.instrumentation.IInstrumentationAdapter;
  */
 public class LoadRunnerInstrumentationExtension extends AbstractInstrumentationExtension {
 
+	public LoadRunnerInstrumentationExtension() {
+		super(LoadRunnerInstrumentationClient.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The loadrunner instrumentation satellite adapter can be used to "
 														+ "connect to an HP Loadrunner instrumentation satellite. It will only "
 														+ "be applicable if you have a Loadrunner as a workload generator.";
-	
-	@Override
-	public IInstrumentationAdapter createExtensionArtifact() {
-		return new LoadRunnerInstrumentationClient(this);
-	}
-
-	@Override
-	public String getName() {
-		return "instrumentation.satellite.adapter.loadrunner";
-	}
 	
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
 		return "LoadRunner Instrumentation Satellite Adapter";
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return LoadGeneratorClient.testConnection(host, port);
 	}
 

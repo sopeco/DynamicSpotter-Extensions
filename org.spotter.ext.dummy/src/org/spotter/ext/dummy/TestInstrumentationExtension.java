@@ -15,44 +15,43 @@
  */
 package org.spotter.ext.dummy;
 
-import org.lpe.common.config.ConfigParameterDescription;
 import org.spotter.core.instrumentation.AbstractInstrumentationExtension;
-import org.spotter.core.instrumentation.IInstrumentationAdapter;
 
 public class TestInstrumentationExtension extends AbstractInstrumentationExtension {
+
+	public TestInstrumentationExtension() {
+		super(TestInstrumentation.class);
+	}
 
 	private static final String EXTENSION_DESCRIPTION = "The test instrumentation satellite adapter is used for test purposes only. The "
 														+ "satellite adapter is a dummy and does nothing. The dummy will be removed after "
 														+ "the first version has been officially released.";
 
 	@Override
-	public IInstrumentationAdapter createExtensionArtifact() {
-		return new TestInstrumentation(this);
-	}
-
-	@Override
-	public String getName() {
-		return "instrumentation.satellite.adapter.test";
-	}
-
-	@Override
 	protected String getDefaultSatelleiteExtensionName() {
 		return "Test Instrumentation Satellite Adapter";
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
 	@Override
-	protected void initializeConfigurationParameters() {
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
 	}
-
+	
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return true;
 	}
 
 	@Override
 	public boolean isRemoteExtension() {
 		return false;
+	}
+
+	@Override
+	protected void initializeConfigurationParameters() {
 	}
 
 }

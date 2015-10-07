@@ -18,9 +18,12 @@ package org.spotter.ext.dummy;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.workload.AbstractWorkloadExtension;
-import org.spotter.core.workload.IWorkloadAdapter;
 
 public class TestLoadDriverExtension extends  AbstractWorkloadExtension  {
+
+	public TestLoadDriverExtension() {
+		super(TestLoadDriver.class);
+	}
 
 	private static final String EXTENSION_DESCRIPTION = "The test workload satellite adapter is used for test purposes only. The "
 														+ "satellite adapter is a dummy and does nothing. The dummy will be removed after "
@@ -29,32 +32,29 @@ public class TestLoadDriverExtension extends  AbstractWorkloadExtension  {
 	public static final String NUM_EXPERIMENTS = "org.spotter.test.numExperiments";
 
 	@Override
-	public IWorkloadAdapter createExtensionArtifact() {
-		return new TestLoadDriver(this);
-	}
-
-	@Override
-	public String getName() {
-		return "workload.satellite.adapter.test";
-	}
-
-	@Override
 	protected String getDefaultSatelleiteExtensionName() {
 		return "Test Workload Satellite Adapter";
+	}
+
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
 	}
 	
 	@Override
 	protected void initializeConfigurationParameters() {
-		ConfigParameterDescription par = new ConfigParameterDescription(NUM_EXPERIMENTS, LpeSupportedTypes.Integer);
+		final ConfigParameterDescription par = new ConfigParameterDescription(NUM_EXPERIMENTS, LpeSupportedTypes.Integer);
 		par.setMandatory(false);
 		par.setDefaultValue(String.valueOf(100));
 		par.setDescription("Number of experiments.");
 		addConfigParameter(par);
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return true;
 	}
 

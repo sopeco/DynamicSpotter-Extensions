@@ -18,7 +18,6 @@ package org.spotter.ext.workload.simple;
 import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.workload.AbstractWorkloadExtension;
-import org.spotter.core.workload.IWorkloadAdapter;
 
 /**
  * Extension class for simple workload generator.
@@ -28,15 +27,14 @@ import org.spotter.core.workload.IWorkloadAdapter;
  */
 public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 
+	public SimpleWorkloadExtension() {
+		super(SimpleWorkloadDriver.class);
+	}
+
 	private static final String EXTENSION_DESCRIPTION = "The customized workload satellite adapter can be used to "
 														+ "execute custom written Java client classes. This satellite "
 														+ "adapter is hence only applicable when you have written "
 														+ "your own Java client class.";
-	
-	@Override
-	public String getName() {
-		return "workload.satellite.adapter.customized";
-	}
 
 	@Override
 	protected String getDefaultSatelleiteExtensionName() {
@@ -44,7 +42,7 @@ public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 	}
 	
 	private ConfigParameterDescription createScriptPathParameter() {
-		ConfigParameterDescription scriptParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription scriptParameter = new ConfigParameterDescription(
 				SimpleWorkloadDriver.USER_SCRIPT_PATH, LpeSupportedTypes.String);
 		scriptParameter.setMandatory(true);
 		scriptParameter.setASet(false);
@@ -58,7 +56,7 @@ public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 	}
 
 	private ConfigParameterDescription createScriptClassParameter() {
-		ConfigParameterDescription classParameter = new ConfigParameterDescription(
+		final ConfigParameterDescription classParameter = new ConfigParameterDescription(
 				SimpleWorkloadDriver.USER_SCRIPT_CLASS_NAME, LpeSupportedTypes.String);
 		classParameter.setMandatory(true);
 		classParameter.setASet(false);
@@ -68,20 +66,22 @@ public class SimpleWorkloadExtension extends AbstractWorkloadExtension {
 		return classParameter;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
+	
 	@Override
 	protected void initializeConfigurationParameters() {
 		addConfigParameter(createScriptPathParameter());
 		addConfigParameter(createScriptClassParameter());
-		addConfigParameter(ConfigParameterDescription.createExtensionDescription(EXTENSION_DESCRIPTION));
 	}
 
 	@Override
-	public IWorkloadAdapter createExtensionArtifact() {
-		return new SimpleWorkloadDriver(this);
-	}
-
-	@Override
-	public boolean testConnection(String host, String port) {
+	public boolean testConnection(final String host, final String port) {
 		return true;
 	}
 

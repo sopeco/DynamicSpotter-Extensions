@@ -54,7 +54,7 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 	 *            extension provider
 	 */
 
-	public LoadRunnerWorkloadClient(IExtension<?> provider) {
+	public LoadRunnerWorkloadClient(final IExtension provider) {
 		super(provider);
 
 	}
@@ -71,8 +71,8 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 	}
 
 	@Override
-	public void startLoad(LoadConfig loadConfig) throws WorkloadException {
-		LGWorkloadConfig lrConfig = createLRConfig(loadConfig);
+	public void startLoad(final LoadConfig loadConfig) throws WorkloadException {
+		final LGWorkloadConfig lrConfig = createLRConfig(loadConfig);
 		LOGGER.info("Triggered load with {} users ...", lrConfig.getNumUsers());
 		experimentStartTime = System.currentTimeMillis();
 		rampUpDuration = calculateActualRampUpDuration(lrConfig)
@@ -82,11 +82,11 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 		lrClient.startLoad(lrConfig);
 	}
 
-	private long calculateActualRampUpDuration(LGWorkloadConfig lrConfig) {
+	private long calculateActualRampUpDuration(final LGWorkloadConfig lrConfig) {
 
-		int rampUpInterval = lrConfig.getRampUpIntervalLength();
-		int rampUpUsersPerInterval = lrConfig.getRampUpUsersPerInterval();
-		int numUsers = lrConfig.getNumUsers();
+		final int rampUpInterval = lrConfig.getRampUpIntervalLength();
+		final int rampUpUsersPerInterval = lrConfig.getRampUpUsersPerInterval();
+		final int numUsers = lrConfig.getNumUsers();
 
 		return ((numUsers / rampUpUsersPerInterval) - ((numUsers
 				% rampUpUsersPerInterval == 0) ? 1 : 0))
@@ -99,8 +99,8 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 		LOGGER.info("Load generation finished.");
 	}
 
-	private LGWorkloadConfig createLRConfig(LoadConfig loadConfig) {
-		LGWorkloadConfig lrConfig = new LGWorkloadConfig();
+	private LGWorkloadConfig createLRConfig(final LoadConfig loadConfig) {
+		final LGWorkloadConfig lrConfig = new LGWorkloadConfig();
 
 		lrConfig.setCoolDownIntervalLength(loadConfig
 				.getCoolDownIntervalLength());
@@ -137,7 +137,7 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 				+ rampUpDuration) {
 			try {
 				Thread.sleep(POLLING_INTERVAL);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				throw new WorkloadException(e);
 			}
 		}
@@ -150,7 +150,7 @@ public class LoadRunnerWorkloadClient extends AbstractWorkloadAdapter {
 				+ rampUpDuration + experimentDuration) {
 			try {
 				Thread.sleep(POLLING_INTERVAL);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				throw new WorkloadException(e);
 			}
 		}
