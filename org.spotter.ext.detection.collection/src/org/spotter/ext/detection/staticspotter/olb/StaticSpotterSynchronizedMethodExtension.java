@@ -48,13 +48,14 @@ public class StaticSpotterSynchronizedMethodExtension extends AbstractDetectionE
 	}
 
 	private ConfigParameterDescription createStaticSpotterExportFile() {
-		final ConfigParameterDescription numExperimentsParameter = new ConfigParameterDescription(STATIC_SPOTTER_EXPORT_FILE,
+		final ConfigParameterDescription staticSpotterExportFileParameter = new ConfigParameterDescription(STATIC_SPOTTER_EXPORT_FILE,
 				LpeSupportedTypes.String);
-		numExperimentsParameter.setDefaultValue("");
-		numExperimentsParameter.setAFile(true);
-		numExperimentsParameter.setDescription("Full file path to the file exported by Static Spotter containing potential "
+		staticSpotterExportFileParameter.setDefaultValue("");
+		staticSpotterExportFileParameter.setAFile(true);
+		staticSpotterExportFileParameter.setDescription("Full file path to the file exported by Static Spotter containing potential "
 				+ "spurious methods.");
-		return numExperimentsParameter;
+		staticSpotterExportFileParameter.setMandatory(true);
+		return staticSpotterExportFileParameter;
 	}
 	
 	/* (non-Javadoc)
