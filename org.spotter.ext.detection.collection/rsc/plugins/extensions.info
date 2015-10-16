@@ -7,6 +7,7 @@ org.spotter.ext.detection.dbcongestion.DBCongestionExtension
 org.spotter.ext.detection.edc.EDCExtension
 org.spotter.ext.detection.stifle.StifleExtension
 org.spotter.ext.detection.olb.OLBExtension
+org.spotter.ext.detection.staticspotter.olb.StaticSpotterSynchronizedMethodExtension
 org.spotter.ext.detection.excessiveMessaging.ExcessiveMessagingExtension
 org.spotter.ext.detection.blob.BlobExtension
 org.spotter.ext.detection.est.EmptySemiTrucksExtension
