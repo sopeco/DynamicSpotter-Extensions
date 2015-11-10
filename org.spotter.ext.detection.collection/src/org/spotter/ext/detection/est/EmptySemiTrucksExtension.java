@@ -24,13 +24,24 @@ import org.spotter.core.detection.AbstractDetectionExtension;
  * 
  */
 public class EmptySemiTrucksExtension extends AbstractDetectionExtension {
-
 	public EmptySemiTrucksExtension() {
 		super(EmptySemiTrucksDetectionController.class);
 	}
 
-	// TODO: please provide a description
-	private static final String EXTENSION_DESCRIPTION = "no description";
+	private static final String EXTENSION_DESCRIPTION = 
+			"The Empty Semi Trucks occurs in software systems "
+			+ "where a big amount of requests is needed for a single job.";
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
 
 	@Override
 	protected void initializeConfigurationParameters() {

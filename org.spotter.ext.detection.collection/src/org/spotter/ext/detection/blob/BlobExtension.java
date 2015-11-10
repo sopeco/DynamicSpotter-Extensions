@@ -16,6 +16,9 @@ public class BlobExtension extends AbstractDetectionExtension {
 	protected static final String DETECTION_STRATEGY_KEY = "strategy";
 	protected static final String COMP_EXCLUSION_STRATEGY = "exclusion analysis strategy";
 	protected static final String MEAN_ANALYSIS_STRATEGY = "mean analysis strategy";
+	private static final String EXTENSION_DESCRIPTION = 
+			"The Blob occurs when one class performs most of the system "
+			+ "work relegating other classes to minor, supporting roles.";
 
 	private ConfigParameterDescription createStrategyParameter() {
 		final ConfigParameterDescription scopeParameter = new ConfigParameterDescription(DETECTION_STRATEGY_KEY,
@@ -30,7 +33,14 @@ public class BlobExtension extends AbstractDetectionExtension {
 				+ "used to analyse the Blob anti-pattern.");
 		return scopeParameter;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.lpe.common.extension.ReflectiveAbstractExtension#getDescription()
+	 */
+	@Override
+	public String getDescription() {
+		return EXTENSION_DESCRIPTION;
+	}
 
 	@Override
 	protected void initializeConfigurationParameters() {
