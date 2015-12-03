@@ -19,7 +19,9 @@ public class OLBExtension extends AbstractDetectionExtension {
 	}
 
 	private static final double _100_PERCENT = 100.0;
-	private static final String EXTENSION_DESCRIPTION = "The One Lane Bridge anti-pattern is a typical software bottleneck. ";
+	private static final String EXTENSION_DESCRIPTION = 
+			"A One Lane Bridge occurs, if a passive resource limits the concurrency in an application. "
+			+ "Passive resources can be for instance mutexes, connection pools, or database locks. ";
 
 	public static final String CPU_UTILIZATION_THRESHOLD_KEY = "cpuThreshold";
 	public static final String EXPERIMENT_STEPS_KEY = "numExperiments";
