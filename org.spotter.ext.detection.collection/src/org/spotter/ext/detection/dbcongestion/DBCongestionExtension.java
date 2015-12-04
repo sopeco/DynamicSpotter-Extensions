@@ -29,7 +29,8 @@ public class DBCongestionExtension extends AbstractDetectionExtension {
 	}
 
 	// TODO: please provide a description
-	private static final String EXTENSION_DESCRIPTION = "no description";
+	private static final String EXTENSION_DESCRIPTION = "If a high utilization of the database CPU is observed, or any tables of "
+			+ "the database are excessively locked, then we observe Database Congestion.";
 
 	
 	protected static final String DETECTION_STRATEGY_KEY = "strategy";

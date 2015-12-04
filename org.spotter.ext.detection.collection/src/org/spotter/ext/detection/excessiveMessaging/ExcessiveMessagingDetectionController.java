@@ -29,6 +29,10 @@ import org.spotter.core.detection.IExperimentReuser;
 import org.spotter.exceptions.WorkloadException;
 import org.spotter.shared.result.model.SpotterResult;
 
+/**
+ * Implements the Excessive Messaging detection as described in PhD Werth, page 145. For parameters and semantics, see there.
+ *
+ */
 public class ExcessiveMessagingDetectionController extends AbstractDetectionController implements IExperimentReuser {
 	private static final int EXPERIMENT_STEPS = 5;
 	private static final double TCP_PACKET_SIZE = 1500;

@@ -19,13 +19,16 @@ import org.lpe.common.config.ConfigParameterDescription;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
 
+
 public class EDCExtension extends AbstractDetectionExtension {
 
 	public EDCExtension() {
 		super(EDCDetectionController.class);
 	}
 
-	private static final String EXTENSION_DESCRIPTION = "An expensive database call. ";
+	private static final String EXTENSION_DESCRIPTION = "Expensive Database Calls are single, long-running database request. "
+			+ "They cause high overhead at the database, either due to high locking times, many locks, "
+			+ "or high utilization of the database's resources.";
 	public static final String INSTRUMENTATION_GRANULARITY_KEY = "instrumentationGranularity";
 	public static final String PERF_REQ_RELATIVE_QUERY_RT_KEY = "perfReqRelativeQueryRT";
 	public static final String PERF_REQ_RELATIVE_QUERY_RT_DIFF_KEY = "perfReqRelativeQueryRTDiff";

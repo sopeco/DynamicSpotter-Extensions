@@ -29,6 +29,10 @@ import org.spotter.exceptions.WorkloadException;
 import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
 
+/**
+ * Implements the DB congestion detection as described in PhD Werth, page 138. For parameters and semantics, see there.
+ *
+ */
 public class DBCongestionDetectionController extends AbstractDetectionController implements IExperimentReuser {
 
 	private int requiredSignificantSteps;

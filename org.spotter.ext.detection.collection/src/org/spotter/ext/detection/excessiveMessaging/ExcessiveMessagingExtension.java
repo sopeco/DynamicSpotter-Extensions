@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.lpe.common.config.ConfigParameterDescription;
-import org.lpe.common.extension.IExtensionArtifact;
 import org.lpe.common.util.LpeSupportedTypes;
 import org.spotter.core.detection.AbstractDetectionExtension;
 
@@ -30,7 +29,7 @@ public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
 		numSignificantStepsParameter.setDefaultValue(String.valueOf(REQUIRED_SIGNIFICANT_STEPS_DEFAULT));
 		numSignificantStepsParameter.setRange(String.valueOf(1), String.valueOf(Integer.MAX_VALUE));
 		numSignificantStepsParameter.setDescription("This parameter specifies the number of steps between experiments "
-				+ "required to show a significant increase in order to detect a One Lane Bridge.");
+				+ "required to show a significant increase in order to detect Excessive Messaging.");
 		return numSignificantStepsParameter;
 	}
 
@@ -56,7 +55,7 @@ public class ExcessiveMessagingExtension extends AbstractDetectionExtension {
 		scopeParameter.setOptions(scopeOptions);
 		scopeParameter.setDefaultValue(STAGNATION_STRATEGY);
 		scopeParameter.setDescription("This parameter determines the strategy, "
-				+ "used to analyse the Database congestion anti-pattern.");
+				+ "used to analyse Excessive Messaging");
 		return scopeParameter;
 	}
 

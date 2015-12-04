@@ -46,6 +46,10 @@ import org.spotter.shared.configuration.ConfigKeys;
 import org.spotter.shared.result.model.SpotterResult;
 import org.spotter.shared.status.DiagnosisStatus;
 
+/**
+ * Implements the EDC detection as described in PhD Werth, page 143. For parameters and semantics, see there.
+ *
+ */
 public class EDCDetectionController extends AbstractDetectionController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EDCDetectionController.class);
