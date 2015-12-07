@@ -351,7 +351,8 @@ public class ExcessiveMessagingDetectionController extends AbstractDetectionCont
 				final AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
 				chartBuilder.startChart(interfaceName, "number of users", "utilization [%]");
 				chartBuilder.addUtilizationLineSeries(utils, "network utilization", true);
-				chartBuilder.addHorizontalLine((utilizationThreshold / networkSpeed) * 100.0, "threshold");
+				// TODO FIXME For unknown reasons this call fails
+				// chartBuilder.addHorizontalLine((utilizationThreshold / networkSpeed) * 100.0, "threshold");
 				getResultManager().storeImageChartResource(chartBuilder, "Network" + interfaceName, result);
 			}
 
