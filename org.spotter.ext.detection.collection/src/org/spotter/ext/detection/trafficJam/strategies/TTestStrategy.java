@@ -24,44 +24,44 @@ public class TTestStrategy implements ITrafficJamStrategy {
 	private TrafficJamDetectionController mainDetectionController;
 
 	@Override
-	public boolean analyseOperationResponseTimes(Dataset dataset, String operation, SpotterResult result) {
+	public boolean analyseOperationResponseTimes(final Dataset dataset, final String operation, final SpotterResult result) {
 		try {
 			int prevNumUsers = -1;
 			int firstSignificantNumUsers = -1;
 			int significantSteps = 0;
-			List<Integer> sortedNumUsersList = new ArrayList<Integer>(dataset.getValueSet(
+			final List<Integer> sortedNumUsersList = new ArrayList<Integer>(dataset.getValueSet(
 					AbstractDetectionController.NUMBER_OF_USERS_KEY, Integer.class));
 			Collections.sort(sortedNumUsersList);
-			int minNumUsers = sortedNumUsersList.get(0);
-			NumericPairList<Integer, Double> rawData = new NumericPairList<>();
-			NumericPairList<Integer, Double> means = new NumericPairList<>();
-			List<Number> ci = new ArrayList<>();
-			for (Integer numUsers : sortedNumUsersList) {
+			final int minNumUsers = sortedNumUsersList.get(0);
+			final NumericPairList<Integer, Double> rawData = new NumericPairList<>();
+			final NumericPairList<Integer, Double> means = new NumericPairList<>();
+			final List<Number> ci = new ArrayList<>();
+			for (final Integer numUsers : sortedNumUsersList) {
 				if (prevNumUsers > 0) {
-					ParameterSelection selectionCurrent = new ParameterSelection().select(
+					final ParameterSelection selectionCurrent = new ParameterSelection().select(
 							AbstractDetectionController.NUMBER_OF_USERS_KEY, numUsers).select(
 							ResponseTimeRecord.PAR_OPERATION, operation);
-					ParameterSelection selectionPrev = new ParameterSelection().select(
+					final ParameterSelection selectionPrev = new ParameterSelection().select(
 							AbstractDetectionController.NUMBER_OF_USERS_KEY, prevNumUsers).select(
 							ResponseTimeRecord.PAR_OPERATION, operation);
 
-					List<Long> currentValues = LpeNumericUtils.filterOutliersUsingIQR(selectionCurrent.applyTo(dataset)
+					final List<Long> currentValues = LpeNumericUtils.filterOutliersUsingIQR(selectionCurrent.applyTo(dataset)
 							.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class));
-					List<Long> prevValues = LpeNumericUtils.filterOutliersUsingIQR(selectionPrev.applyTo(dataset)
+					final List<Long> prevValues = LpeNumericUtils.filterOutliersUsingIQR(selectionPrev.applyTo(dataset)
 							.getValues(ResponseTimeRecord.PAR_RESPONSE_TIME, Long.class));
 
-					List<Double> sums1 = new ArrayList<>();
-					List<Double> sums2 = new ArrayList<>();
+					final List<Double> sums1 = new ArrayList<>();
+					final List<Double> sums2 = new ArrayList<>();
 					LpeNumericUtils.createNormalDistributionByBootstrapping(prevValues, currentValues, sums1, sums2);
 
 					if (sums2.size() < 2 || sums1.size() < 2) {
 						throw new IllegalArgumentException("Traffic Jam detection failed for the operation '"
 								+ operation + "', because there are not enough measurement points for a t-test.");
 					}
-					double prevMean = LpeNumericUtils.average(sums1);
-					double currentMean = LpeNumericUtils.average(sums2);
+					final double prevMean = LpeNumericUtils.average(sums1);
+					final double currentMean = LpeNumericUtils.average(sums2);
 
-					double pValue = LpeNumericUtils.tTest(sums2, sums1);
+					final double pValue = LpeNumericUtils.tTest(sums2, sums1);
 					if (pValue >= 0 && pValue <= requiredSignificanceLevel && prevMean < currentMean) {
 						if (firstSignificantNumUsers < 0) {
 							firstSignificantNumUsers = prevNumUsers;
@@ -74,21 +74,21 @@ public class TTestStrategy implements ITrafficJamStrategy {
 
 					// update chart data
 					if (prevNumUsers == minNumUsers) {
-						double stdDev = LpeNumericUtils.stdDev(sums1);
-						for (Double val : sums1) {
+						final double stdDev = LpeNumericUtils.stdDev(sums1);
+						for (final Double val : sums1) {
 							rawData.add(prevNumUsers, val);
 						}
-						double ciWidth = LpeNumericUtils.getConfidenceIntervalWidth(sums1.size(), stdDev,
+						final double ciWidth = LpeNumericUtils.getConfidenceIntervalWidth(sums1.size(), stdDev,
 								requiredSignificanceLevel);
 						means.add(prevNumUsers, prevMean);
 						ci.add(ciWidth / 2.0);
 					}
 
-					double stdDev = LpeNumericUtils.stdDev(sums2);
-					for (Double val : sums2) {
+					final double stdDev = LpeNumericUtils.stdDev(sums2);
+					for (final Double val : sums2) {
 						rawData.add(numUsers, val);
 					}
-					double ciWidth = LpeNumericUtils.getConfidenceIntervalWidth(sums2.size(), stdDev,
+					final double ciWidth = LpeNumericUtils.getConfidenceIntervalWidth(sums2.size(), stdDev,
 							requiredSignificanceLevel);
 					means.add(numUsers, currentMean);
 					ci.add(ciWidth / 2.0);
@@ -98,7 +98,7 @@ public class TTestStrategy implements ITrafficJamStrategy {
 			}
 
 			AnalysisChartBuilder chartBuilder = AnalysisChartBuilder.getChartBuilder();
-			String operationName = operation.contains("(")?operation.substring(0, operation.indexOf("(")):operation;
+			final String operationName = operation.contains("(")?operation.substring(0, operation.indexOf("(")):operation;
 			chartBuilder.startChart(operationName, "number of users", "response time [ms]");
 			chartBuilder.addScatterSeries(rawData, "response times");
 			mainDetectionController.getResultManager().storeImageChartResource(chartBuilder, "Response Times", result);
@@ -113,19 +113,19 @@ public class TTestStrategy implements ITrafficJamStrategy {
 				return true;
 			}
 			return false;
-		} catch (Exception e) {
-			return false;
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 
 	@Override
-	public void setProblemDetectionConfiguration(Properties problemDetectionConfiguration) {
-		String requiredSignificantStepsStr = problemDetectionConfiguration
+	public void setProblemDetectionConfiguration(final Properties problemDetectionConfiguration) {
+		final String requiredSignificantStepsStr = problemDetectionConfiguration
 				.getProperty(TrafficJamExtension.REQUIRED_SIGNIFICANT_STEPS_KEY);
 		requiredSignificantSteps = requiredSignificantStepsStr != null ? Integer.parseInt(requiredSignificantStepsStr)
 				: TrafficJamExtension.REQUIRED_SIGNIFICANT_STEPS_DEFAULT;
 
-		String requiredConfidenceLevelStr = problemDetectionConfiguration
+		final String requiredConfidenceLevelStr = problemDetectionConfiguration
 				.getProperty(TrafficJamExtension.REQUIRED_CONFIDENCE_LEVEL_KEY);
 		requiredSignificanceLevel = 1.0 - (requiredConfidenceLevelStr != null ? Double
 				.parseDouble(requiredConfidenceLevelStr) : TrafficJamExtension.REQUIRED_CONFIDENCE_LEVEL_DEFAULT);
@@ -133,7 +133,7 @@ public class TTestStrategy implements ITrafficJamStrategy {
 	}
 
 	@Override
-	public void setMainDetectionController(TrafficJamDetectionController mainDetectionController) {
+	public void setMainDetectionController(final TrafficJamDetectionController mainDetectionController) {
 		this.mainDetectionController = mainDetectionController;
 	}
 
